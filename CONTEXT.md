@@ -31,7 +31,7 @@ Storage:
 - Database stores file URLs only
 
 Auth:
-- Staff users authenticate via password (or PIN)
+- Staff users authenticate via password
 - Clients do NOT have accounts
 - Clients access order status via expiring tokenized link
 
@@ -199,8 +199,8 @@ CREATE TABLE roles (
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     role_id INT NOT NULL,
-    national_id VARCHAR(50) NOT NULL UNIQUE,
-    pin_hash VARCHAR(255) NOT NULL,
+    document VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
