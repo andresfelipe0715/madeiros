@@ -199,6 +199,7 @@ CREATE TABLE roles (
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     role_id INT NOT NULL,
+    name VARCHAR(150) NOT NULL,
     document VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
@@ -210,6 +211,7 @@ CREATE TABLE users (
 CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
+    document VARCHAR(50) NOT NULL UNIQUE,
     phone VARCHAR(30) NULL
 );
 
@@ -221,20 +223,30 @@ CREATE TABLE stages (
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
+    material VARCHAR(255) NOT NULL,
+    notes TEXT NULL,
+    invoice_number VARCHAR(50) NOT NULL UNIQUE,
     created_by INT NOT NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    delivered_at TIMESTAMP NULL,
+    delivered_by INT NULL,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (delivered_by) REFERENCES users(id)
+
 );
 
 CREATE TABLE order_stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     stage_id INT NOT NULL,
+    notes TEXT NULL,
     started_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL,
     started_by INT NULL,
     completed_by INT NULL,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (stage_id) REFERENCES stages(id),
     FOREIGN KEY (started_by) REFERENCES users(id),
