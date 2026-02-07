@@ -250,6 +250,7 @@ CREATE TABLE order_stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     stage_id INT NOT NULL,
+    sequence INT NOT NULL,
     notes TEXT NULL,
     started_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL,
@@ -260,7 +261,8 @@ CREATE TABLE order_stages (
     FOREIGN KEY (stage_id) REFERENCES stages(id),
     FOREIGN KEY (started_by) REFERENCES users(id),
     FOREIGN KEY (completed_by) REFERENCES users(id),
-    UNIQUE (order_id, stage_id)
+    UNIQUE (order_id, stage_id),
+    UNIQUE (order_id, sequence)
 );
 
 CREATE TABLE file_types (
