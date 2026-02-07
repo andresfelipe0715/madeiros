@@ -152,3 +152,12 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Admin always has access to all stages.  
 - Each module only shows orders for stages the user has permission to act on.  
 - Actions available per module: Start, Pause, Finish, Add Notes (except Entrega, which only finishes/delivers).  
+
+---
+
+## Build Configuration
+
+**Sass Deprecations**
+- We have explicitly silenced Sass deprecation warnings in `vite.config.js` to handle Bootstrap 5's legacy Sass usage.
+- Silenced warnings: `import`, `if-function`, `global-builtin`, `color-functions`.
+- This ensures clean build output without noise from `node_modules`.
