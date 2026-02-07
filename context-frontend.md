@@ -152,7 +152,7 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Admin always has access to all stages.  
 - Each module only shows orders for stages the user has permission to act on.  
 - Actions available per module: Start, Pause, Finish, Add Notes (except Entrega, which only finishes/delivers).  
-
+-  “Remitir a” sends the order back to the immediately previous completed stage and resets the current stage timestamps.
 ---
 
 ## Build Configuration
