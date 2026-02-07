@@ -63,6 +63,14 @@ Roles are stored in a lookup table, not enums.
 
 ---
 
+### Role Stage Access
+
+- Roles define what stages a user is allowed to work on
+- A role may be allowed to work on multiple stages
+- A stage may be worked on by multiple roles
+- This allows temporary or permanent overlap between roles when understaffed
+- Authorization is data-driven, not hardcoded
+---
 ### Order Stages (Workflow Engine)
 
 This is the heart of the system.
@@ -135,7 +143,7 @@ Each link:
 
 ## Security Rules
 
-- Staff can only interact with stages matching their role
+- Staff can only interact with stages allowed for their role
 - Admin can see everything
 - Clients cannot modify anything
 - Tracking tokens must expire
@@ -184,6 +192,7 @@ No ENUMs are used. Lookup tables are used instead.
 - order_files
 - order_logs
 - order_tracking_links
+- role_stages
 
 ---
 
@@ -289,4 +298,13 @@ CREATE TABLE order_tracking_links (
     used_at TIMESTAMP NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
+CREATE TABLE role_stages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_id INT NOT NULL,
+    stage_id INT NOT NULL,
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (stage_id) REFERENCES stages(id),
+    UNIQUE (role_id, stage_id)
 );
