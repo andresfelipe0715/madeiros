@@ -308,3 +308,5 @@ CREATE TABLE role_stages (
     FOREIGN KEY (stage_id) REFERENCES stages(id),
     UNIQUE (role_id, stage_id)
 );
+
+For frontend context, see context-frontend.md
