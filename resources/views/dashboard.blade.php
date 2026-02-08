@@ -1,9 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Módulos de Producción') }}
-        </h2>
-        <p class="text-sm text-secondary mb-0">Seleccione un módulo para gestionar los pedidos en esa etapa.</p>
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ __('Módulos de Producción') }}
+                </h2>
+                <p class="text-sm text-secondary mb-0">Seleccione un módulo para gestionar los pedidos en esa etapa.</p>
+            </div>
+            @if($isAdmin)
+                <a href="{{ route('orders.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Nueva Orden
+                </a>
+            @endif
+        </div>
     </x-slot>
 
     <div class="py-12">

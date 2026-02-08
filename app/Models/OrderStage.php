@@ -7,6 +7,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderStage extends Model
 {
+    protected $fillable = [
+        'order_id',
+        'stage_id',
+        'sequence',
+        'notes',
+        'started_at',
+        'completed_at',
+        'started_by',
+        'completed_by',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

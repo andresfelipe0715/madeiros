@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use App\Models\Role;
 use App\Models\Stage;
 use App\Models\User;
@@ -62,15 +63,31 @@ class DefaultDataSeeder extends Seeder
 
             // 3. Create one test user per role
             // Using document as a unique identifier for testing
-            $document = $roleCodes[$roleName] . '_123';
+            $document = $roleCodes[$roleName].'_123';
 
             User::firstOrCreate(
                 ['document' => $document],
                 [
-                    'name' => $roleName . ' Test',
+                    'name' => $roleName.' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
+                ]
+            );
+        }
+
+        // 4. Create sample clients
+        $clientsData = [
+            ['name' => 'Cliente Uno', 'document' => '123456789', 'phone' => '3001112222'],
+            ['name' => 'Cliente Dos', 'document' => '987654321', 'phone' => '3003334444'],
+        ];
+
+        foreach ($clientsData as $client) {
+            Client::firstOrCreate(
+                ['document' => $client['document']],
+                [
+                    'name' => $client['name'],
+                    'phone' => $client['phone'],
                 ]
             );
         }

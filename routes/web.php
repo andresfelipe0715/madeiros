@@ -21,6 +21,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/order-stages/{orderStage}/finish', [\App\Http\Controllers\OrderStageController::class, 'finish'])->name('order-stages.finish');
     Route::post('/order-stages/{orderStage}/remit', [\App\Http\Controllers\OrderStageController::class, 'remit'])->name('order-stages.remit');
 
+    Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
+
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

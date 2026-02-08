@@ -8,6 +8,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    protected $fillable = [
+        'client_id',
+        'material',
+        'invoice_number',
+        'notes',
+        'created_by',
+        'delivered_by',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'delivered_at' => 'datetime',
+        ];
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
