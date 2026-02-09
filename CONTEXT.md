@@ -252,6 +252,7 @@ CREATE TABLE order_stages (
     stage_id INT NOT NULL,
     sequence INT NOT NULL,
     notes TEXT NULL,
+    remit_reason TEXT NULL,
     started_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL,
     started_by INT NULL,

@@ -14,7 +14,7 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-9 col-lg-7">
-                    <div class="card shadow-sm border-0 overflow-hidden">
+                    <div class="card shadow-sm border-0">
                         <div class="bg-primary bg-gradient py-1"></div>
                         <div class="card-body p-4 p-md-5">
                             <form action="{{ route('orders.store') }}" method="POST">
@@ -25,7 +25,7 @@
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
                                         <select name="client_id" id="client_id" class="form-select border-start-0 @error('client_id') is-invalid @enderror" required>
-                                            <option value="">Seleccione un cliente</option>
+                                            <option value=""></option>
                                             @foreach($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
                                                     {{ $client->name }}
@@ -115,6 +115,12 @@
     </div>
 
     <style>
+        input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #212529 !important;
+}
         .bg-soft-info { background-color: rgba(13, 202, 240, 0.1); }
         .bg-soft-success { background-color: rgba(25, 135, 84, 0.1); }
         .hover-elevate:hover {
@@ -130,9 +136,9 @@
         .custom-input-group {
             border: 1px solid #dee2e6;
             border-radius: 0.5rem;
-            overflow: hidden;
             transition: all 0.2s ease;
             background-color: #fff;
+            position: relative; /* Ensure dropdown displays correctly */
         }
         .custom-input-group:focus-within {
             border-color: #0d6efd;
@@ -157,5 +163,69 @@
         .custom-input-group .form-select {
             padding-left: 0.5rem;
         }
+
+        /* Border radius fixes since we removed overflow:hidden */
+        .custom-input-group > :first-child {
+            border-top-left-radius: 0.4rem;
+            border-bottom-left-radius: 0.4rem;
+        }
+        .custom-input-group > :last-child {
+            border-top-right-radius: 0.4rem;
+            border-bottom-right-radius: 0.4rem;
+        }
+
+        /* Tom Select Integration */
+        .ts-wrapper.form-select {
+            padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .ts-control {
+            border: none !important;
+            padding: 0.375rem 0.5rem !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        .ts-wrapper.single .ts-control {
+            background-image: none !important;
+        }
+        .ts-wrapper.single.input-active .ts-control {
+            background: #fff !important;
+        }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            margin-top: 5px !important;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #dee2e6 !important;
+            background-color: #fff !important;
+            z-index: 1050 !important;
+        }
+
+
+        .form-switch .form-check-input {
+        background-size: 1rem 1rem;
+        background-position: left center;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-position: right center;
+    }
+     
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var settings = {
+                create: false,
+                sortField: {
+                    field: 'text',
+                    direction: 'asc'
+                },
+                placeholder: 'Seleccione un cliente',
+                allowEmptyOption: true,
+                maxOptions: 50,
+            };
+            new TomSelect('#client_id', settings);
+        });
+    </script>
 </x-app-layout>
