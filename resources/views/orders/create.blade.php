@@ -26,11 +26,9 @@
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
                                         <select name="client_id" id="client_id" class="form-select border-start-0 @error('client_id') is-invalid @enderror" required>
                                             <option value=""></option>
-                                            @foreach($clients as $client)
-                                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                                    {{ $client->name }}
-                                                </option>
-                                            @endforeach
+                                            @if($selectedClient)
+                                                <option value="{{ $selectedClient->id }}" selected>{{ $selectedClient->name }}</option>
+                                            @endif
                                         </select>
                                     </div>
                                     @error('client_id')
@@ -200,6 +198,29 @@ select:-webkit-autofill {
             background-color: #fff !important;
             z-index: 1050 !important;
         }
+        .ts-wrapper .ts-control input::placeholder {
+            color: #6c757d !important;
+            opacity: 1;
+        }
+        .ts-wrapper.loading .ts-control::after {
+            content: " ";
+            display: block;
+            width: 14px;
+            height: 14px;
+            margin: 0;
+            border-radius: 50%;
+            border: 2px solid #0d6efd;
+            border-color: #0d6efd transparent #0d6efd transparent;
+            animation: ts-spinner 1.2s linear infinite;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            margin-top: -7px;
+        }
+        @keyframes ts-spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
 
         .form-switch .form-check-input {
@@ -216,14 +237,35 @@ select:-webkit-autofill {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var settings = {
+                valueField: 'id',
+                labelField: 'name',
+                searchField: 'name',
                 create: false,
-                sortField: {
-                    field: 'text',
-                    direction: 'asc'
-                },
-                placeholder: 'Seleccione un cliente',
+                placeholder: 'Escriba el nombre del cliente...',
                 allowEmptyOption: true,
-                maxOptions: 50,
+                loadThrottle: 300, // Debounce 300ms
+                load: function(query, callback) {
+                    if (query.length < 2) return callback();
+                    
+                    var url = '{{ route("clients.search") }}?q=' + encodeURIComponent(query);
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            callback(json);
+                        }).catch(() => {
+                            callback();
+                        });
+                },
+                render: {
+                    option: function(item, escape) {
+                        return '<div class="py-2 px-3 border-bottom">' +
+                                    '<span class="d-block">' + escape(item.name) + '</span>' +
+                                '</div>';
+                    },
+                    item: function(item, escape) {
+                        return '<div class="py-0">' + escape(item.name) + '</div>';
+                    }
+                }
             };
             new TomSelect('#client_id', settings);
         });

@@ -24,6 +24,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
 
+    Route::get('/clients/search', [\App\Http\Controllers\ClientSearchController::class, 'search'])->name('clients.search');
+
 });
 
 require __DIR__.'/auth.php';

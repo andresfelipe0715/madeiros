@@ -32,14 +32,18 @@ class OrderController extends Controller
             abort(403, 'No tiene permisos para crear órdenes.');
         }
 
-        $clients = Client::all();
         $stages = Stage::all()->sortBy(function ($stage) {
             $index = array_search($stage->name, self::DEFAULT_WORKFLOW);
 
             return $index === false ? 999 : $index;
         });
 
-        return view('orders.create', compact('clients', 'stages'));
+        $selectedClient = null;
+        if (old('client_id')) {
+            $selectedClient = Client::find(old('client_id'));
+        }
+
+        return view('orders.create', compact('stages', 'selectedClient'));
     }
 
     /**
