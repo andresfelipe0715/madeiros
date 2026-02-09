@@ -19,4 +19,9 @@ class Role extends Model
     {
         return $this->belongsToMany(Stage::class, 'role_stages');
     }
+
+    public function orderPermission(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(RoleOrderPermission::class);
+    }
 }

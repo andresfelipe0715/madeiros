@@ -21,8 +21,13 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/order-stages/{orderStage}/finish', [\App\Http\Controllers\OrderStageController::class, 'finish'])->name('order-stages.finish');
     Route::post('/order-stages/{orderStage}/remit', [\App\Http\Controllers\OrderStageController::class, 'remit'])->name('order-stages.remit');
 
+    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}/edit', [\App\Http\Controllers\OrderController::class, 'edit'])->name('orders.edit');
+    Route::put('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'update'])->name('orders.update');
+    Route::post('/orders/{order}/add-stage', [\App\Http\Controllers\OrderController::class, 'addStage'])->name('orders.add-stage');
+    Route::delete('/orders/{order}/remove-stage/{stage}', [\App\Http\Controllers\OrderController::class, 'removeStage'])->name('orders.remove-stage');
 
     Route::get('/clients/search', [\App\Http\Controllers\ClientSearchController::class, 'search'])->name('clients.search');
 

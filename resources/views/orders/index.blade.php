@@ -1,0 +1,87 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h4 font-weight-bold mb-0">
+                {{ __('Lista de Órdenes') }}
+            </h2>
+            @can('create-orders')
+                <a href="{{ route('orders.create') }}" class="btn btn-primary">
+                    {{ __('Nueva Orden') }}
+                </a>
+            @endcan
+        </div>
+    </x-slot>
+
+    <div class="py-4">
+        <div class="container">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light text-muted text-uppercase small font-weight-bold">
+                                <tr>
+                                    <th class="px-4 py-3">ID</th>
+                                    <th class="px-4 py-3">Cliente</th>
+                                    <th class="px-4 py-3">Factura</th>
+                                    <th class="px-4 py-3">Material</th>
+                                    <th class="px-4 py-3">Etapa Actual</th>
+                                    <th class="px-4 py-3 text-nowrap">Fecha Creación</th>
+                                    <th class="px-4 py-3 text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="align-middle">
+                                @forelse($orders as $order)
+                                    <tr>
+                                        <td class="px-4 py-3">#{{ $order->id }}</td>
+                                        <td class="px-4 py-3">{{ $order->client->name }}</td>
+                                        <td class="px-4 py-3">{{ $order->invoice_number }}</td>
+                                        <td class="px-4 py-3">{{ $order->material }}</td>
+                                        <td class="px-4 py-3">
+                                            @php
+                                                $currentStage = $order->orderStages
+                                                    ->where('completed_at', null)
+                                                    ->sortBy('sequence')
+                                                    ->first();
+                                            @endphp
+                                            @if($order->delivered_at)
+                                                <span class="badge bg-success-subtle text-success">Entregado</span>
+                                            @elseif($currentStage)
+                                                <span class="badge bg-primary-subtle text-primary">
+                                                    {{ $currentStage->stage->name }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">Sin etapa</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-nowrap">
+                                            {{ $order->created_at->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td class="px-4 py-3 text-end">
+                                            @can('edit-orders')
+                                                <a href="{{ route('orders.edit', $order) }}"
+                                                    class="btn btn-sm btn-outline-primary">
+                                                    Gestionar
+                                                </a>
+                                            @endcan
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-4 py-5 text-center text-muted">
+                                            No se encontraron órdenes.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @if($orders->hasPages())
+                    <div class="card-footer bg-white border-top-0 py-3">
+                        {{ $orders->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</x-app-layout>
