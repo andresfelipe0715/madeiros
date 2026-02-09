@@ -24,4 +24,9 @@ class Role extends Model
     {
         return $this->hasOne(RoleOrderPermission::class);
     }
+
+    public function clientPermission(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(RoleClientPermission::class);
+    }
 }

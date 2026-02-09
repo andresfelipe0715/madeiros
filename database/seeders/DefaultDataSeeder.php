@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Role;
+use App\Models\RoleClientPermission;
 use App\Models\RoleOrderPermission;
 use App\Models\Stage;
 use App\Models\User;
@@ -67,12 +68,12 @@ class DefaultDataSeeder extends Seeder
 
             // 3. Create one test user per role
             // Using document as a unique identifier for testing
-            $document = $roleCodes[$roleName] . '_123';
+            $document = $roleCodes[$roleName].'_123';
 
             User::firstOrCreate(
                 ['document' => $document],
                 [
-                    'name' => $roleName . ' Test',
+                    'name' => $roleName.' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
@@ -97,11 +98,18 @@ class DefaultDataSeeder extends Seeder
         }
 
         // 5. Populate role_order_permissions
+        // 5. Populate role_order_permissions and role_client_permissions
         $adminRole = Role::where('name', 'Admin')->first();
         if ($adminRole) {
             RoleOrderPermission::updateOrCreate(
                 ['role_id' => $adminRole->id],
                 ['can_view' => true, 'can_edit' => true, 'can_create' => true]
+            );
+
+            // Populate role_client_permissions for Admin
+            RoleClientPermission::updateOrCreate(
+                ['role_id' => $adminRole->id],
+                ['can_view' => true, 'can_create' => true, 'can_edit' => true]
             );
         }
 
@@ -110,6 +118,12 @@ class DefaultDataSeeder extends Seeder
             RoleOrderPermission::updateOrCreate(
                 ['role_id' => $role->id],
                 ['can_view' => true, 'can_edit' => false, 'can_create' => false]
+            );
+
+            // Deny client permissions for others by default
+            RoleClientPermission::updateOrCreate(
+                ['role_id' => $role->id],
+                ['can_view' => false, 'can_create' => false, 'can_edit' => false]
             );
         }
 

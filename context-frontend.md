@@ -174,7 +174,31 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Users cannot interact with production stages; only delivery actions are allowed.
 
 ---
+## Module: Clients
+**Role:** Admin (or any future role authorized via Gate)
 
+**Clients shown:**  
+- Only users authorized with `view-clients` can see the list.
+- Currently, only Admin can view clients, but the system should allow extending to other roles later.
+
+**Table columns:**  
+- ID  
+- Nombre  
+- Documento  
+- Teléfono  
+- Fecha de creación  
+
+**Actions:**  
+- **Create Client:** Only visible to users authorized with `create-clients`.  
+- **Update Client:** Only visible to users authorized with `edit-clients`.  
+- **No Delete:** Clients cannot be deleted.  
+
+**Special rules:**  
+- Admin can create and update clients; other roles cannot.  
+- Clients are permanent and cannot be removed.  
+- Created clients can immediately be assigned to orders when creating or editing an order.  
+- Frontend buttons or links for creating clients should respect Gate permissions.
+---
 ## Notes on Role-Stage Access
 - Each role can access one or more stages as defined in the `role_stages` table.  
 - Default workflow: Corte → Enchape → Servicios Especiales → Revision → Entrega  

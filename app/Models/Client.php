@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
 {
-    public $timestamps = false;
+    protected $fillable = [
+        'name',
+        'document',
+        'phone',
+    ];
 
     public function orders(): HasMany
     {

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\OrderManagementController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,12 +28,18 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
 
     // Order Management
-    Route::get('/orders', [\App\Http\Controllers\OrderManagementController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}/edit', [\App\Http\Controllers\OrderManagementController::class, 'edit'])->name('orders.edit');
-    Route::put('/orders/{order}', [\App\Http\Controllers\OrderManagementController::class, 'update'])->name('orders.update');
-    Route::post('/orders/{order}/add-stage', [\App\Http\Controllers\OrderManagementController::class, 'addStage'])->name('orders.add-stage');
-    Route::delete('/orders/{order}/remove-stage/{stage}', [\App\Http\Controllers\OrderManagementController::class, 'removeStage'])->name('orders.remove-stage');
+    Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}/edit', [OrderManagementController::class, 'edit'])->name('orders.edit');
+    Route::put('/orders/{order}', [OrderManagementController::class, 'update'])->name('orders.update');
+    Route::post('/orders/{order}/stages', [OrderManagementController::class, 'addStage'])->name('orders.add-stage');
+    Route::delete('/orders/{order}/stages/{stage}', [OrderManagementController::class, 'removeStage'])->name('orders.remove-stage');
 
+    // Clients Management
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
     Route::get('/clients/search', [\App\Http\Controllers\ClientSearchController::class, 'search'])->name('clients.search');
 
 });

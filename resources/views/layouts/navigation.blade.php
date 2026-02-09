@@ -21,6 +21,12 @@
                             {{ __('Órdenes') }}
                         </x-nav-link>
                     @endcan
+
+                    @can('view-clients')
+                        <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
+                            {{ __('Clientes') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -87,6 +93,12 @@
             @can('view-orders')
                 <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
                     {{ __('Órdenes') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('view-clients')
+                <x-responsive-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
+                    {{ __('Clientes') }}
                 </x-responsive-nav-link>
             @endcan
         </div>

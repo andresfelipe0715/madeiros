@@ -30,5 +30,17 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('create-orders', function (\App\Models\User $user) {
             return (new \App\Services\OrderPermissionService)->canCreate($user);
         });
+
+        \Illuminate\Support\Facades\Gate::define('view-clients', function (\App\Models\User $user) {
+            return (bool) ($user->role->clientPermission->can_view ?? false);
+        });
+
+        \Illuminate\Support\Facades\Gate::define('create-clients', function (\App\Models\User $user) {
+            return (bool) ($user->role->clientPermission->can_create ?? false);
+        });
+
+        \Illuminate\Support\Facades\Gate::define('edit-clients', function (\App\Models\User $user) {
+            return (bool) ($user->role->clientPermission->can_edit ?? false);
+        });
     }
 }
