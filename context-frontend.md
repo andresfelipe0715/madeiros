@@ -117,6 +117,36 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Finished orders move forward; current stage no longer sees it.
 
 ---
+## Module: Orders List
+**Role:** Admin (or any other role authorized to manage orders, e.g., Secretaria)
+
+**Orders shown:**  
+* Users with these roles can see **all orders**, regardless of which user created them.
+
+**Table columns:**  
+* ID  
+* Nombre de cliente  
+* Material  
+* Current Stage (next stage to act on, or “Completed” if delivered)  
+* Created At  
+* Actions (Edit, Add Stage, Remove Stage)
+
+**Actions:**  
+* **Edit:** Authorized users can **only update** the following fields:  
+  - Número de factura/pedido (must remain unique)  
+  - Material  
+  - Notas especiales  
+  - Ruta de producción (the stages assigned to the order)  
+* **Add Stage:** Can only add stages **after the current stage** of the order.  
+* **Remove Stage:** Can only remove stages **not yet started** (`started_at` is null).  
+
+**Special rules:**  
+* After creating a new order, redirect to this Orders List view instead of going to the first stage.  
+* Stage workflow integrity must be maintained.  
+* Only users with roles authorized to manage orders can access this module.  
+* Invoice numbers (`Número de factura/pedido`) must be unique across all orders.  
+* Use `/orders/create` (`create.blade.php`) as a reference for how to structure the update/edit form.
+---
 
 ## Module: Entrega
 **Role:** Empleado de entrega
