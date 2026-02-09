@@ -197,7 +197,13 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Admin can create and update clients; other roles cannot.  
 - Clients are permanent and cannot be removed.  
 - Created clients can immediately be assigned to orders when creating or editing an order.  
-- Frontend buttons or links for creating clients should respect Gate permissions.
+- Frontend buttons or links for creating clients should respect Gate permissions.  
+- Access control is entirely managed via Laravel Gates:
+  - `view-clients` → can see the Clients list
+  - `create-clients` → can create new clients
+  - `edit-clients` → can update existing clients
+- No roles are hardcoded; new roles can be granted permissions simply by assigning these Gate abilities.
+- Frontend buttons and links must respect these Gate permissions, so users without access do not see or interact with forbidden actions.
 ---
 ## Notes on Role-Stage Access
 - Each role can access one or more stages as defined in the `role_stages` table.  

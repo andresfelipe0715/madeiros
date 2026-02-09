@@ -185,6 +185,7 @@ No ENUMs are used. Lookup tables are used instead.
 - roles
 - users
 - clients
+- role_client_permissions
 - orders
 - stages
 - order_stages
@@ -194,7 +195,6 @@ No ENUMs are used. Lookup tables are used instead.
 - order_tracking_links
 - role_stages
 - role_order_permissions
-
 ---
 
 ### Role Order Permissions
@@ -239,7 +239,9 @@ CREATE TABLE clients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     document VARCHAR(50) NOT NULL UNIQUE,
-    phone VARCHAR(30) NULL
+    phone VARCHAR(30) NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE stages (
@@ -342,5 +344,14 @@ CREATE TABLE role_order_permissions (
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
-
+CREATE TABLE role_client_permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_id INT NOT NULL UNIQUE,
+    can_view BOOLEAN NOT NULL DEFAULT 0,
+    can_create BOOLEAN NOT NULL DEFAULT 0,
+    can_edit BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
 For frontend context, see context-frontend.md
