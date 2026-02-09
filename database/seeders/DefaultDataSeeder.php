@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Role;
+use App\Models\RoleOrderPermission;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -18,16 +19,19 @@ class DefaultDataSeeder extends Seeder
     {
         // 1. Create Stages
         $stagesData = [
-            'Corte',
-            'Enchape',
-            'Servicios Especiales',
-            'Revisión',
-            'Entrega',
+            'Corte' => 10,
+            'Enchape' => 20,
+            'Servicios Especiales' => 30,
+            'Revisión' => 40,
+            'Entrega' => 50,
         ];
 
         $stages = [];
-        foreach ($stagesData as $name) {
-            $stages[$name] = Stage::firstOrCreate(['name' => $name]);
+        foreach ($stagesData as $name => $sequence) {
+            $stages[$name] = Stage::updateOrCreate(
+                ['name' => $name],
+                ['default_sequence' => $sequence]
+            );
         }
 
         // 2. Create Roles and link to Stages
@@ -63,12 +67,12 @@ class DefaultDataSeeder extends Seeder
 
             // 3. Create one test user per role
             // Using document as a unique identifier for testing
-            $document = $roleCodes[$roleName].'_123';
+            $document = $roleCodes[$roleName] . '_123';
 
             User::firstOrCreate(
                 ['document' => $document],
                 [
-                    'name' => $roleName.' Test',
+                    'name' => $roleName . ' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
@@ -91,5 +95,23 @@ class DefaultDataSeeder extends Seeder
                 ]
             );
         }
+
+        // 5. Populate role_order_permissions
+        $adminRole = Role::where('name', 'Admin')->first();
+        if ($adminRole) {
+            RoleOrderPermission::updateOrCreate(
+                ['role_id' => $adminRole->id],
+                ['can_view' => true, 'can_edit' => true, 'can_create' => true]
+            );
+        }
+
+        $otherRoles = Role::where('name', '!=', 'Admin')->get();
+        foreach ($otherRoles as $role) {
+            RoleOrderPermission::updateOrCreate(
+                ['role_id' => $role->id],
+                ['can_view' => true, 'can_edit' => false, 'can_create' => false]
+            );
+        }
+
     }
 }

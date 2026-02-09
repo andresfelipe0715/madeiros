@@ -193,9 +193,27 @@ No ENUMs are used. Lookup tables are used instead.
 - order_logs
 - order_tracking_links
 - role_stages
+- role_order_permissions
 
 ---
 
+### Role Order Permissions
+
+- This table defines which roles are allowed to **create, view, or edit orders**.
+- It is separate from `role_stages`, which controls stage access.
+- Columns:
+  - `role_id` → links to `roles` table
+  - `can_view` → whether the role can see all orders
+  - `can_edit` → whether the role can edit orders
+  - `can_create` → whether the role can create new orders
+- This table is **managed by developers**, not admins.
+- When checking permissions for order actions:
+  - `/orders/create` → `can_create`
+  - Orders List `/orders` → `can_view`
+  - Order edit `/orders/{order}/edit` → `can_edit`
+- Roles not included in this table have no access to these order actions by default.
+- This allows dynamic control over which roles can manage orders without hardcoding Admin or Secretaria roles.
+---
 ## SQL Schema
 
 ```sql
@@ -226,7 +244,8 @@ CREATE TABLE clients (
 
 CREATE TABLE stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
+    name VARCHAR(100) NOT NULL UNIQUE,
+    default_sequence INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE orders (
@@ -310,6 +329,18 @@ CREATE TABLE role_stages (
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (stage_id) REFERENCES stages(id),
     UNIQUE (role_id, stage_id)
+);
+
+
+CREATE TABLE role_order_permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_id INT NOT NULL,
+    can_view BOOLEAN NOT NULL DEFAULT 0,
+    can_edit BOOLEAN NOT NULL DEFAULT 0,
+    can_create BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 For frontend context, see context-frontend.md

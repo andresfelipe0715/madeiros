@@ -11,7 +11,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->role->name === 'Admin';
+        return \Illuminate\Support\Facades\Gate::allows('create-orders');
     }
 
     public function rules(): array

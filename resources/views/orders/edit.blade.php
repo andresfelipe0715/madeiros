@@ -140,8 +140,8 @@
                                 </div>
                             </form>
                             <div class="mt-2">
-                                <small class="text-muted">Nota: La etapa se añadirá después de la etapa actual o al
-                                    final si ninguna ha iniciado.</small>
+                                <small class="text-muted">Nota: La etapa se insertará en el flujo de producción según su
+                                    secuencia predeterminada.</small>
                             </div>
                         </div>
                     </div>
