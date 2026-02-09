@@ -12,6 +12,7 @@ class OrderStage extends Model
         'stage_id',
         'sequence',
         'notes',
+        'remit_reason',
         'started_at',
         'completed_at',
         'started_by',

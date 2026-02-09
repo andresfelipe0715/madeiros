@@ -92,6 +92,16 @@
                                 </td>
                             @endif
                             <td>
+                                @php
+                                    $remitSource = $order->orderStages->where('sequence', '>', $orderStage->sequence)->whereNotNull('remit_reason')->first();
+                                @endphp
+                                @if($remitSource)
+                                    <div class="alert alert-danger py-1 px-2 mb-2 small d-inline-block">
+                                        <i class="bi bi-arrow-left-circle-fill me-1"></i>
+                                        <strong>Retorno de {{ $remitSource->stage->name }}:</strong><br>
+                                        {{ $remitSource->remit_reason }}
+                                    </div>
+                                @endif
                                 <small class="text-muted d-block">Gral: {{ Str::limit($order->notes, 30) }}</small>
                                 <small class="text-info d-block">{{ $stageName }}:
                                     {{ Str::limit($orderStage->notes, 30) }}</small>

@@ -6,6 +6,7 @@ use App\Models\OrderStage;
 use App\Services\StageAuthorizationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderStageController extends Controller
 {
@@ -20,10 +21,15 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        $orderStage->update([
-            'started_at' => now(),
-            'started_by' => Auth::id(),
-        ]);
+        DB::transaction(function () use ($orderStage) {
+            // Clear any remit reasons for this order as it's moving forward again
+            $orderStage->order->orderStages()->update(['remit_reason' => null]);
+
+            $orderStage->update([
+                'started_at' => now(),
+                'started_by' => Auth::id(),
+            ]);
+        });
 
         return back()->with('status', 'Etapa iniciada.');
     }
@@ -57,24 +63,27 @@ class OrderStageController extends Controller
     {
         $request->validate([
             'target_stage_id' => 'required|exists:stages,id',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
-        // Remit logic: Reset self and all stages after the target
+        // 1. Reset timeline for all stages starting from target back to current
+        $targetSequence = $orderStage->order->orderStages()
+            ->where('stage_id', $request->target_stage_id)
+            ->value('sequence');
+
         $orderStage->order->orderStages()
-            ->where('sequence', '>=', function ($query) use ($request) {
-                $query->select('sequence')
-                    ->from('order_stages')
-                    ->where('stage_id', $request->target_stage_id)
-                    ->limit(1);
-            })
+            ->where('sequence', '>=', $targetSequence)
             ->update([
                 'started_at' => null,
                 'completed_at' => null,
                 'started_by' => null,
                 'completed_by' => null,
-                'notes' => $request->notes // Add remit notes to target? 
             ]);
+
+        // 2. Save the remission reason ONLY on the current stage record
+        $orderStage->update([
+            'remit_reason' => $request->notes,
+        ]);
 
         return back()->with('status', 'Pedido remitido.');
     }
