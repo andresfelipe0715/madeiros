@@ -17,7 +17,7 @@
                     <div class="card shadow-sm border-0">
                         <div class="bg-primary bg-gradient py-1"></div>
                         <div class="card-body p-4 p-md-5">
-                            <form action="{{ route('orders.store') }}" method="POST">
+                            <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
 
                                 <div class="mb-4">
@@ -96,6 +96,17 @@
                                     </div>
                                     @error('stages')
                                         <div class="text-danger small mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="order_file" class="form-label fw-bold">Archivo de la Orden <span class="text-muted fw-normal small">(PDF, Opcional)</span></label>
+                                    <div class="input-group custom-input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-file-earmark-pdf-fill"></i></span>
+                                        <input type="file" name="order_file" id="order_file" class="form-control border-start-0 @error('order_file') is-invalid @enderror" accept="application/pdf">
+                                    </div>
+                                    @error('order_file')
+                                        <div class="text-danger small mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
 

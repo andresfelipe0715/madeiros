@@ -23,6 +23,7 @@ class StoreOrderRequest extends FormRequest
             'notes' => 'nullable|string',
             'stages' => 'required|array|min:1',
             'stages.*' => 'exists:stages,id',
+            'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB
         ];
     }
 
@@ -35,6 +36,9 @@ class StoreOrderRequest extends FormRequest
             'stages.required' => 'Debe seleccionar al menos una etapa.',
             'stages.min' => 'Debe seleccionar al menos una etapa.',
             'stages.*.exists' => 'Una de las etapas seleccionadas no es válida.',
+            'order_file.file' => 'El archivo de la orden debe ser un archivo válido.',
+            'order_file.mimes' => 'El archivo de la orden debe ser un PDF.',
+            'order_file.max' => 'El archivo de la orden no debe pesar más de 10MB.',
         ];
     }
 }

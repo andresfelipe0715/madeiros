@@ -96,16 +96,49 @@ Duration is calculated from timestamps.
 
 ---
 
-### Files
+## Order File (Archivo de la Orden)
 
-- Orders can have multiple files
-- File types are stored in a lookup table
-- Examples:
-  - Initial order PDF
-  - Revision images
-  - Extra attachments
+There is exactly ONE canonical file associated with an order in v1.
 
-Database stores file URLs only.
+**Ownership and lifecycle**
+- The file belongs to the ORDER, not to any stage
+- It is uploaded ONLY at order creation
+- It never changes during production stages
+
+**Upload rules**
+- Single file input
+- PDF only
+- Optional
+- Uploaded at `/orders/create`
+- Stored in external storage (Google Drive)
+- Database stores public URL only
+- Creates exactly ONE row in `order_files`
+- Uses `file_types = archivo_orden`
+
+**Hard prohibitions (all versions)**
+- Stages MUST NOT upload files
+- Stages MUST NOT replace files
+- Stages MUST NOT delete files
+- Multi-file inputs are forbidden
+- Multi-select inputs are forbidden
+
+**Visibility**
+- Read-only
+- Visible in all stage modules as reference material
+- If no file exists, nothing is shown
+
+**Out of scope (v1)**
+- File replacement
+- File deletion
+- Multiple order-level files
+
+**Extending files in future versions**
+- Supporting additional order-level files requires:
+  - Creating a new `file_types` row
+  - Adding exactly ONE new single-file input to `/orders/create`
+- Each file type maps to one input and one `order_files` row
+- No file type may accept multiple files
+- No stage may introduce new file inputs
 
 ---
 

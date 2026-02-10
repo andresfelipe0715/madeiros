@@ -24,6 +24,7 @@
                         <th>Cliente</th>
                         <th>Material</th>
                         @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
+                            <th>Archivo Orden</th>
                             <th>Archivo Proyecto</th>
                         @endif
                         @if($normName === 'corte')
@@ -42,6 +43,7 @@
                     @forelse($orders as $order)
                         @php
                             $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id);
+                            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'archivo_orden'));
                             $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'proyecto'));
                             $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina'));
                             $canAct = $authService->canActOnStage(auth()->user(), $order, $stage->id);
@@ -51,6 +53,16 @@
                             <td>{{ $order->client->name }}</td>
                             <td>{{ $order->material }}</td>
                             @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
+                                <td>
+                                    @if($orderFile)
+                                        <a href="{{ $orderFile->file_url }}" target="_blank"
+                                            class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>
                                     @if($projectFile)
                                         <a href="{{ $projectFile->file_url }}" target="_blank"

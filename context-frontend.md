@@ -14,7 +14,7 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - ID  
 - Nombre de cliente  
 - Tipo de Material  
-- Archivo proyecto (pdf or csv if exists for that order)  
+- Archivo de la Orden (PDF, read-only)
 - Archivo máquina (TBD)  
 - Fecha envío  
 - Estado de proyecto (e.g., Pendiente para corte, En corte)  
@@ -44,7 +44,7 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - ID  
 - Nombre de cliente  
 - Tipo de Material  
-- Archivo proyecto (pdf or csv if exists for that order)  
+Archivo de la Orden (PDF, read-only if exists)
 - Fecha envío  
 - Estado de proyecto (e.g., Listo para Enchape, Enchapando)  
 - Observaciones Enchape  
@@ -74,7 +74,7 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Tipo de Material  
 - Fecha envío  
 - Estado de proyecto (e.g., Listo para Servicios Especiales, En proceso)  
-- Archivo proyecto (pdf or csv if exists for that order)  
+Archivo de la Orden (PDF, read-only if exists) 
 - Observaciones Servicios Especiales  
 - Observaciones generales  
 - Acciones  
@@ -100,7 +100,7 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - ID  
 - Nombre de cliente  
 - Tipo de Material  
-- Archivo proyecto (pdf or csv if exists for that order)  
+-Archivo de la Orden (PDF, read-only if exists)
 - Fecha envío  
 - Estado de proyecto (e.g., Listo para Revisión, En revisión)  
 - Observaciones Enchape  
@@ -160,7 +160,7 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Tipo de Material  
 - Fecha envío  
 - Estado de proyecto (e.g., Listo para entrega)  
-- Archivo proyecto (pdf or csv if exists for that order)  
+-Archivo de la Orden (PDF, read-only if exists)
 - Observaciones generales  
 - Acciones
 
@@ -213,6 +213,43 @@ This file stores all frontend-specific rules, modules, and role-based behaviors 
 - Each module only shows orders for stages the user has permission to act on.  
 - Actions available per module: Start, Pause, Finish, Add Notes (except Entrega, which only finishes/delivers).  
 -  “Remitir a” sends the order back to the immediately previous completed stage and resets the current stage timestamps.
+---
+
+
+## Module: Order Creation
+**Role:** Admin (or any role with `can_create` on orders)
+
+**Route:**
+- `GET /orders/create`
+- `POST /orders`
+
+**Form fields:**
+- Cliente
+- Número de factura/pedido (unique)
+- Material
+- Notas especiales
+- Ruta de producción (stages selection)
+- **Archivo de la Orden (PDF, optional, order-level)**
+
+**Archivo de la Orden rules:**
+- Optional
+- Single file input
+- PDF only
+- Uploaded at order creation time
+- Stored in external storage (Google Drive)
+- Database stores public file URL only
+- Creates exactly ONE row in `order_files`
+- Uses a dedicated `file_types` value (e.g. `archivo_orden`)
+
+**Hard constraints:**
+- One input = one file
+- Multi-file inputs are forbidden
+- File cannot be replaced or deleted in v1
+- Stages cannot upload or modify files
+
+**Visibility:**
+- Read-only
+- Visible in all stage modules as reference material
 ---
 
 ## Build Configuration

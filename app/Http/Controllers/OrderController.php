@@ -41,7 +41,7 @@ class OrderController extends Controller
 
         $validated = $request->validated();
 
-        $order = DB::transaction(function () use ($validated) {
+        $order = DB::transaction(function () use ($validated, $request) {
             $order = Order::create([
                 'client_id' => $validated['client_id'],
                 'material' => $validated['material'],
@@ -60,6 +60,22 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'stage_id' => $stage->id,
                     'sequence' => $index + 1,
+                ]);
+            }
+
+            // Handle optional Archivo de la Orden
+            if ($request->hasFile('order_file')) {
+                $file = $request->file('order_file');
+                $path = $file->store('orders', 'public');
+                $url = \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+
+                $fileType = \App\Models\FileType::firstOrCreate(['name' => 'archivo_orden']);
+
+                \App\Models\OrderFile::create([
+                    'order_id' => $order->id,
+                    'file_type_id' => $fileType->id,
+                    'file_url' => $url,
+                    'uploaded_by' => Auth::id(),
                 ]);
             }
 
