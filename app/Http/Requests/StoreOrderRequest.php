@@ -20,7 +20,7 @@ class StoreOrderRequest extends FormRequest
             'client_id' => 'required|exists:clients,id',
             'material' => 'required|string|max:255',
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:300',
             'stages' => 'required|array|min:1',
             'stages.*' => 'exists:stages,id',
             'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB
@@ -39,6 +39,7 @@ class StoreOrderRequest extends FormRequest
             'order_file.file' => 'El archivo de la orden debe ser un archivo válido.',
             'order_file.mimes' => 'El archivo de la orden debe ser un PDF.',
             'order_file.max' => 'El archivo de la orden no debe pesar más de 10MB.',
+            'notes.max' => 'Las notas no deben exceder los 300 caracteres.',
         ];
     }
 }
