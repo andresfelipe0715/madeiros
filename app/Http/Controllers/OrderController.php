@@ -67,14 +67,13 @@ class OrderController extends Controller
             if ($request->hasFile('order_file')) {
                 $file = $request->file('order_file');
                 $path = $file->store('orders', 'public');
-                $url = \Illuminate\Support\Facades\Storage::disk('public')->url($path);
 
                 $fileType = \App\Models\FileType::firstOrCreate(['name' => 'archivo_orden']);
 
                 \App\Models\OrderFile::create([
                     'order_id' => $order->id,
                     'file_type_id' => $fileType->id,
-                    'file_url' => $url,
+                    'file_path' => $path,
                     'uploaded_by' => Auth::id(),
                 ]);
             }

@@ -15,9 +15,19 @@ class OrderFile extends Model
     protected $fillable = [
         'order_id',
         'file_type_id',
-        'file_url',
+        'file_path',
         'uploaded_by',
     ];
+
+    /**
+     * Get the full URL for the file.
+     */
+    protected function fileUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn () => \Illuminate\Support\Facades\Storage::disk('public')->url($this->file_path),
+        );
+    }
 
     public function order(): BelongsTo
     {

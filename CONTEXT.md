@@ -331,7 +331,7 @@ CREATE TABLE order_files (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     file_type_id INT NOT NULL,
-    file_url TEXT NOT NULL,
+    file_path TEXT NOT NULL,
     uploaded_by INT NOT NULL,
     uploaded_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),

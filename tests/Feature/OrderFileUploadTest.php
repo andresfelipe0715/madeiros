@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Client;
-use App\Models\FileType;
 use App\Models\Order;
 use App\Models\Role;
 use App\Models\Stage;
@@ -49,12 +48,18 @@ it('can upload a PDF file when creating an order', function () {
     ]);
 
     $orderFile = $order->orderFiles->first();
-    $this->assertNotEmpty($orderFile->file_url);
+    $this->assertNotEmpty($orderFile->file_path);
+    $this->assertStringNotContainsString('http', $orderFile->file_path);
+    $this->assertStringNotContainsString('/storage/', $orderFile->file_path);
 
-    // Check if file exists in fake storage
-    $path = str_replace(Storage::disk('public')->url(''), '', $orderFile->file_url);
-    $path = ltrim($path, '/');
-    Storage::disk('public')->assertExists($path);
+    $this->assertNotEmpty($orderFile->file_url);
+    // In tests, file_url might be /storage/... or http://... depending on env
+    $this->assertTrue(
+        str_contains($orderFile->file_url, 'http') || str_starts_with($orderFile->file_url, '/storage/')
+    );
+
+    // Check if file exists in fake storage using the relative path directly
+    Storage::disk('public')->assertExists($orderFile->file_path);
 });
 
 it('rejects non-PDF files', function () {
