@@ -20,10 +20,13 @@ class ClientSearchController extends Controller
         }
 
         $clients = Client::query()
-            ->where('name', 'LIKE', "%{$query}%")
+            ->where(function ($queryBuilder) use ($query) {
+                $queryBuilder->where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('document', 'LIKE', "%{$query}%");
+            })
             ->orderBy('name')
             ->limit(20)
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'document']);
 
         return response()->json($clients);
     }

@@ -24,8 +24,8 @@
                                     <label for="client_id" class="form-label fw-bold">Cliente</label>
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
-                                        <select name="client_id" id="client_id" class="form-select border-start-0 @error('client_id') is-invalid @enderror" required>
-                                            <option value=""></option>
+                                        <select name="client_id" id="client_id" class="form-select border-start-0 @error('client_id') is-invalid @enderror" required placeholder="Escriba nombre o documento del cliente">
+                                            
                                             @if($selectedClient)
                                                 <option value="{{ $selectedClient->id }}" selected>{{ $selectedClient->name }}</option>
                                             @endif
@@ -250,10 +250,10 @@ select:-webkit-autofill {
             var settings = {
                 valueField: 'id',
                 labelField: 'name',
-                searchField: 'name',
+                searchField: ['name', 'document'],
                 create: false,
-                placeholder: 'Escriba el nombre del cliente...',
-                allowEmptyOption: true,
+                placeholder: 'Escriba nombre o documento del cliente',
+                allowEmptyOption: false,
                 loadThrottle: 300, // Debounce 300ms
                 load: function(query, callback) {
                     if (query.length < 2) return callback();
@@ -269,12 +269,34 @@ select:-webkit-autofill {
                 },
                 render: {
                     option: function(item, escape) {
+                        var name = item.name;
+                        var document = item.document;
+                        
+                        if (!name && !document) {
+                            return null;
+                        }
+
+                        var label = escape(name);
+                        if (document) {
+                            label += '-' + escape(document);
+                        }
                         return '<div class="py-2 px-3 border-bottom">' +
-                                    '<span class="d-block">' + escape(item.name) + '</span>' +
+                                    '<span class="d-block">' + label + '</span>' +
                                 '</div>';
                     },
                     item: function(item, escape) {
-                        return '<div class="py-0">' + escape(item.name) + '</div>';
+                        var name = item.name;
+                        var document = item.document;
+
+                        if (!name && !document) {
+                            return null;
+                        }
+
+                        var label = escape(name);
+                        if (document) {
+                            label += '-' + escape(document);
+                        }
+                        return '<div class="py-0">' + label + '</div>';
                     }
                 }
             };
