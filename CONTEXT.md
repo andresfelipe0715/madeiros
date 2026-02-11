@@ -27,8 +27,8 @@ Frontend:
 - Simple role-based UI
 
 Storage:
-- External file storage (Google Drive or similar)
-- Database stores file URLs only
+- Local storage in Laravel `storage/app/orders/` (or `public/orders/` if you want public access)
+- Database stores relative file paths only (e.g., `orders/12345.pdf`)
 
 Auth:
 - Staff users authenticate via password
@@ -110,8 +110,8 @@ There is exactly ONE canonical file associated with an order in v1.
 - PDF only
 - Optional
 - Uploaded at `/orders/create`
-- Stored in external storage (Google Drive)
-- Database stores public URL only
+- Stored in local storage (`storage/app/public/order/` or `public/order/`)
+- Database stores relative path only (e.g., `order/archivo_orden_123.pdf`)
 - Creates exactly ONE row in `order_files`
 - Uses `file_types = archivo_orden`
 
@@ -274,7 +274,8 @@ CREATE TABLE clients (
     document VARCHAR(50) NOT NULL UNIQUE,
     phone VARCHAR(30) NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX (name)
 );
 
 CREATE TABLE stages (
@@ -311,6 +312,7 @@ CREATE TABLE order_stages (
     completed_at TIMESTAMP NULL,
     started_by INT NULL,
     completed_by INT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (stage_id) REFERENCES stages(id),
@@ -369,13 +371,13 @@ CREATE TABLE role_stages (
 
 CREATE TABLE role_order_permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL,
+    role_id INT NOT NULL UNIQUE,
     can_view BOOLEAN NOT NULL DEFAULT 0,
     can_edit BOOLEAN NOT NULL DEFAULT 0,
     can_create BOOLEAN NOT NULL DEFAULT 0,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id)
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 CREATE TABLE role_client_permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
