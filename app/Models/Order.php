@@ -61,4 +61,26 @@ class Order extends Model
     {
         return $this->hasMany(OrderTrackingLink::class);
     }
+
+    public function currentStageName(): string
+    {
+        if ($this->delivered_at) {
+            return 'Entregada';
+        }
+
+        if ($this->orderStages->isEmpty()) {
+            return 'Sin etapa';
+        }
+
+        $currentStage = $this->orderStages
+            ->whereNull('completed_at')
+            ->sortBy('sequence')
+            ->first();
+
+        if ($currentStage) {
+            return $currentStage->stage->name;
+        }
+
+        return 'Entregada';
+    }
 }

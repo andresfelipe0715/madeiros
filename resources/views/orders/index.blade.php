@@ -38,19 +38,20 @@
                                         <td class="px-4 py-3">{{ $order->material }}</td>
                                         <td class="px-4 py-3">
                                             @php
-                                                $currentStage = $order->orderStages
-                                                    ->where('completed_at', null)
-                                                    ->sortBy('sequence')
-                                                    ->first();
+                                                $stageName = $order->currentStageName();
                                             @endphp
-                                            @if($order->delivered_at)
-                                                <span class="badge bg-success-subtle text-success">Entregado</span>
-                                            @elseif($currentStage)
-                                                <span class="badge bg-primary-subtle text-primary">
-                                                    {{ $currentStage->stage->name }}
+                                            @if($stageName === 'Entregada')
+                                                <span class="badge bg-success-subtle text-success">
+                                                    {{ $stageName }}
+                                                </span>
+                                            @elseif($stageName === 'Sin etapa')
+                                                <span class="badge bg-secondary-subtle text-secondary">
+                                                    {{ $stageName }}
                                                 </span>
                                             @else
-                                                <span class="badge bg-secondary-subtle text-secondary">Sin etapa</span>
+                                                <span class="badge bg-primary-subtle text-primary">
+                                                    {{ $stageName }}
+                                                </span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-nowrap">

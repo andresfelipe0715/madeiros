@@ -38,8 +38,9 @@ class OrderManagementController extends Controller
         $order->load(['client', 'orderStages.stage']);
 
         $allStages = Stage::orderBy('default_sequence')->get();
+        $finalStageId = Stage::orderBy('default_sequence', 'desc')->value('id');
 
-        return view('orders.edit', compact('order', 'allStages'));
+        return view('orders.edit', compact('order', 'allStages', 'finalStageId'));
     }
 
     /**
@@ -130,6 +131,15 @@ class OrderManagementController extends Controller
 
         if ($orderStage->started_at) {
             return back()->with('error', 'No se puede eliminar una etapa que ya ha iniciado.');
+        }
+
+        // Integrity check: Prevent removing the final stage (highest default_sequence)
+        $isFinalStage = Stage::where('id', $stage->id)
+            ->where('default_sequence', Stage::max('default_sequence'))
+            ->exists();
+
+        if ($isFinalStage) {
+            return back()->with('error', 'No se puede eliminar la etapa final de entrega.');
         }
 
         DB::transaction(function () use ($order, $orderStage) {
