@@ -140,8 +140,9 @@
                                 </div>
                             </form>
                             <div class="mt-2">
-                                <small class="text-muted">Nota: La etapa se insertará en el flujo de producción según su
-                                    secuencia predeterminada.</small>
+                                <small class="text-muted">Nota: La etapa se insertará automáticamente en la posición
+                                    lógica
+                                    según el flujo de producción.</small>
                             </div>
                         </div>
                     </div>

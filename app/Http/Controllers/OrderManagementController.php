@@ -72,15 +72,46 @@ class OrderManagementController extends Controller
 
         $newStage = Stage::findOrFail($stageId);
 
-        DB::transaction(function () use ($order, $newStage) {
-            // Add with a temporary high sequence to avoid immediate conflict
+        // Validation rule: Block if any stage with a HIGHER default_sequence has already been completed.
+        // "No se puede insertar esta etapa porque ya se completaron etapas posteriores."
+        $hasLaterCompletedStage = $order->orderStages()
+            ->whereNotNull('completed_at')
+            ->whereHas('stage', function ($query) use ($newStage) {
+                $query->where('default_sequence', '>', $newStage->default_sequence);
+            })
+            ->exists();
+
+        if ($hasLaterCompletedStage) {
+            return back()->with('error', 'No se puede insertar esta etapa porque ya se completaron etapas posteriores.');
+        }
+
+        // Determine the correct insertion position (sequence) for the frozen workflow.
+        // We look for the current sequence of the stage that should logically follow this new stage.
+        $nextLogicalStage = $order->orderStages()
+            ->join('stages', 'order_stages.stage_id', '=', 'stages.id')
+            ->where('stages.default_sequence', '>', $newStage->default_sequence)
+            ->orderBy('stages.default_sequence', 'asc')
+            ->first();
+
+        // If no follow-up stage exists, it goes to the end.
+        if ($nextLogicalStage) {
+            $position = $nextLogicalStage->sequence;
+        } else {
+            $position = $order->orderStages()->max('sequence') + 1;
+        }
+
+        DB::transaction(function () use ($order, $newStage, $position) {
+            // 1. Shift existing stages up (+1) from the calculated position
+            $order->orderStages()
+                ->where('sequence', '>=', $position)
+                ->increment('sequence');
+
+            // 2. Insert new stage at the calculated sequence
             OrderStage::create([
                 'order_id' => $order->id,
                 'stage_id' => $newStage->id,
-                'sequence' => 9999, // Temporary high sequence
+                'sequence' => $position,
             ]);
-
-            $this->resequenceOrderStages($order);
         });
 
         return back()->with('success', 'Etapa añadida exitosamente.');
@@ -102,39 +133,33 @@ class OrderManagementController extends Controller
         }
 
         DB::transaction(function () use ($order, $orderStage) {
+            $deletedSequence = $orderStage->sequence;
             $orderStage->delete();
-            $this->resequenceOrderStages($order);
+
+            // Shift existing stages down to fill the gap
+            $order->orderStages()
+                ->where('sequence', '>', $deletedSequence)
+                ->decrement('sequence');
         });
 
         return back()->with('success', 'Etapa eliminada exitosamente.');
     }
 
     /**
-     * Resequence all stages for an order based on their default sequence.
-     * This method avoids UNIQUE constraint violations by using a two-step update.
+     * Resequence all stages for an order solely based on their CURRENT sequence.
+     * This is used as a safety/compacter and never uses the global default_sequence.
      */
     private function resequenceOrderStages(Order $order): void
     {
-        // 1. Shift all current sequences to a temporary range (+10000) to avoid any UNIQUE collision
-        // This is done as a raw query to be statement-safe and bypass model events/state.
-        DB::table('order_stages')
-            ->where('order_id', $order->id)
-            ->update(['sequence' => DB::raw('sequence + 10000')]);
-
-        // 2. Get the records sorted by their global default sequence
-        $records = DB::table('order_stages')
-            ->join('stages', 'order_stages.stage_id', '=', 'stages.id')
-            ->where('order_stages.order_id', $order->id)
-            ->orderBy('stages.default_sequence')
-            ->select('order_stages.id')
+        // Get the records sorted by their current sequence (order-specific truth)
+        $records = $order->orderStages()
+            ->orderBy('sequence')
             ->get();
 
-        // 3. Re-assign sequential sequences starting from 1
+        // Re-assign sequential sequences starting from 1 to ensure no gaps
         $i = 1;
         foreach ($records as $record) {
-            DB::table('order_stages')
-                ->where('id', $record->id)
-                ->update(['sequence' => $i++]);
+            $record->update(['sequence' => $i++]);
         }
     }
 }
