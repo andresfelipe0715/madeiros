@@ -12,11 +12,12 @@ class OrderStageController extends Controller
 {
     public function __construct(
         protected StageAuthorizationService $authService
-    ) {}
+    ) {
+    }
 
     public function start(OrderStage $orderStage)
     {
-        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -44,16 +45,34 @@ class OrderStageController extends Controller
         return back()->with('status', 'Etapa pausada.');
     }
 
-    public function finish(OrderStage $orderStage)
+    public function finish(OrderStage $orderStage): \Illuminate\Http\RedirectResponse
     {
-        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        $orderStage->update([
-            'completed_at' => now(),
-            'completed_by' => Auth::id(),
-        ]);
+        DB::transaction(function () use ($orderStage) {
+            // 1. Mark current stage as completed
+            $orderStage->update([
+                'completed_at' => now(),
+                'completed_by' => Auth::id(),
+            ]);
+
+            // 2. Load fresh order data to ensure we have the latest state and correct model type
+            $order = \App\Models\Order::find($orderStage->order_id);
+
+            // 3. Determine if this is the last stage and all are completed using Eloquent
+            $maxSequence = $order->orderStages()->max('sequence');
+            $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
+
+            // 4. Update the Order only if current sequence is the max and no stages remain incomplete
+            if ($orderStage->sequence == $maxSequence && !$hasIncompleteStages) {
+                $order->update([
+                    'delivered_at' => now(),
+                    'delivered_by' => Auth::id(),
+                ]);
+            }
+        });
 
         return back()->with('status', 'Etapa finalizada.');
     }
@@ -80,6 +99,12 @@ class OrderStageController extends Controller
             ]);
 
         // 2. Save the remission reason ONLY on the current stage record
+        // and clear delivery status if it was delivered
+        $orderStage->order->update([
+            'delivered_at' => null,
+            'delivered_by' => null,
+        ]);
+
         $orderStage->update([
             'remit_reason' => $request->notes,
         ]);
@@ -89,7 +114,7 @@ class OrderStageController extends Controller
 
     public function updateNotes(Request $request, OrderStage $orderStage)
     {
-        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 

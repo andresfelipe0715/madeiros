@@ -77,7 +77,8 @@
                                         @foreach($stages as $stage)
                                             <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input" type="checkbox" name="stages[]" value="{{ $stage->id }}" id="stage_{{ $stage->id }}" 
-                                                    {{ (is_array(old('stages')) && in_array($stage->id, old('stages'))) || (!old('stages') && true) ? 'checked' : '' }}>
+                                                    {{ (is_array(old('stages')) && in_array($stage->id, old('stages'))) || (!old('stages') && true) ? 'checked' : '' }}
+                                                    @if($loop->last) onclick="return false;" @endif>
                                                 <label class="form-check-label d-flex justify-content-between align-items-center w-100" for="stage_{{ $stage->id }}">
                                                     <span>{{ $stage->name }}</span>
                                                     @if($loop->first)

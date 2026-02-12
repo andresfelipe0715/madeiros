@@ -18,7 +18,13 @@ class Order extends Model
         'notes',
         'created_by',
         'delivered_by',
+        'delivered_at',
     ];
+
+    public function getCreatorNameAttribute(): string
+    {
+        return $this->createdBy?->name ?? 'Sistema';
+    }
 
     protected function casts(): array
     {
@@ -64,10 +70,6 @@ class Order extends Model
 
     public function currentStageName(): string
     {
-        if ($this->delivered_at) {
-            return 'Entregada';
-        }
-
         if ($this->orderStages->isEmpty()) {
             return 'Sin etapa';
         }

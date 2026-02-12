@@ -21,7 +21,7 @@ class OrderManagementController extends Controller
     {
         Gate::authorize('view-orders');
 
-        $orders = Order::with(['client', 'orderStages.stage'])
+        $orders = Order::with(['client', 'orderStages.stage', 'createdBy'])
             ->latest()
             ->paginate(15);
 

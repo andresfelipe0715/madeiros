@@ -25,7 +25,7 @@ it('returns "Sin etapa" when order has no stages', function () {
     expect($order->currentStageName())->toBe('Sin etapa');
 });
 
-it('returns "Entregada" when order is marked as delivered', function () {
+it('returns "Sin etapa" when order is marked as delivered but has no stages', function () {
     $order = new Order();
     $order->client_id = $this->client->id;
     $order->created_by = $this->user->id;
@@ -34,7 +34,7 @@ it('returns "Entregada" when order is marked as delivered', function () {
     $order->delivered_at = now();
     $order->save();
 
-    expect($order->currentStageName())->toBe('Entregada');
+    expect($order->currentStageName())->toBe('Sin etapa');
 });
 
 it('returns the name of the first incomplete stage', function () {

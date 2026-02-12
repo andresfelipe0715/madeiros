@@ -22,10 +22,12 @@
                                 <tr>
                                     <th class="px-4 py-3">ID</th>
                                     <th class="px-4 py-3">Cliente</th>
+                                    <th class="px-4 py-3 text-nowrap">Creado por</th>
                                     <th class="px-4 py-3">Factura</th>
                                     <th class="px-4 py-3">Material</th>
                                     <th class="px-4 py-3">Etapa Actual</th>
                                     <th class="px-4 py-3 text-nowrap">Fecha Creación</th>
+                                    <th class="px-4 py-3 text-nowrap">Fecha Entrega</th>
                                     <th class="px-4 py-3 text-end">Acciones</th>
                                 </tr>
                             </thead>
@@ -34,6 +36,7 @@
                                     <tr>
                                         <td class="px-4 py-3">#{{ $order->id }}</td>
                                         <td class="px-4 py-3">{{ $order->client->name }}</td>
+                                        <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
                                         <td class="px-4 py-3">{{ $order->invoice_number }}</td>
                                         <td class="px-4 py-3">{{ $order->material }}</td>
                                         <td class="px-4 py-3">
@@ -57,6 +60,13 @@
                                         <td class="px-4 py-3 text-nowrap">
                                             {{ $order->created_at->format('d/m/Y H:i') }}
                                         </td>
+                                        <td class="px-4 py-3 text-nowrap">
+                                            @if($order->delivered_at)
+                                                {{ $order->delivered_at->format('d/m/Y H:i') }}
+                                            @else
+                                                <span class="text-muted italic small">No entregada</span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-end">
                                             @can('edit-orders')
                                                 <a href="{{ route('orders.edit', $order) }}"
@@ -68,7 +78,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-4 py-5 text-center text-muted">
+                                        <td colspan="9" class="px-4 py-5 text-center text-muted">
                                             No se encontraron órdenes.
                                         </td>
                                     </tr>
