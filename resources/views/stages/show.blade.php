@@ -90,7 +90,78 @@
         @endif
     @endforeach
 
+    <!-- Modals for Notes -->
+    @foreach($orders as $order)
+        @php 
+            $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id);
+            $canEdit = $authService->canActOnStage(auth()->user(), $order, $stage->id);
+        @endphp
+        <div class="modal fade" id="notesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow">
+                    <form action="{{ route('order-stages.update-notes', $orderStage->id) }}" method="POST">
+                        @csrf
+                        <div class="modal-header bg-primary text-white border-0">
+                            <h5 class="modal-title">Observaciones - Pedido #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <!-- Section A: Observaciones Generales -->
+                            <div class="mb-4">
+                                <label class="form-label font-weight-bold text-muted small text-uppercase">Sección A: Observaciones Generales</label>
+                                <div class="p-3 bg-light rounded border text-muted text-break">
+                                    {{ $order->notes ?: 'Sin observaciones generales.' }}
+                                </div>
+                                <p class="x-small text-muted mt-1"><i class="bi bi-info-circle"></i> Estas notas fueron creadas al registrar la orden y son de solo lectura.</p>
+                            </div>
+
+                            @php
+                                $remitSource = $order->orderStages->where('sequence', '>', $orderStage->sequence)->whereNotNull('remit_reason')->first();
+                            @endphp
+
+                            @if($remitSource)
+                                <div class="mb-4">
+                                    <label class="form-label font-weight-bold text-danger small text-uppercase">Sección C: Motivo de Remisión</label>
+                                    <div class="p-3 bg-soft-danger rounded border border-danger text-danger text-break">
+                                        <strong>De {{ $remitSource->stage->name }}:</strong> {{ $remitSource->remit_reason }}
+                                    </div>
+                                    <p class="x-small text-danger mt-1"><i class="bi bi-info-circle"></i> Esta es la razón por la cual el pedido fue devuelto a esta etapa.</p>
+                                </div>
+                            @endif
+
+                            <hr class="my-4 opacity-50">
+
+                            <!-- Section B: Observaciones de esta Etapa -->
+                            <div class="mb-0">
+                                <label for="notes_{{ $orderStage->id }}" class="form-label font-weight-bold text-primary small text-uppercase">Sección B: Observaciones de {{ $stage->name }}</label>
+                                <textarea name="notes" id="notes_{{ $orderStage->id }}" 
+                                    class="form-control shadow-none @if(!$canEdit) bg-light @endif" 
+                                    rows="4" 
+                                    placeholder="Ingrese observaciones específicas para esta etapa..."
+                                    {{ !$canEdit ? 'readonly' : '' }}>{{ $orderStage->notes }}</textarea>
+                                @if($canEdit)
+                                    <p class="x-small text-muted mt-1"><i class="bi bi-pencil"></i> Solo tú y otros usuarios de esta etapa pueden editar estas notas.</p>
+                                @else
+                                    <p class="x-small text-danger mt-1"><i class="bi bi-lock-fill"></i> No tienes permisos para editar las notas de esta etapa.</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 p-4 pt-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                            @if($canEdit)
+                                <button type="submit" class="btn btn-primary rounded-pill px-4">Guardar Cambios</button>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     <style>
+        .x-small {
+            font-size: 0.75rem;
+        }
         .breadcrumb-item + .breadcrumb-item::before {
             content: "/";
         }
@@ -102,6 +173,9 @@
         }
         .font-weight-bold {
             font-weight: 600 !important;
+        }
+        .bg-soft-danger {
+            background-color: rgba(220, 53, 69, 0.1);
         }
     </style>
 </x-app-layout>

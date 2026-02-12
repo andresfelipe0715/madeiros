@@ -117,7 +117,7 @@ class DefaultDataSeeder extends Seeder
         foreach ($otherRoles as $role) {
             RoleOrderPermission::updateOrCreate(
                 ['role_id' => $role->id],
-                ['can_view' => true, 'can_edit' => false, 'can_create' => false]
+                ['can_view' => false, 'can_edit' => false, 'can_create' => false]
             );
 
             // Deny client permissions for others by default

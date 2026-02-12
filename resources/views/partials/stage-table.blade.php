@@ -55,8 +55,7 @@
                             @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
                                 <td>
                                     @if($orderFile)
-                                        <a href="{{ $orderFile->file_url }}" target="_blank"
-                                            class="btn btn-sm btn-outline-danger">
+                                        <a href="{{ $orderFile->file_url }}" target="_blank" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-file-earmark-pdf"></i> PDF
                                         </a>
                                     @else
@@ -103,20 +102,25 @@
                                     @endif
                                 </td>
                             @endif
-                            <td>
-                                @php
-                                    $remitSource = $order->orderStages->where('sequence', '>', $orderStage->sequence)->whereNotNull('remit_reason')->first();
-                                @endphp
-                                @if($remitSource)
-                                    <div class="alert alert-danger py-1 px-2 mb-2 small d-inline-block">
-                                        <i class="bi bi-arrow-left-circle-fill me-1"></i>
-                                        <strong>Retorno de {{ $remitSource->stage->name }}:</strong><br>
-                                        {{ $remitSource->remit_reason }}
+                            <td class="px-3">
+                                <div style="cursor: pointer;" data-bs-toggle="modal"
+                                    data-bs-target="#notesModal{{ $orderStage->id }}">
+                                    @php
+                                        $remitSource = $order->orderStages->where('sequence', '>', $orderStage->sequence)->whereNotNull('remit_reason')->first();
+                                    @endphp
+                                    @if($remitSource)
+                                        <small class="text-danger d-block fw-bold"><i
+                                                class="bi bi-arrow-left-circle-fill me-1"></i>Retorno:
+                                            {{ Str::limit($remitSource->remit_reason, 30) }}</small>
+                                    @endif
+                                    <small class="text-muted d-block"><span class="fw-bold">Gral:</span>
+                                        {{ Str::limit($order->notes, 30) ?: '-' }}</small>
+                                    <small class="text-info d-block fw-bold"><span
+                                            class="text-dark">{{ $stageName }}:</span>
+                                        {{ Str::limit($orderStage->notes, 30) ?: '-' }}</small>
+                                    <div class="text-primary x-small mt-1"><i class="bi bi-pencil-square"></i> Ver/Editar
                                     </div>
-                                @endif
-                                <small class="text-muted d-block">Gral: {{ Str::limit($order->notes, 30) }}</small>
-                                <small class="text-info d-block">{{ $stageName }}:
-                                    {{ Str::limit($orderStage->notes, 30) }}</small>
+                                </div>
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">

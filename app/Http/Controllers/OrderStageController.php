@@ -12,12 +12,11 @@ class OrderStageController extends Controller
 {
     public function __construct(
         protected StageAuthorizationService $authService
-    ) {
-    }
+    ) {}
 
     public function start(OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -47,7 +46,7 @@ class OrderStageController extends Controller
 
     public function finish(OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -86,5 +85,22 @@ class OrderStageController extends Controller
         ]);
 
         return back()->with('status', 'Pedido remitido.');
+    }
+
+    public function updateNotes(Request $request, OrderStage $orderStage)
+    {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+            return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
+        }
+
+        $request->validate([
+            'notes' => 'nullable|string|max:300',
+        ]);
+
+        $orderStage->update([
+            'notes' => $request->notes,
+        ]);
+
+        return back()->with('status', 'Observaciones actualizadas.');
     }
 }
