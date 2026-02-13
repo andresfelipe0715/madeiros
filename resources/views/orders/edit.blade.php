@@ -195,4 +195,15 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .form-switch .form-check-input {
+            background-size: 1rem 1rem;
+            background-position: left center;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-position: right center;
+        }
+    </style>
 </x-app-layout>
