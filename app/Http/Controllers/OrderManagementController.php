@@ -103,9 +103,7 @@ class OrderManagementController extends Controller
 
         DB::transaction(function () use ($order, $newStage, $position) {
             // 1. Shift existing stages up (+1) from the calculated position
-            $order->orderStages()
-                ->where('sequence', '>=', $position)
-                ->increment('sequence');
+            $this->shiftStagesUp($order, $position);
 
             // 2. Insert new stage at the calculated sequence
             OrderStage::create([
@@ -147,9 +145,7 @@ class OrderManagementController extends Controller
             $orderStage->delete();
 
             // Shift existing stages down to fill the gap
-            $order->orderStages()
-                ->where('sequence', '>', $deletedSequence)
-                ->decrement('sequence');
+            $this->shiftStagesDown($order, $deletedSequence);
         });
 
         return back()->with('success', 'Etapa eliminada exitosamente.');
@@ -170,6 +166,38 @@ class OrderManagementController extends Controller
         $i = 1;
         foreach ($records as $record) {
             $record->update(['sequence' => $i++]);
+        }
+    }
+
+    /**
+     * Increment sequences of existing stages by 1 starting from a given position.
+     * Updates individually in descending order to avoid unique constraint violations.
+     */
+    private function shiftStagesUp(Order $order, int $fromSequence): void
+    {
+        $stages = $order->orderStages()
+            ->where('sequence', '>=', $fromSequence)
+            ->orderBy('sequence', 'desc')
+            ->get();
+
+        foreach ($stages as $stage) {
+            $stage->update(['sequence' => $stage->sequence + 1]);
+        }
+    }
+
+    /**
+     * Decrement sequences of existing stages by 1 for sequences greater than a given position.
+     * Updates individually in ascending order to avoid unique constraint violations.
+     */
+    private function shiftStagesDown(Order $order, int $greaterThanSequence): void
+    {
+        $stages = $order->orderStages()
+            ->where('sequence', '>', $greaterThanSequence)
+            ->orderBy('sequence', 'asc')
+            ->get();
+
+        foreach ($stages as $stage) {
+            $stage->update(['sequence' => $stage->sequence - 1]);
         }
     }
 }

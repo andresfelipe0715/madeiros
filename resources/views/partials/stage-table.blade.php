@@ -110,7 +110,7 @@
                                     @endphp
                                     @if($remitSource)
                                         <small class="text-danger d-block fw-bold"><i
-                                                class="bi bi-arrow-left-circle-fill me-1"></i>Retorno:
+                                                class="bi bi-arrow-left-circle-fill"></i>Retorno:
                                             {{ Str::limit($remitSource->remit_reason, 30) }}</small>
                                     @endif
                                     <small class="text-muted d-block"><span class="fw-bold">Gral:</span>
