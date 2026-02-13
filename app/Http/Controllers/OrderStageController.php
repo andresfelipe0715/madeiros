@@ -81,13 +81,23 @@ class OrderStageController extends Controller
             'notes' => 'required|string',
         ]);
 
-        DB::transaction(function () use ($request, $orderStage) {
+        return DB::transaction(function () use ($request, $orderStage) {
             $order = $orderStage->order;
             $targetStageId = $request->target_stage_id;
+
+            // Integrity Check: target_stage_id must belong to the same order and have a lower sequence
+            $targetStage = $order->orderStages()
+                ->where('stage_id', $targetStageId)
+                ->first();
+
+            if (!$targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
+                abort(400, 'Invalid remittance target.');
+            }
+
+            $targetSequence = $targetStage->sequence;
             $reason = str_replace(['|', ':'], [' ', ' '], $request->notes); // Sanitize to avoid format breakage
 
             // 1. Create the structured log entry
-            // remit|from:{from_stage_id}|to:{to_stage_id}|reason:{reason_text}
             \App\Models\OrderLog::create([
                 'order_id' => $order->id,
                 'user_id' => Auth::id(),
@@ -101,10 +111,6 @@ class OrderStageController extends Controller
             ]);
 
             // 3. Reset execution data of all stages starting from target back to current
-            $targetSequence = $order->orderStages()
-                ->where('stage_id', $targetStageId)
-                ->value('sequence');
-
             $order->orderStages()
                 ->where('sequence', '>=', $targetSequence)
                 ->update([
@@ -113,9 +119,9 @@ class OrderStageController extends Controller
                     'started_by' => null,
                     'completed_by' => null,
                 ]);
-        });
 
-        return back()->with('status', 'Pedido remitido.');
+            return back()->with('status', 'Pedido remitido.');
+        });
     }
 
     public function updateNotes(Request $request, OrderStage $orderStage)
