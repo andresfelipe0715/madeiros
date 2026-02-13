@@ -12,7 +12,9 @@
             <h4 class="mb-0 font-weight-bolder">{{ $stageName }}</h4>
         </div>
         <div class="text-end">
-            <span class="badge bg-soft-primary text-primary rounded-pill">{{ $orders->count() }} Pedidos en cola</span>
+            <span class="badge bg-soft-primary text-primary rounded-pill">
+                {{ $orders->count() }} de {{ $orders->total() }} pedidos en cola
+            </span>
         </div>
     </div>
     <div class="card-body px-0 pt-3 pb-2">
@@ -165,6 +167,9 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="mt-4 px-4">
+            {{ $orders->links() }}
         </div>
     </div>
 </div>

@@ -49,7 +49,7 @@ class DashboardController extends Controller
             abort(403, 'No tiene acceso a este módulo.');
         }
 
-        // Fetch orders for this stage (next pending in sequence)
+        // Fetch orders for this stage (next pending in sequence) with pagination
         $orders = Order::whereHas('orderStages', function ($query) use ($stage) {
             $query->where('stage_id', $stage->id)
                 ->whereNull('completed_at')
@@ -62,14 +62,9 @@ class DashboardController extends Controller
                 });
         })
             ->with(['client', 'orderStages.stage', 'orderFiles.fileType', 'createdBy'])
-            ->get();
+            ->paginate(15);
 
-        // Filter orders using the authorization service to ensure strict adherence to business rules
-        $orders = $orders->filter(function ($order) use ($user, $stage) {
-            return $this->authService->canActOnStage($user, $order, $stage->id);
-        });
-
-        // 1. Fetch relevant remit logs in a single query for all these orders
+        // 1. Fetch relevant remit logs in a single query for the orders on this page
         $orderIds = $orders->pluck('id');
         $allRemitLogs = \App\Models\OrderLog::whereIn('order_id', $orderIds)
             ->where('action', 'like', 'remit|%')
