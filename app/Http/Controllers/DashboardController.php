@@ -69,9 +69,29 @@ class DashboardController extends Controller
             return $this->authService->canActOnStage($user, $order, $stage->id);
         });
 
+        // 1. Fetch relevant remit logs in a single query for all these orders
+        $orderIds = $orders->pluck('id');
+        $allRemitLogs = \App\Models\OrderLog::whereIn('order_id', $orderIds)
+            ->where('action', 'like', 'remit|%')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        // 2. Group and filter logs for the CURRENT stage (last 2 only)
+        $remitLogs = $allRemitLogs->groupBy('order_id')->map(function ($logs) use ($stage) {
+            return $logs->filter(function ($log) use ($stage) {
+                $data = $log->remit_data;
+                return $data && $data['to'] == $stage->id;
+            })->take(2)->values();
+        });
+
+        // 3. Get stage names for efficient lookup in Blade (no DB queries in views)
+        $stageNames = \App\Models\Stage::pluck('name', 'id');
+
         return view('stages.show', [
             'stage' => $stage,
             'orders' => $orders,
+            'remitLogs' => $remitLogs, // Pass structured data to Blade
+            'stageNames' => $stageNames,
             'authService' => $this->authService,
             'isAdmin' => $isAdmin
         ]);

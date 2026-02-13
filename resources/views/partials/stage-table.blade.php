@@ -106,12 +106,15 @@
                                 <div style="cursor: pointer;" data-bs-toggle="modal"
                                     data-bs-target="#notesModal{{ $orderStage->id }}">
                                     @php
-                                        $remitSource = $order->orderStages->where('sequence', '>', $orderStage->sequence)->whereNotNull('remit_reason')->first();
+                                        $orderRemitLogs = $remitLogs[$order->id] ?? collect();
+                                        $latestRemit = $orderRemitLogs->first();
+                                        $remitData = $latestRemit?->remit_data;
+                                        $showRemit = (bool) $remitData;
                                     @endphp
-                                    @if($remitSource)
+                                    @if($showRemit)
                                         <small class="text-danger d-block fw-bold"><i
                                                 class="bi bi-arrow-left-circle-fill"></i>Retorno:
-                                            {{ Str::limit($remitSource->remit_reason, 30) }}</small>
+                                            {{ Str::limit($remitData['reason'], 30) }}</small>
                                     @endif
                                     <small class="text-muted d-block"><span class="fw-bold">Gral:</span>
                                         {{ Str::limit($order->notes, 30) ?: '-' }}</small>

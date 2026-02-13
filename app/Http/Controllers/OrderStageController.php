@@ -22,9 +22,6 @@ class OrderStageController extends Controller
         }
 
         DB::transaction(function () use ($orderStage) {
-            // Clear any remit reasons for this order as it's moving forward again
-            $orderStage->order->orderStages()->update(['remit_reason' => null]);
-
             $orderStage->update([
                 'started_at' => now(),
                 'started_by' => Auth::id(),
@@ -81,33 +78,42 @@ class OrderStageController extends Controller
     {
         $request->validate([
             'target_stage_id' => 'required|exists:stages,id',
-            'notes' => 'nullable|string',
+            'notes' => 'required|string',
         ]);
 
-        // 1. Reset timeline for all stages starting from target back to current
-        $targetSequence = $orderStage->order->orderStages()
-            ->where('stage_id', $request->target_stage_id)
-            ->value('sequence');
+        DB::transaction(function () use ($request, $orderStage) {
+            $order = $orderStage->order;
+            $targetStageId = $request->target_stage_id;
+            $reason = str_replace(['|', ':'], [' ', ' '], $request->notes); // Sanitize to avoid format breakage
 
-        $orderStage->order->orderStages()
-            ->where('sequence', '>=', $targetSequence)
-            ->update([
-                'started_at' => null,
-                'completed_at' => null,
-                'started_by' => null,
-                'completed_by' => null,
+            // 1. Create the structured log entry
+            // remit|from:{from_stage_id}|to:{to_stage_id}|reason:{reason_text}
+            \App\Models\OrderLog::create([
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'action' => "remit|from:{$orderStage->stage_id}|to:{$targetStageId}|reason:{$reason}",
             ]);
 
-        // 2. Save the remission reason ONLY on the current stage record
-        // and clear delivery status if it was delivered
-        $orderStage->order->update([
-            'delivered_at' => null,
-            'delivered_by' => null,
-        ]);
+            // 2. Clear delivery status if it was delivered
+            $order->update([
+                'delivered_at' => null,
+                'delivered_by' => null,
+            ]);
 
-        $orderStage->update([
-            'remit_reason' => $request->notes,
-        ]);
+            // 3. Reset execution data of all stages starting from target back to current
+            $targetSequence = $order->orderStages()
+                ->where('stage_id', $targetStageId)
+                ->value('sequence');
+
+            $order->orderStages()
+                ->where('sequence', '>=', $targetSequence)
+                ->update([
+                    'started_at' => null,
+                    'completed_at' => null,
+                    'started_by' => null,
+                    'completed_by' => null,
+                ]);
+        });
 
         return back()->with('status', 'Pedido remitido.');
     }

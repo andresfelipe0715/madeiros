@@ -116,16 +116,25 @@
                             </div>
 
                             @php
-                                $remitSource = $order->orderStages->where('sequence', '>', $orderStage->sequence)->whereNotNull('remit_reason')->first();
+                                $orderRemitLogs = $remitLogs[$order->id] ?? collect();
+                                $showRemit = $orderRemitLogs->isNotEmpty();
                             @endphp
 
-                            @if($remitSource)
+                            @if($showRemit)
                                 <div class="mb-4">
-                                    <label class="form-label font-weight-bold text-danger small text-uppercase">Sección C: Motivo de Remisión</label>
-                                    <div class="p-3 bg-soft-danger rounded border border-danger text-danger text-break">
-                                        <strong>De {{ $remitSource->stage->name }}:</strong> {{ $remitSource->remit_reason }}
-                                    </div>
-                                    <p class="x-small text-danger mt-1"><i class="bi bi-info-circle"></i> Esta es la razón por la cual el pedido fue devuelto a esta etapa.</p>
+                                    <label class="form-label font-weight-bold text-danger small text-uppercase">Sección C: Motivos de Remisión</label>
+                                    
+                                    @foreach($orderRemitLogs as $index => $log)
+                                        @php 
+                                            $data = $log->remit_data;
+                                            $fromStageName = $stageNames[$data['from']] ?? 'Desconocida';
+                                        @endphp
+                                        <div class="p-3 mb-2 bg-soft-danger rounded border border-danger text-danger text-break">
+                                            <strong>{{ $index === 0 ? 'Causa de remisión' : 'Remisión anterior' }} (De {{ $fromStageName }}):</strong><br>
+                                            {{ $data['reason'] }}
+                                        </div>
+                                    @endforeach
+                                    <p class="x-small text-danger mt-1"><i class="bi bi-info-circle"></i> Estas son las razones por las cuales el pedido fue devuelto a esta etapa.</p>
                                 </div>
                             @endif
 

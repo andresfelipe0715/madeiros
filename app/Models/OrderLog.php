@@ -9,6 +9,35 @@ class OrderLog extends Model
 {
     public $timestamps = false;
 
+    protected $fillable = [
+        'order_id',
+        'user_id',
+        'action',
+    ];
+
+    /**
+     * Parse a remit action string into structured data.
+     * remit|from:{from_id}|to:{to_id}|reason:{text}
+     */
+    public function getRemitDataAttribute(): ?array
+    {
+        if (!str_starts_with($this->action, 'remit|')) {
+            return null;
+        }
+
+        $parts = explode('|', $this->action);
+        $data = [];
+
+        foreach ($parts as $part) {
+            if (str_contains($part, ':')) {
+                [$key, $value] = explode(':', $part, 2);
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
