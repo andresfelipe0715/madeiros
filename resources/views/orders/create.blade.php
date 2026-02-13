@@ -70,6 +70,18 @@
                                 </div>
 
                                 <div class="mb-5">
+                                    <label class="form-label fw-bold d-block">Configuración Adicional</label>
+                                    <div class="bg-light p-4 rounded-3 border mb-4">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" name="lleva_herrajeria" id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="lleva_herrajeria">Incluye Herrajería</label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="lleva_manual_armado" id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado') ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="lleva_manual_armado">Incluye Manual de Armado</label>
+                                        </div>
+                                    </div>
+
                                     <label class="form-label fw-bold d-block">Ruta de Producción</label>
                                     <p class="text-muted small mb-3">Seleccione las etapas que requiere este pedido. Por defecto se seleccionan todas.</p>
                                     

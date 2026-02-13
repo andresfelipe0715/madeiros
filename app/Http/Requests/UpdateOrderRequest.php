@@ -26,6 +26,8 @@ class UpdateOrderRequest extends FormRequest
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number,'.$orderId,
             'material' => 'required|string|max:255',
             'notes' => 'nullable|string',
+            'lleva_herrajeria' => 'boolean',
+            'lleva_manual_armado' => 'boolean',
         ];
     }
 }

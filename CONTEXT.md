@@ -289,6 +289,8 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
     material VARCHAR(255) NOT NULL,
+    lleva_herrajeria TINYINT(1) NOT NULL DEFAULT 0,
+    lleva_manual_armado TINYINT(1) NOT NULL DEFAULT 0,
     notes VARCHAR(300) NULL,
     invoice_number VARCHAR(50) NOT NULL UNIQUE,
     created_by INT NOT NULL,

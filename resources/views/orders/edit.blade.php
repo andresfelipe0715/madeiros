@@ -92,6 +92,21 @@
                                     @enderror
                                 </div>
 
+                                <div class="mb-4">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
+                                            id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria', $order->lleva_herrajeria) ? 'checked' : '' }}>
+                                        <label class="form-check-label text-muted small text-uppercase font-weight-bold"
+                                            for="lleva_herrajeria">Incluye Herrajería</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="lleva_manual_armado"
+                                            id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado', $order->lleva_manual_armado) ? 'checked' : '' }}>
+                                        <label class="form-check-label text-muted small text-uppercase font-weight-bold"
+                                            for="lleva_manual_armado">Incluye Manual de Armado</label>
+                                    </div>
+                                </div>
+
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">
                                         {{ __('Actualizar Información') }}

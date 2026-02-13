@@ -45,6 +45,8 @@ class OrderController extends Controller
             $order = Order::create([
                 'client_id' => $validated['client_id'],
                 'material' => $validated['material'],
+                'lleva_herrajeria' => $request->has('lleva_herrajeria'),
+                'lleva_manual_armado' => $request->has('lleva_manual_armado'),
                 'invoice_number' => $validated['invoice_number'],
                 'notes' => $validated['notes'] ?? null,
                 'created_by' => Auth::id(),

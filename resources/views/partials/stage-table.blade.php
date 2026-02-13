@@ -25,6 +25,8 @@
                         <th>ID</th>
                         <th>Cliente</th>
                         <th>Material</th>
+                        <th>Herrajería</th>
+                        <th>Manual</th>
                         @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
                             <th>Archivo Orden</th>
                             <th>Archivo Proyecto</th>
@@ -54,6 +56,8 @@
                             <td>{{ $order->id }}</td>
                             <td>{{ $order->client->name }}</td>
                             <td>{{ $order->material }}</td>
+                            <td>{{ $order->lleva_herrajeria ? 'Sí' : 'No' }}</td>
+                            <td>{{ $order->lleva_manual_armado ? 'Sí' : 'No' }}</td>
                             @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
                                 <td>
                                     @if($orderFile)

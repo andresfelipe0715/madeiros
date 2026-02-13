@@ -21,6 +21,8 @@ class StoreOrderRequest extends FormRequest
             'material' => 'required|string|max:255',
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number',
             'notes' => 'nullable|string|max:300',
+            'lleva_herrajeria' => 'boolean',
+            'lleva_manual_armado' => 'boolean',
             'stages' => 'required|array|min:1',
             'stages.*' => 'exists:stages,id',
             'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB

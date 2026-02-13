@@ -14,6 +14,8 @@ class Order extends Model
     protected $fillable = [
         'client_id',
         'material',
+        'lleva_herrajeria',
+        'lleva_manual_armado',
         'invoice_number',
         'notes',
         'created_by',
@@ -30,6 +32,8 @@ class Order extends Model
     {
         return [
             'delivered_at' => 'datetime',
+            'lleva_herrajeria' => 'boolean',
+            'lleva_manual_armado' => 'boolean',
         ];
     }
 

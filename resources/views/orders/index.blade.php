@@ -25,6 +25,8 @@
                                     <th class="px-4 py-3 text-nowrap">Creado por</th>
                                     <th class="px-4 py-3">Factura</th>
                                     <th class="px-4 py-3">Material</th>
+                                    <th class="px-4 py-3">Herrajería</th>
+                                    <th class="px-4 py-3">Manual</th>
                                     <th class="px-4 py-3">Etapa Actual</th>
                                     <th class="px-4 py-3 text-nowrap">Fecha Creación</th>
                                     <th class="px-4 py-3 text-nowrap">Fecha Entrega</th>
@@ -39,6 +41,8 @@
                                         <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
                                         <td class="px-4 py-3">{{ $order->invoice_number }}</td>
                                         <td class="px-4 py-3">{{ $order->material }}</td>
+                                        <td class="px-4 py-3">{{ $order->lleva_herrajeria ? 'Sí' : 'No' }}</td>
+                                        <td class="px-4 py-3">{{ $order->lleva_manual_armado ? 'Sí' : 'No' }}</td>
                                         <td class="px-4 py-3">
                                             @php
                                                 $stageName = $order->currentStageName();

@@ -50,7 +50,11 @@ class OrderManagementController extends Controller
     {
         Gate::authorize('edit-orders');
 
-        $order->update($request->validated());
+        $data = $request->validated();
+        $data['lleva_herrajeria'] = $request->has('lleva_herrajeria');
+        $data['lleva_manual_armado'] = $request->has('lleva_manual_armado');
+
+        $order->update($data);
 
         return redirect()->route('orders.index')
             ->with('success', 'Orden actualizada exitosamente.');
