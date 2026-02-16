@@ -13,7 +13,7 @@
     </x-slot>
 
     <div class="py-4">
-        <div class="container">
+        <div class="container-fluid px-5">
             <div class="card shadow-sm">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -34,8 +34,8 @@
                                 @forelse($clients as $client)
                                     <tr>
                                         <td class="px-4 py-3 text-muted">#{{ $client->id }}</td>
-                                        <td class="px-4 py-3 font-weight-bold">{{ $client->name }}</td>
-                                        <td class="px-4 py-3">{{ $client->document }}</td>
+                                        <td class="px-4 py-3 font-weight-bold">{{ Str::limit($client->name, 50) }}</td>
+                                        <td class="px-4 py-3">{{ Str::limit($client->document, 50) }}</td>
                                         <td class="px-4 py-3 text-nowrap">{{ $client->phone ?? 'N/A' }}</td>
                                         <td class="px-4 py-3 text-nowrap">
                                             {{ $client->created_at->format('d/m/Y H:i') }}

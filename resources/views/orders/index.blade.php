@@ -13,7 +13,7 @@
     </x-slot>
 
     <div class="py-4">
-        <div class="container">
+        <div class="container-fluid px-5">
             <div class="card shadow-sm">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -37,10 +37,10 @@
                                 @forelse($orders as $order)
                                     <tr>
                                         <td class="px-4 py-3">#{{ $order->id }}</td>
-                                        <td class="px-4 py-3">{{ $order->client->name }}</td>
+                                        <td class="px-4 py-3">{{ Str::limit($order->client->name, 50) }}</td>
                                         <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
                                         <td class="px-4 py-3">{{ $order->invoice_number }}</td>
-                                        <td class="px-4 py-3">{{ $order->material }}</td>
+                                        <td class="px-4 py-3">{{ Str::limit($order->material, 50) }}</td>
                                         <td class="px-4 py-3">{{ $order->lleva_herrajeria ? 'Sí' : 'No' }}</td>
                                         <td class="px-4 py-3">{{ $order->lleva_manual_armado ? 'Sí' : 'No' }}</td>
                                         <td class="px-4 py-3">
