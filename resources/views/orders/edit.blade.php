@@ -44,11 +44,23 @@
                     <div class="card shadow-sm h-100">
                         <div class="card-header bg-white py-3">
                             <h5 class="card-title mb-0">Detalles de la Orden</h5>
+
                         </div>
                         <div class="card-body">
+                            @if($order->delivered_at)
+                                <div class="alert alert-warning border-0 shadow-sm mb-4">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Esta orden no se puede editar porque ya tiene una fecha de entrega.
+                                </div>
+                            @endif
+
                             <form action="{{ route('orders.update', $order) }}" method="POST">
                                 @csrf
                                 @method('PUT')
+
+                                @php
+                                    $isDisabled = $order->delivered_at ? 'disabled' : '';
+                                @endphp
 
                                 <div class="mb-3">
                                     <label
@@ -64,7 +76,7 @@
                                     <input type="text"
                                         class="form-control @error('invoice_number') is-invalid @enderror"
                                         id="invoice_number" name="invoice_number"
-                                        value="{{ old('invoice_number', $order->invoice_number) }}" required>
+                                        value="{{ old('invoice_number', $order->invoice_number) }}" required {{ $isDisabled }}>
                                     @error('invoice_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -75,7 +87,7 @@
                                         class="form-label text-muted small text-uppercase font-weight-bold">Material</label>
                                     <input type="text" class="form-control @error('material') is-invalid @enderror"
                                         id="material" name="material" value="{{ old('material', $order->material) }}"
-                                        required>
+                                        required {{ $isDisabled }}>
                                     @error('material')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -86,7 +98,7 @@
                                         class="form-label text-muted small text-uppercase font-weight-bold">Notas
                                         Especiales</label>
                                     <textarea class="form-control @error('notes') is-invalid @enderror" id="notes"
-                                        name="notes" rows="3">{{ old('notes', $order->notes) }}</textarea>
+                                        name="notes" rows="3" {{ $isDisabled }}>{{ old('notes', $order->notes) }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -95,20 +107,20 @@
                                 <div class="mb-4">
                                     <div class="form-check form-switch mb-2">
                                         <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
-                                            id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria', $order->lleva_herrajeria) ? 'checked' : '' }}>
+                                            id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria', $order->lleva_herrajeria) ? 'checked' : '' }} {{ $isDisabled }}>
                                         <label class="form-check-label text-muted small text-uppercase font-weight-bold"
                                             for="lleva_herrajeria">Incluye Herrajería</label>
                                     </div>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="lleva_manual_armado"
-                                            id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado', $order->lleva_manual_armado) ? 'checked' : '' }}>
+                                            id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado', $order->lleva_manual_armado) ? 'checked' : '' }} {{ $isDisabled }}>
                                         <label class="form-check-label text-muted small text-uppercase font-weight-bold"
                                             for="lleva_manual_armado">Incluye Manual de Armado</label>
                                     </div>
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn btn-primary" {{ $isDisabled }}>
                                         {{ __('Actualizar Información') }}
                                     </button>
                                 </div>

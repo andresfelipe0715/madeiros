@@ -23,6 +23,10 @@
                                 @csrf
                                 @method('PUT')
 
+                                @php
+                                    $hasOrders = $client->orders()->exists();
+                                @endphp
+
                                 <div class="mb-3">
                                     <label for="name"
                                         class="form-label text-muted small text-uppercase font-weight-bold">Nombre
@@ -40,7 +44,14 @@
                                         NIT</label>
                                     <input type="text" class="form-control @error('document') is-invalid @enderror"
                                         id="document" name="document" value="{{ old('document', $client->document) }}"
-                                        required>
+                                        required {{ $hasOrders ? 'disabled' : '' }}>
+                                    @if($hasOrders)
+                                        <div class="form-text text-danger small fw-bold">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            El documento no se puede modificar porque este cliente ya tiene órdenes
+                                            asociadas.
+                                        </div>
+                                    @endif
                                     @error('document')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

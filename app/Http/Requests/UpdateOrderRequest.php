@@ -12,7 +12,18 @@ class UpdateOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('edit-orders');
+        if (! Gate::allows('edit-orders')) {
+            return false;
+        }
+
+        $order = $this->route('order');
+
+        // Block updates if order already has a delivery date
+        if ($order && $order->delivered_at) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
