@@ -181,7 +181,7 @@
                                         @if($canAct)
                                             @if(!$orderStage->started_at)
                                                 @if($orderStage->is_pending)
-                                                    <button type="button" class="btn btn-sm btn-primary btn-action opacity-50" disabled title="Este pedido está marcado como pendiente.">
+                                                    <button type="button" class="btn btn-sm btn-primary btn-action opacity-50" disabled title="No se puede procesar mientras esté pendiente.">
                                                         Iniciar
                                                     </button>
                                                 @else
@@ -203,9 +203,9 @@
                                                 <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
                                                     class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
-                                                        {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
-                                                        {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                    <button type="submit" class="btn btn-sm btn-success btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
+                                                        {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
+                                                        {{ $orderStage->is_pending ? 'title="No se puede procesar mientras esté pendiente."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
                                                         {{ $normName === 'entrega' ? 'Entrega del mueble realizada' : 'Finalizar' }}
                                                     </button>
                                                 </form>
@@ -215,11 +215,11 @@
                                         @endif
 
                                         @if($normName !== 'entrega' && $normName !== 'corte' && $canAct)
-                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}" 
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}" 
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#remitirModal{{ $orderStage->id }}"
-                                                {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
-                                                {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
+                                                {{ $orderStage->is_pending ? 'title="No se puede procesar mientras esté pendiente."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
                                                 Remitir
                                             </button>
                                         @endif
