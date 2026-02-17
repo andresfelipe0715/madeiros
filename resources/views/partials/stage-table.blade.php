@@ -169,61 +169,67 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="d-flex flex-wrap gap-2 align-items-center">
-                                    @if($canAct)
-                                        @if(!$orderStage->started_at)
-                                            <form action="{{ route('order-stages.start', $orderStage->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-primary btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
-                                                    {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
-                                                    {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
-                                                    Iniciar
-                                                </button>
-                                            </form>
-                                        @elseif(!$orderStage->completed_at)
-                                            <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
-                                                class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-warning btn-action">Pausar</button>
-                                            </form>
-                                            <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
-                                                class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
-                                                    {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
-                                                    {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
-                                                    {{ $normName === 'entrega' ? 'Entrega del mueble realizada' : 'Finalizar' }}
-                                                </button>
-                                            </form>
+                                <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-2">
+                                    {{-- Group A: Producción (Left) --}}
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if($canAct)
+                                            @if(!$orderStage->started_at)
+                                                <form action="{{ route('order-stages.start', $orderStage->id) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-primary btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                        {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                                        {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                        Iniciar
+                                                    </button>
+                                                </form>
+                                            @elseif(!$orderStage->completed_at)
+                                                <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-warning btn-action">Detener proceso</button>
+                                                </form>
+                                                <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                        {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                                        {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                        {{ $normName === 'entrega' ? 'Entrega del mueble realizada' : 'Finalizar' }}
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @else
+                                            <span class="text-muted small">No autorizado</span>
                                         @endif
-                                        
-                                        @if($normName === 'entrega')
+
+                                        @if($normName !== 'entrega' && $normName !== 'corte' && $canAct)
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}" 
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#remitirModal{{ $orderStage->id }}"
+                                                {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                                {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                Remitir
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    {{-- Group B: Entregas (Right) --}}
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @if($normName === 'entrega' && $canAct)
                                             @if($order->lleva_herrajeria && !$order->herrajeria_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-hardware', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de herrajería?')">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-primary btn-action">Entregar herrajería</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action">Entregar herrajería</button>
                                                 </form>
                                             @endif
                                             @if($order->lleva_manual_armado && !$order->manual_armado_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-manual', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de manual de armado?')">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-info btn-action">Entregar manual de armado</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action">Entregar manual de armado</button>
                                                 </form>
                                             @endif
                                         @endif
-                                    @else
-                                        <span class="text-muted small">No autorizado</span>
-                                    @endif
-
-                                    @if($normName !== 'entrega' && $normName !== 'corte')
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}" 
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#remitirModal{{ $orderStage->id }}"
-                                            {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
-                                            {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
-                                            Remitir
-                                        </button>
-                                    @endif
+                                    </div>
                                 </div>
                             </td>
                         </tr>
