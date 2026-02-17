@@ -12,7 +12,7 @@ class StageAuthorizationService
      */
     public function canActOnStage(User $user, Order $order, int $stageId): bool
     {
-        // Non-admin users can only act on stages linked to their role via role_stages
+        // 1. Non-admin users can only act on stages linked to their role via role_stages
         $hasRoleAccess = $user->role->stages()
             ->where('stages.id', $stageId)
             ->exists();
@@ -21,7 +21,7 @@ class StageAuthorizationService
             return false;
         }
 
-        // The order must require that stage
+        // 2. The order must require that stage
         $targetOrderStage = $order->orderStages()
             ->where('stage_id', $stageId)
             ->first();
@@ -30,13 +30,45 @@ class StageAuthorizationService
             return false;
         }
 
-        // All previous required stages must be completed
-        // "Stages are linear per order" - using order_stages.id to determine sequence
+        // 3. Admin Override: Users with role_order_permissions.can_edit = true can bypass the queue
+        $canOverride = $user->role->orderPermission?->can_edit ?? false;
+        if ($canOverride) {
+            return true;
+        }
+
+        // 4. Internal Sequence: All previous required stages in this order must be completed
         $unfinishedPreviousStages = $order->orderStages()
             ->where('sequence', '<', $targetOrderStage->sequence)
             ->whereNull('completed_at')
             ->exists();
 
-        return !$unfinishedPreviousStages;
+        if ($unfinishedPreviousStages) {
+            return false;
+        }
+
+        // 5. Queue Logic: Order must be the next pending order in this stage
+        return $this->isNextInQueue($order, $stageId);
+    }
+
+    /**
+     * Determine if an order is the next pending order in a specific stage.
+     */
+    public function isNextInQueue(Order $order, int $stageId): bool
+    {
+        // Find other orders that have this stage as "pending" or "in progress"
+        // and are "ready" for it (their own internal sequence is complete)
+        // and have a lower ID (original creation order).
+        return !\App\Models\OrderStage::where('stage_id', $stageId)
+            ->where('order_id', '<', $order->id)
+            ->whereNull('completed_at')
+            ->whereNotExists(function ($query) {
+                // The blocking order must also be "ready" for this stage
+                $query->select('id')
+                    ->from('order_stages as os2')
+                    ->whereColumn('os2.order_id', 'order_stages.order_id')
+                    ->whereColumn('os2.sequence', '<', 'order_stages.sequence')
+                    ->whereNull('os2.completed_at');
+            })
+            ->exists();
     }
 }

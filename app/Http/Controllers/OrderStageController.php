@@ -17,7 +17,14 @@ class OrderStageController extends Controller
 
     public function start(OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        $user = Auth::user();
+
+        // 1. Basic Authorization (Role Access + Internal Sequence + Queue/Admin Override)
+        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            // Check if it's just a queue issue to provide better feedback
+            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+                return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
+            }
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -48,7 +55,12 @@ class OrderStageController extends Controller
 
     public function finish(OrderStage $orderStage): \Illuminate\Http\RedirectResponse
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        $user = Auth::user();
+
+        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+                return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
+            }
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 

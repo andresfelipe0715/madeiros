@@ -50,7 +50,10 @@
                             $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'archivo_orden'));
                             $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'proyecto'));
                             $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina'));
+                            
+                            $isNext = $authService->isNextInQueue($order, $stage->id);
                             $canAct = $authService->canActOnStage(auth()->user(), $order, $stage->id);
+                            $isAdmin = auth()->user()->role->orderPermission?->can_edit ?? false;
                         @endphp
                         <tr>
                             <td>{{ $order->id }}</td>
@@ -93,8 +96,14 @@
                                     <span class="badge bg-success">Finalizado</span>
                                 @elseif($orderStage->started_at)
                                     <span class="badge bg-warning text-dark">En proceso</span>
+                                    @if(!$isNext)
+                                        <span class="badge bg-info ms-1" title="Bypass de cola utilizado"><i class="bi bi-star-fill small"></i> Prioritario</span>
+                                    @endif
                                 @else
                                     <span class="badge bg-secondary">Pendiente</span>
+                                    @if($isNext)
+                                        <span class="badge bg-primary ms-1 shadow-sm animate-pulse">Siguiente</span>
+                                    @endif
                                 @endif
                             </td>
                             @if($normName === 'corte')
@@ -137,7 +146,11 @@
                                         @if(!$orderStage->started_at)
                                             <form action="{{ route('order-stages.start', $orderStage->id) }}" method="POST">
                                                 @csrf
-                                                <button type="submit" class="btn btn-primary">Iniciar</button>
+                                                <button type="submit" class="btn btn-primary {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                    {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                                    {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                    Iniciar
+                                                </button>
                                             </form>
                                         @elseif(!$orderStage->completed_at)
                                             <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
@@ -148,7 +161,11 @@
                                             <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
                                                 class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-success">Finalizar</button>
+                                                <button type="submit" class="btn btn-success {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                    {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                                    {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                    Finalizar
+                                                </button>
                                             </form>
                                         @endif
                                     @else
