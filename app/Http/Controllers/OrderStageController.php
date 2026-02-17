@@ -174,4 +174,34 @@ class OrderStageController extends Controller
 
         return back()->with('status', 'Observaciones actualizadas.');
     }
+
+    public function deliverHardware(OrderStage $orderStage)
+    {
+        $user = Auth::user();
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
+        }
+
+        $orderStage->order->update([
+            'herrajeria_delivered_at' => now(),
+            'herrajeria_delivered_by' => $user->id,
+        ]);
+
+        return back()->with('status', 'Herrajería entregada.');
+    }
+
+    public function deliverManual(OrderStage $orderStage)
+    {
+        $user = Auth::user();
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
+        }
+
+        $orderStage->order->update([
+            'manual_armado_delivered_at' => now(),
+            'manual_armado_delivered_by' => $user->id,
+        ]);
+
+        return back()->with('status', 'Manual de armado entregado.');
+    }
 }

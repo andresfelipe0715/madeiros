@@ -41,8 +41,32 @@
                                         <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
                                         <td class="px-4 py-3">{{ $order->invoice_number }}</td>
                                         <td class="px-4 py-3">{{ Str::limit($order->material, 50) }}</td>
-                                        <td class="px-4 py-3">{{ $order->lleva_herrajeria ? 'Sí' : 'No' }}</td>
-                                        <td class="px-4 py-3">{{ $order->lleva_manual_armado ? 'Sí' : 'No' }}</td>
+                                        <td class="px-4 py-3">
+                                            @if($order->lleva_herrajeria)
+                                                @if($order->herrajeria_delivered_at)
+                                                    <span class="text-success small"><i class="bi bi-check-circle-fill"></i>
+                                                        Entregada</span>
+                                                @else
+                                                    <span class="text-warning small"><i class="bi bi-clock-history"></i>
+                                                        Pendiente</span>
+                                                @endif
+                                            @else
+                                                <span class="text-muted small">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if($order->lleva_manual_armado)
+                                                @if($order->manual_armado_delivered_at)
+                                                    <span class="text-success small"><i class="bi bi-check-circle-fill"></i>
+                                                        Entregado</span>
+                                                @else
+                                                    <span class="text-warning small"><i class="bi bi-clock-history"></i>
+                                                        Pendiente</span>
+                                                @endif
+                                            @else
+                                                <span class="text-muted small">N/A</span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">
                                             @php
                                                 $stageName = $order->currentStageName();

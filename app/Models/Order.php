@@ -21,6 +21,10 @@ class Order extends Model
         'created_by',
         'delivered_by',
         'delivered_at',
+        'herrajeria_delivered_at',
+        'herrajeria_delivered_by',
+        'manual_armado_delivered_at',
+        'manual_armado_delivered_by',
     ];
 
     public function getCreatorNameAttribute(): string
@@ -32,6 +36,8 @@ class Order extends Model
     {
         return [
             'delivered_at' => 'datetime',
+            'herrajeria_delivered_at' => 'datetime',
+            'manual_armado_delivered_at' => 'datetime',
             'lleva_herrajeria' => 'boolean',
             'lleva_manual_armado' => 'boolean',
         ];
@@ -50,6 +56,16 @@ class Order extends Model
     public function deliveredBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'delivered_by');
+    }
+
+    public function herrajeriaDeliveredBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'herrajeria_delivered_by');
+    }
+
+    public function manualArmadoDeliveredBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manual_armado_delivered_by');
     }
 
     public function orderStages(): HasMany
@@ -85,6 +101,17 @@ class Order extends Model
 
         if ($currentStage) {
             return $currentStage->stage->name;
+        }
+
+        // Logic for persistent "Entrega" stage when extras are pending
+        $entregaStage = $this->orderStages->first(fn ($os) => strtolower($os->stage->name) === 'entrega');
+        if (
+            $entregaStage && $entregaStage->completed_at && (
+                ($this->lleva_herrajeria && ! $this->herrajeria_delivered_at) ||
+                ($this->lleva_manual_armado && ! $this->manual_armado_delivered_at)
+            )
+        ) {
+            return $entregaStage->stage->name;
         }
 
         return 'Entregada';

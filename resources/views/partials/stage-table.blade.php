@@ -59,8 +59,36 @@
                             <td>{{ $order->id }}</td>
                             <td>{{ $order->client->name }}</td>
                             <td>{{ $order->material }}</td>
-                            <td>{{ $order->lleva_herrajeria ? 'Sí' : 'No' }}</td>
-                            <td>{{ $order->lleva_manual_armado ? 'Sí' : 'No' }}</td>
+                            <td>
+                                @if($order->lleva_herrajeria)
+                                    @if($order->herrajeria_delivered_at)
+                                        <div class="text-success small">
+                                            Entregado<br>
+                                            <span class="x-small text-muted">{{ $order->herrajeria_delivered_at->format('d/m/Y') }}</span><br>
+                                            <span class="x-small text-muted">Por: {{ $order->herrajeriaDeliveredBy?->name ?? '?' }}</span>
+                                        </div>
+                                    @else
+                                        <span class="badge bg-soft-warning text-warning">Pendiente</span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($order->lleva_manual_armado)
+                                    @if($order->manual_armado_delivered_at)
+                                        <div class="text-success small">
+                                            Entregado<br>
+                                            <span class="x-small text-muted">{{ $order->manual_armado_delivered_at->format('d/m/Y') }}</span><br>
+                                            <span class="x-small text-muted">Por: {{ $order->manualArmadoDeliveredBy?->name ?? '?' }}</span>
+                                        </div>
+                                    @else
+                                        <span class="badge bg-soft-warning text-warning">Pendiente</span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
                                 <td>
                                     @if($orderFile)
@@ -141,12 +169,12 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="btn-group btn-group-sm">
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
                                     @if($canAct)
                                         @if(!$orderStage->started_at)
                                             <form action="{{ route('order-stages.start', $orderStage->id) }}" method="POST">
                                                 @csrf
-                                                <button type="submit" class="btn btn-primary {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                <button type="submit" class="btn btn-sm btn-primary btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
                                                     {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
                                                     {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
                                                     Iniciar
@@ -156,24 +184,39 @@
                                             <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
                                                 class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-warning">Pausar</button>
+                                                <button type="submit" class="btn btn-sm btn-warning btn-action">Pausar</button>
                                             </form>
                                             <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
                                                 class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-success {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                <button type="submit" class="btn btn-sm btn-success btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
                                                     {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
                                                     {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
-                                                    Finalizar
+                                                    {{ $normName === 'entrega' ? 'Entrega del mueble realizada' : 'Finalizar' }}
                                                 </button>
                                             </form>
+                                        @endif
+                                        
+                                        @if($normName === 'entrega')
+                                            @if($order->lleva_herrajeria && !$order->herrajeria_delivered_at)
+                                                <form action="{{ route('order-stages.deliver-hardware', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de herrajería?')">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary btn-action">Entregar herrajería</button>
+                                                </form>
+                                            @endif
+                                            @if($order->lleva_manual_armado && !$order->manual_armado_delivered_at)
+                                                <form action="{{ route('order-stages.deliver-manual', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de manual de armado?')">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-info btn-action">Entregar manual de armado</button>
+                                                </form>
+                                            @endif
                                         @endif
                                     @else
                                         <span class="text-muted small">No autorizado</span>
                                     @endif
 
                                     @if($normName !== 'entrega' && $normName !== 'corte')
-                                        <button type="button" class="btn btn-outline-danger ms-1 {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}" 
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}" 
                                             data-bs-toggle="modal"
                                             data-bs-target="#remitirModal{{ $orderStage->id }}"
                                             {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
@@ -196,4 +239,21 @@
             {{ $orders->links() }}
         </div>
     </div>
+    <style>
+        .btn-action {
+            width: 130px;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            white-space: normal;
+            word-wrap: break-word;
+            text-align: center;
+        }
+    </style>
 </div>

@@ -53,6 +53,9 @@ Roles are stored in a lookup table, not enums.
 - An order represents one delivery / job
 - Each order belongs to a client
 - Orders do NOT have a fixed workflow
+- Projects may include extras: Hardware (herrajería) and Assembly Manual
+- Delivery of the main product (furniture) and extras happen independently
+- System tracks delivery traceability (timestamp and user) for each component separately
 
 ---
 
@@ -161,6 +164,17 @@ Each link:
 - Belongs to one order
 - Has an expiration date
 - Can be regenerated if needed
+
+---
+
+### Delivery Workflow
+
+- **Main Delivery**: Marking the final stage as "Entrega del mueble realizada" tracks when the product leaves the factory.
+- **Independent Extras**: Hardware and manuals can be marked as delivered independently from the main product.
+- **Stage Persistence**: An order remains visible in the "Entrega" module until ALL required components (Furniture, Hardware, and Manual) have been delivered. It only disappears from the production queue when no required delivery remains pending.
+- **Traceability**: Each delivery component (Furniture, Hardware, Manual) stores its own `delivered_at` and `delivered_by` data.
+- **Operational Flexibility**: Main delivery is NOT blocked if extras are still pending.
+- **Conditional UI**: Buttons for extras delivery only appear if the order specifically requires them.
 
 ---
 
@@ -297,11 +311,16 @@ CREATE TABLE orders (
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     delivered_at TIMESTAMP NULL,
     delivered_by INT NULL,
+    herrajeria_delivered_at TIMESTAMP NULL,
+    herrajeria_delivered_by INT NULL,
+    manual_armado_delivered_at TIMESTAMP NULL,
+    manual_armado_delivered_by INT NULL,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
-    FOREIGN KEY (delivered_by) REFERENCES users(id)
-
+    FOREIGN KEY (delivered_by) REFERENCES users(id),
+    FOREIGN KEY (herrajeria_delivered_by) REFERENCES users(id),
+    FOREIGN KEY (manual_armado_delivered_by) REFERENCES users(id)
 );
 
 CREATE TABLE order_stages (
