@@ -41,13 +41,30 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (!Auth::attempt(['document' => $this->document, 'password' => $this->password, 'active' => true], $this->boolean('remember'))) {
+        $credentials = $this->only('document', 'password');
+
+        // 1. Verify credentials without logging in to keep error generic if they fail
+        if (!Auth::validate($credentials)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'document' => trans('auth.failed'),
+                'document' => 'Documento o contraseña incorrectos.',
             ]);
         }
+
+        // 2. Credentials are correct, now verify active status
+        $user = \App\Models\User::where('document', $this->document)->first();
+
+        if (!$user || !$user->active) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'document' => 'Tu usuario está inactivo. Contacta al administrador.',
+            ]);
+        }
+
+        // 3. Both credentials and status are valid, proceed to login
+        Auth::login($user, $this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }
