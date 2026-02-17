@@ -173,8 +173,11 @@
                                     @endif
 
                                     @if($normName !== 'entrega' && $normName !== 'corte')
-                                        <button type="button" class="btn btn-outline-danger ms-1" data-bs-toggle="modal"
-                                            data-bs-target="#remitirModal{{ $orderStage->id }}">
+                                        <button type="button" class="btn btn-outline-danger ms-1 {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}" 
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#remitirModal{{ $orderStage->id }}"
+                                            {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                            {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
                                             Remitir
                                         </button>
                                     @endif

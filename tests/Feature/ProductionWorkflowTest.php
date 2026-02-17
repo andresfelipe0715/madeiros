@@ -1,14 +1,14 @@
 <?php
 
+use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderStage;
 use App\Models\Role;
 use App\Models\RoleOrderPermission;
 use App\Models\Stage;
 use App\Models\User;
-use App\Models\Client;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -29,12 +29,24 @@ beforeEach(function () {
     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
 
+    $this->enchapeRole = Role::create(['name' => 'Enchape User']);
+    $this->enchapeRole->stages()->attach($this->enchape->id);
+    RoleOrderPermission::create(['role_id' => $this->enchapeRole->id, 'can_edit' => false]);
+
     // 4. Setup Users
     $this->corteUser = User::create([
         'name' => 'Corte User',
         'document' => 'CORT123',
         'password' => bcrypt('password'),
         'role_id' => $this->corteRole->id,
+        'active' => true,
+    ]);
+
+    $this->enchapeUser = User::create([
+        'name' => 'Enchape User',
+        'document' => 'ENCH123',
+        'password' => bcrypt('password'),
+        'role_id' => $this->enchapeRole->id,
         'active' => true,
     ]);
 
@@ -53,7 +65,7 @@ it('blocks a regular user from starting an order if it is not next in queue', fu
         'client_id' => $this->client->id,
         'material' => 'Wood',
         'invoice_number' => 'INV-A',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
@@ -62,7 +74,7 @@ it('blocks a regular user from starting an order if it is not next in queue', fu
         'client_id' => $this->client->id,
         'material' => 'Metal',
         'invoice_number' => 'INV-B',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     $orderStageB = OrderStage::create(['order_id' => $orderB->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
@@ -86,7 +98,7 @@ it('allows a regular user to start the next order in queue', function () {
         'client_id' => $this->client->id,
         'material' => 'Wood',
         'invoice_number' => 'INV-A',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     $orderStageA = OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
@@ -106,7 +118,7 @@ it('allows an admin to override the queue', function () {
         'client_id' => $this->client->id,
         'material' => 'Wood',
         'invoice_number' => 'INV-A',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
@@ -115,7 +127,7 @@ it('allows an admin to override the queue', function () {
         'client_id' => $this->client->id,
         'material' => 'Metal',
         'invoice_number' => 'INV-B',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     $orderStageB = OrderStage::create(['order_id' => $orderB->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
@@ -135,7 +147,7 @@ it('blocks finishing an order if it is not next in queue', function () {
         'client_id' => $this->client->id,
         'material' => 'Wood',
         'invoice_number' => 'INV-A',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
@@ -144,14 +156,14 @@ it('blocks finishing an order if it is not next in queue', function () {
         'client_id' => $this->client->id,
         'material' => 'Metal',
         'invoice_number' => 'INV-B',
-        'created_by' => $this->adminUser->id
+        'created_by' => $this->adminUser->id,
     ]);
     $orderStageB = OrderStage::create([
         'order_id' => $orderB->id,
         'stage_id' => $this->corte->id,
         'sequence' => 1,
         'started_at' => now(),
-        'started_by' => $this->adminUser->id
+        'started_by' => $this->adminUser->id,
     ]);
 
     // Acting as Corte User
@@ -164,4 +176,74 @@ it('blocks finishing an order if it is not next in queue', function () {
     $response->assertRedirect(route('dashboard'));
     $response->assertSessionHasErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
     expect($orderStageB->refresh()->completed_at)->toBeNull();
+});
+
+it('blocks a regular user from remitting an order if it is not next in queue', function () {
+    // Create Order A (Next in Enchape)
+    $orderA = Order::create([
+        'client_id' => $this->client->id,
+        'material' => 'Wood',
+        'invoice_number' => 'INV-RA',
+        'created_by' => $this->adminUser->id,
+    ]);
+    OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1, 'completed_at' => now()]);
+    OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->enchape->id, 'sequence' => 2]);
+
+    // Create Order B (Not Next in Enchape)
+    $orderB = Order::create([
+        'client_id' => $this->client->id,
+        'material' => 'Metal',
+        'invoice_number' => 'INV-RB',
+        'created_by' => $this->adminUser->id,
+    ]);
+    OrderStage::create(['order_id' => $orderB->id, 'stage_id' => $this->corte->id, 'sequence' => 1, 'completed_at' => now()]);
+    $orderStageB_Enchape = OrderStage::create(['order_id' => $orderB->id, 'stage_id' => $this->enchape->id, 'sequence' => 2]);
+
+    // Acting as Enchape User
+    Auth::login($this->enchapeUser);
+
+    // Try to remit Order B back to Corte
+    $response = $this->from(route('dashboard'))->post(route('order-stages.remit', $orderStageB_Enchape->id), [
+        'target_stage_id' => $this->corte->id,
+        'notes' => 'Needs rework',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertRedirect(route('dashboard'));
+    $response->assertSessionHasErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
+});
+
+it('allows an admin to remit any order (override)', function () {
+    // Create Order A (Next)
+    $orderA = Order::create([
+        'client_id' => $this->client->id,
+        'material' => 'Wood',
+        'invoice_number' => 'INV-OA',
+        'created_by' => $this->adminUser->id,
+    ]);
+    OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1, 'completed_at' => now()]);
+    OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->enchape->id, 'sequence' => 2]);
+
+    // Create Order B (Not Next)
+    $orderB = Order::create([
+        'client_id' => $this->client->id,
+        'material' => 'Metal',
+        'invoice_number' => 'INV-OB',
+        'created_by' => $this->adminUser->id,
+    ]);
+    OrderStage::create(['order_id' => $orderB->id, 'stage_id' => $this->corte->id, 'sequence' => 1, 'completed_at' => now()]);
+    $orderStageB_Enchape = OrderStage::create(['order_id' => $orderB->id, 'stage_id' => $this->enchape->id, 'sequence' => 2]);
+
+    // Acting as Admin User
+    Auth::login($this->adminUser);
+
+    // Try to remit Order B back to Corte (Override)
+    $response = $this->from(route('dashboard'))->post(route('order-stages.remit', $orderStageB_Enchape->id), [
+        'target_stage_id' => $this->corte->id,
+        'notes' => 'Force rework',
+    ]);
+
+    $response->assertStatus(302);
+    $response->assertRedirect(route('dashboard'));
+    $response->assertSessionHas('status', 'Pedido remitido.');
 });

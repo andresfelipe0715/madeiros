@@ -19,7 +19,7 @@
                             <h5 class="card-title mb-0">Información del Cliente</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('clients.store') }}" method="POST">
+                            <form action="{{ route('clients.store') }}" method="POST" novalidate>
                                 @csrf
 
                                 <div class="mb-3">

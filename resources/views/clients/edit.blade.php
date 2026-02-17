@@ -19,7 +19,7 @@
                             <h5 class="card-title mb-0">Información del Cliente: {{ $client->name }}</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('clients.update', $client) }}" method="POST">
+                            <form action="{{ route('clients.update', $client) }}" method="POST" novalidate>
                                 @csrf
                                 @method('PUT')
 

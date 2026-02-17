@@ -57,7 +57,7 @@
             <div class="modal fade" id="remitirModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content border-0 shadow">
-                        <form action="{{ route('order-stages.remit', $orderStage->id) }}" method="POST">
+                        <form action="{{ route('order-stages.remit', $orderStage->id) }}" method="POST" novalidate>
                             @csrf
                             <div class="modal-header bg-danger text-white border-0">
                                 <h5 class="modal-title">Remitir Pedido #{{ $order->id }}</h5>
@@ -67,16 +67,22 @@
                                 <p class="text-muted">¿A qué etapa desea devolver este pedido? Esta acción reiniciará el progreso desde la etapa seleccionada.</p>
                                 <div class="mb-3">
                                     <label class="form-label font-weight-bold">Etapa Destino</label>
-                                    <select name="target_stage_id" class="form-select shadow-none" required>
+                                    <select name="target_stage_id" class="form-select shadow-none @error('target_stage_id') is-invalid @enderror" required>
                                         <option value="" selected disabled>Seleccione etapa...</option>
                                         @foreach($order->orderStages->where('sequence', '<', $orderStage->sequence)->sortBy('sequence') as $prevStage)
-                                            <option value="{{ $prevStage->stage_id }}">{{ $prevStage->stage->name }}</option>
+                                            <option value="{{ $prevStage->stage_id }}" {{ old('target_stage_id') == $prevStage->stage_id ? 'selected' : '' }}>{{ $prevStage->stage->name }}</option>
                                         @endforeach
                                     </select>
+                                    @error('target_stage_id')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="mb-0">
                                     <label class="form-label font-weight-bold">Motivo / Notas</label>
-                                    <textarea name="notes" class="form-control shadow-none" rows="3" placeholder="Indique el motivo por el cual se remite el pedido..."></textarea>
+                                    <textarea name="notes" class="form-control shadow-none @error('notes') is-invalid @enderror" rows="3" placeholder="Indique el motivo por el cual se remite el pedido..." required>{{ old('notes') }}</textarea>
+                                    @error('notes')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="modal-footer border-0 p-4 pt-0">
@@ -187,4 +193,17 @@
             background-color: rgba(220, 53, 69, 0.1);
         }
     </style>
+
+    @if(session('failed_remit_id'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var modalId = '#remitirModal' + '{{ session('failed_remit_id') }}';
+                var modalElement = document.querySelector(modalId);
+                if (modalElement) {
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
+            });
+        </script>
+    @endif
 </x-app-layout>

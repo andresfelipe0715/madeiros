@@ -17,7 +17,7 @@
                     <div class="card shadow-sm border-0">
                         <div class="bg-primary bg-gradient py-1"></div>
                         <div class="card-body p-4 p-md-5">
-                            <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                                 @csrf
 
                                 <div class="mb-4">
@@ -32,7 +32,7 @@
                                         </select>
                                     </div>
                                     @error('client_id')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -43,7 +43,7 @@
                                         <input type="text" name="invoice_number" id="invoice_number" class="form-control border-start-0 @error('invoice_number') is-invalid @enderror" value="{{ old('invoice_number') }}" required placeholder="e.g. FAC-1234">
                                     </div>
                                     @error('invoice_number')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -54,7 +54,7 @@
                                         <input type="text" name="material" id="material" class="form-control border-start-0 @error('material') is-invalid @enderror" value="{{ old('material') }}" required placeholder="e.g. Melamina Roble 18mm">
                                     </div>
                                     @error('material')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -65,7 +65,7 @@
                                         <textarea name="notes" id="notes" class="form-control border-start-0 @error('notes') is-invalid @enderror" rows="3" placeholder="Detalles sobre cortes, acabados o servicios específicos...">{{ old('notes') }}</textarea>
                                     </div>
                                     @error('notes')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -108,7 +108,7 @@
                                         @endforeach
                                     </div>
                                     @error('stages')
-                                        <div class="text-danger small mt-2">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -119,7 +119,7 @@
                                         <input type="file" name="order_file" id="order_file" class="form-control border-start-0 @error('order_file') is-invalid @enderror" accept="application/pdf">
                                     </div>
                                     @error('order_file')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 

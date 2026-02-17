@@ -12,19 +12,19 @@ class OrderStageController extends Controller
 {
     public function __construct(
         protected StageAuthorizationService $authService
-    ) {
-    }
+    ) {}
 
     public function start(OrderStage $orderStage)
     {
         $user = Auth::user();
 
         // 1. Basic Authorization (Role Access + Internal Sequence + Queue/Admin Override)
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             // Check if it's just a queue issue to provide better feedback
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
+
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -40,7 +40,7 @@ class OrderStageController extends Controller
 
     public function pause(OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -57,10 +57,11 @@ class OrderStageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
+
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -79,7 +80,7 @@ class OrderStageController extends Controller
             $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
 
             // 4. Update the Order only if current sequence is the max and no stages remain incomplete
-            if ($orderStage->sequence == $maxSequence && !$hasIncompleteStages) {
+            if ($orderStage->sequence == $maxSequence && ! $hasIncompleteStages) {
                 $order->update([
                     'delivered_at' => now(),
                     'delivered_by' => Auth::id(),
@@ -92,14 +93,27 @@ class OrderStageController extends Controller
 
     public function remit(Request $request, OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        $user = Auth::user();
+
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+                return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
+            }
+
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        $request->validate([
-            'target_stage_id' => 'required|exists:stages,id',
-            'notes' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'target_stage_id' => 'required|exists:stages,id',
+                'notes' => 'required|string',
+            ], [
+                'target_stage_id.required' => 'Seleccione una etapa.',
+                'notes.required' => 'El campo notas es obligatorio.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()->with('failed_remit_id', $orderStage->id);
+        }
 
         return DB::transaction(function () use ($request, $orderStage) {
             $order = $orderStage->order;
@@ -110,7 +124,7 @@ class OrderStageController extends Controller
                 ->where('stage_id', $targetStageId)
                 ->first();
 
-            if (!$targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
+            if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
                 abort(400, 'Invalid remittance target.');
             }
 
@@ -146,7 +160,7 @@ class OrderStageController extends Controller
 
     public function updateNotes(Request $request, OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
