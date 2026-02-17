@@ -28,6 +28,11 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
+        // 2. Pending Validation: A pending stage cannot be started
+        if ($orderStage->is_pending) {
+            return back()->withErrors(['auth' => 'Este pedido está marcado como pendiente.']);
+        }
+
         DB::transaction(function () use ($orderStage) {
             $orderStage->update([
                 'started_at' => now(),
@@ -106,10 +111,11 @@ class OrderStageController extends Controller
         try {
             $request->validate([
                 'target_stage_id' => 'required|exists:stages,id',
-                'notes' => 'required|string',
+                'notes' => 'required|string|max:250',
             ], [
                 'target_stage_id.required' => 'Seleccione una etapa.',
                 'notes.required' => 'El campo notas es obligatorio.',
+                'notes.max' => 'La razón no puede exceder los 250 caracteres.',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()->with('failed_remit_id', $orderStage->id);
@@ -203,5 +209,59 @@ class OrderStageController extends Controller
         ]);
 
         return back()->with('status', 'Manual de armado entregado.');
+    }
+
+    public function markAsPending(Request $request, OrderStage $orderStage)
+    {
+        $user = Auth::user();
+
+        // Only users with can_edit permission (Admin/Authorized) can mark as pending
+        if (! ($user->role->orderPermission?->can_edit ?? false)) {
+            return back()->withErrors(['auth' => 'No tiene permisos para marcar como pendiente.']);
+        }
+
+        $request->validate([
+            'pending_reason' => 'required|string|max:250',
+        ], [
+            'pending_reason.required' => 'La razón del pendiente es obligatoria.',
+            'pending_reason.max' => 'La razón no puede exceder los 250 caracteres.',
+        ]);
+
+        $orderStage->update([
+            'is_pending' => true,
+            'pending_reason' => $request->pending_reason,
+            'pending_marked_by' => Auth::id(),
+            'pending_marked_at' => now(),
+        ]);
+
+        \App\Models\OrderLog::create([
+            'order_id' => $orderStage->order_id,
+            'user_id' => Auth::id(),
+            'action' => 'Etapa marcada como pendiente: '.substr($request->pending_reason, 0, 370),
+        ]);
+
+        return back()->with('status', 'Etapa marcada como pendiente.');
+    }
+
+    public function removePending(OrderStage $orderStage)
+    {
+        $user = Auth::user();
+
+        // Only users with can_edit permission (Admin/Authorized) can remove pending status
+        if (! ($user->role->orderPermission?->can_edit ?? false)) {
+            return back()->withErrors(['auth' => 'No tiene permisos para quitar el estado pendiente.']);
+        }
+
+        $orderStage->update([
+            'is_pending' => false,
+        ]);
+
+        \App\Models\OrderLog::create([
+            'order_id' => $orderStage->order_id,
+            'user_id' => Auth::id(),
+            'action' => 'Pendiente removido',
+        ]);
+
+        return back()->with('status', 'Estado pendiente removido.');
     }
 }

@@ -84,6 +84,13 @@ This is the heart of the system.
   - Not started
   - In progress
   - Completed
+  - **Pendiente (Skipped)**: Temporarily blocked (skip from queue, traceability reason required).
+
+Tracked fields (Pendiente):
+- is_pending
+- pending_reason (max 250)
+- pending_marked_by
+- pending_marked_at
 
 Tracked fields:
 - started_at
@@ -333,12 +340,17 @@ CREATE TABLE order_stages (
     completed_at TIMESTAMP NULL,
     started_by INT NULL,
     completed_by INT NULL,
+    is_pending TINYINT(1) NOT NULL DEFAULT 0,
+    pending_reason VARCHAR(250) NULL,
+    pending_marked_by INT NULL,
+    pending_marked_at TIMESTAMP NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (stage_id) REFERENCES stages(id),
     FOREIGN KEY (started_by) REFERENCES users(id),
     FOREIGN KEY (completed_by) REFERENCES users(id),
+    FOREIGN KEY (pending_marked_by) REFERENCES users(id),
     UNIQUE (order_id, stage_id),
     UNIQUE (order_id, sequence)
 );
@@ -364,7 +376,7 @@ CREATE TABLE order_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     user_id INT NOT NULL,
-    action VARCHAR(255) NOT NULL,
+    action VARCHAR(400) NOT NULL,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (user_id) REFERENCES users(id)

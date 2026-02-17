@@ -122,6 +122,8 @@
                             <td>
                                 @if($orderStage->completed_at)
                                     <span class="badge bg-success">Finalizado</span>
+                                @elseif($orderStage->is_pending)
+                                    <span class="badge bg-danger" title="Pendiente: {{ $orderStage->pending_reason }}">Pendiente</span>
                                 @elseif($orderStage->started_at)
                                     <span class="badge bg-warning text-dark">En proceso</span>
                                     @if(!$isNext)
@@ -154,6 +156,10 @@
                                         $remitData = $latestRemit?->remit_data;
                                         $showRemit = (bool) $remitData;
                                     @endphp
+                                    @if($orderStage->is_pending)
+                                        <small class="text-danger d-block fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Pendiente:
+                                            {{ Str::limit($orderStage->pending_reason, 30) }}</small>
+                                    @endif
                                     @if($showRemit)
                                         <small class="text-danger d-block fw-bold"><i
                                                 class="bi bi-arrow-left-circle-fill"></i>Retorno:
@@ -174,14 +180,20 @@
                                     <div class="d-flex flex-wrap gap-2">
                                         @if($canAct)
                                             @if(!$orderStage->started_at)
-                                                <form action="{{ route('order-stages.start', $orderStage->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-primary btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
-                                                        {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
-                                                        {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                @if($orderStage->is_pending)
+                                                    <button type="button" class="btn btn-sm btn-primary btn-action opacity-50" disabled title="Este pedido está marcado como pendiente.">
                                                         Iniciar
                                                     </button>
-                                                </form>
+                                                @else
+                                                    <form action="{{ route('order-stages.start', $orderStage->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-primary btn-action {{ !$isNext && !$isAdmin ? 'disabled opacity-50' : '' }}"
+                                                            {{ !$isNext && !$isAdmin ? 'disabled' : '' }}
+                                                            {{ !$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '' }}>
+                                                            Iniciar
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             @elseif(!$orderStage->completed_at)
                                                 <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
                                                     class="d-inline">
@@ -211,6 +223,23 @@
                                                 Remitir
                                             </button>
                                         @endif
+
+                                        {{-- Pending Logic Controls (Admin/can_edit only) --}}
+                                        @if($isAdmin && !$orderStage->completed_at && !$orderStage->started_at)
+                                            @if($orderStage->is_pending)
+                                                <form action="{{ route('order-stages.remove-pending', $orderStage->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-success btn-action">Quitar pendiente</button>
+                                                </form>
+                                            @else
+                                                <button type="button" class="btn btn-sm btn-outline-warning btn-action" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#pendingModal{{ $orderStage->id }}">
+                                                    Marcar pendiente
+                                                </button>
+                                            @endif
+                                        @endif
+                                    </div>
                                     </div>
 
                                     {{-- Group B: Entregas (Right) --}}
@@ -245,21 +274,36 @@
             {{ $orders->links() }}
         </div>
     </div>
-    <style>
-        .btn-action {
-            width: 130px;
-            min-height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1.2;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            white-space: normal;
-            word-wrap: break-word;
-            text-align: center;
-        }
     </style>
+
+    {{-- Modal para marcar como pendiente --}}
+    @foreach($orders as $order)
+        @php $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id); @endphp
+        @if($isAdmin && $orderStage && !$orderStage->completed_at && !$orderStage->started_at && !$orderStage->is_pending)
+            <div class="modal fade" id="pendingModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="{{ route('order-stages.mark-as-pending', $orderStage->id) }}" method="POST">
+                            @csrf
+                            <div class="modal-header">
+                                <h5 class="modal-title">Marcar pedido #{{ $order->id }} como Pendiente</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Razón del pendiente <span class="text-danger">*</span></label>
+                                    <textarea name="pending_reason" class="form-control" rows="3" required maxlength="250" placeholder="Ej: Falta material, cliente solicitó retraso..."></textarea>
+                                    <div class="form-text">Máximo 250 caracteres.</div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-warning">Confirmar Pendiente</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
 </div>

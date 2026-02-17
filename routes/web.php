@@ -25,6 +25,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/order-stages/{orderStage}/notes', [\App\Http\Controllers\OrderStageController::class, 'updateNotes'])->name('order-stages.update-notes');
     Route::post('/order-stages/{orderStage}/deliver-hardware', [\App\Http\Controllers\OrderStageController::class, 'deliverHardware'])->name('order-stages.deliver-hardware');
     Route::post('/order-stages/{orderStage}/deliver-manual', [\App\Http\Controllers\OrderStageController::class, 'deliverManual'])->name('order-stages.deliver-manual');
+    Route::post('/order-stages/{orderStage}/mark-as-pending', [\App\Http\Controllers\OrderStageController::class, 'markAsPending'])->name('order-stages.mark-as-pending');
+    Route::post('/order-stages/{orderStage}/remove-pending', [\App\Http\Controllers\OrderStageController::class, 'removePending'])->name('order-stages.remove-pending');
 
     // Order Creation
     Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');

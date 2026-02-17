@@ -17,7 +17,7 @@ class StageAuthorizationService
             ->where('stages.id', $stageId)
             ->exists();
 
-        if (!$hasRoleAccess) {
+        if (! $hasRoleAccess) {
             return false;
         }
 
@@ -26,7 +26,7 @@ class StageAuthorizationService
             ->where('stage_id', $stageId)
             ->first();
 
-        if (!$targetOrderStage) {
+        if (! $targetOrderStage) {
             return false;
         }
 
@@ -57,10 +57,12 @@ class StageAuthorizationService
     {
         // Find other orders that have this stage as "pending" or "in progress"
         // and are "ready" for it (their own internal sequence is complete)
-        // and have a lower ID (original creation order).
-        return !\App\Models\OrderStage::where('stage_id', $stageId)
+        // and have a lower ID (original creation order)
+        // and ARE NOT marked as Pendiente (is_pending = false)
+        return ! \App\Models\OrderStage::where('stage_id', $stageId)
             ->where('order_id', '<', $order->id)
             ->whereNull('completed_at')
+            ->where('is_pending', false) // Skip pending orders in queue
             ->whereNotExists(function ($query) {
                 // The blocking order must also be "ready" for this stage
                 $query->select('id')
