@@ -21,18 +21,12 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $isAdmin = $user->role->name === 'Admin';
 
         // Get accessible stages based on role for the menu
-        if ($isAdmin) {
-            $accessibleStages = Stage::all();
-        } else {
-            $accessibleStages = $user->role->stages;
-        }
+        $accessibleStages = $user->role->stages;
 
         return view('dashboard', [
-            'accessibleStages' => $accessibleStages,
-            'isAdmin' => $isAdmin
+            'accessibleStages' => $accessibleStages
         ]);
     }
 
@@ -42,10 +36,9 @@ class DashboardController extends Controller
     public function showStage(Stage $stage)
     {
         $user = Auth::user();
-        $isAdmin = $user->role->name === 'Admin';
 
         // Authorization: Check if user has access to this stage
-        if (!$isAdmin && !$user->role->stages->contains($stage->id)) {
+        if (!$user->role->stages->contains($stage->id)) {
             abort(403, 'No tiene acceso a este módulo.');
         }
 
@@ -87,8 +80,7 @@ class DashboardController extends Controller
             'orders' => $orders,
             'remitLogs' => $remitLogs, // Pass structured data to Blade
             'stageNames' => $stageNames,
-            'authService' => $this->authService,
-            'isAdmin' => $isAdmin
+            'authService' => $this->authService
         ]);
     }
 }

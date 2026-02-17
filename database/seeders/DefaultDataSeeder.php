@@ -68,12 +68,12 @@ class DefaultDataSeeder extends Seeder
 
             // 3. Create one test user per role
             // Using document as a unique identifier for testing
-            $document = $roleCodes[$roleName].'_123';
+            $document = $roleCodes[$roleName] . '_123';
 
             User::firstOrCreate(
                 ['document' => $document],
                 [
-                    'name' => $roleName.' Test',
+                    'name' => $roleName . ' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
@@ -99,14 +99,19 @@ class DefaultDataSeeder extends Seeder
 
         // 5. Populate role_order_permissions
         // 5. Populate role_order_permissions and role_client_permissions
+        // 5. Populate role_order_permissions and role_client_permissions for Admin
         $adminRole = Role::where('name', 'Admin')->first();
         if ($adminRole) {
+            // Grant access to ALL stages
+            $adminRole->stages()->sync(Stage::pluck('id')->toArray());
+
+            // Grant all Order permissions
             RoleOrderPermission::updateOrCreate(
                 ['role_id' => $adminRole->id],
                 ['can_view' => true, 'can_edit' => true, 'can_create' => true]
             );
 
-            // Populate role_client_permissions for Admin
+            // Grant all Client permissions
             RoleClientPermission::updateOrCreate(
                 ['role_id' => $adminRole->id],
                 ['can_view' => true, 'can_create' => true, 'can_edit' => true]

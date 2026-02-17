@@ -33,6 +33,10 @@ class OrderStageController extends Controller
 
     public function pause(OrderStage $orderStage)
     {
+        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+            return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
+        }
+
         // Pause logic (could be more complex, but for now we just clear started_at or similar)
         // Given the instructions, we'll just implement a simple state change.
         $orderStage->update([
@@ -76,6 +80,10 @@ class OrderStageController extends Controller
 
     public function remit(Request $request, OrderStage $orderStage)
     {
+        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+            return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
+        }
+
         $request->validate([
             'target_stage_id' => 'required|exists:stages,id',
             'notes' => 'required|string',

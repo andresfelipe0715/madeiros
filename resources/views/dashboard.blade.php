@@ -7,11 +7,11 @@
                 </h2>
                 <p class="text-sm text-secondary mb-0">Seleccione un módulo para gestionar los pedidos en esa etapa.</p>
             </div>
-            @if($isAdmin)
+            @can('create-orders')
                 <a href="{{ route('orders.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
                     <i class="bi bi-plus-circle me-1"></i> Nueva Orden
                 </a>
-            @endif
+            @endcan
         </div>
     </x-slot>
 

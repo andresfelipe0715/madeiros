@@ -12,11 +12,6 @@ class StageAuthorizationService
      */
     public function canActOnStage(User $user, Order $order, int $stageId): bool
     {
-        // Admin role can access all stages
-        if ($user->role->name === 'Admin') {
-            return true;
-        }
-
         // Non-admin users can only act on stages linked to their role via role_stages
         $hasRoleAccess = $user->role->stages()
             ->where('stages.id', $stageId)
