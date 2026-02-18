@@ -47,6 +47,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
     Route::get('/clients/search', [\App\Http\Controllers\ClientSearchController::class, 'search'])->name('clients.search');
 
+    // Users Management
+    Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -42,5 +42,17 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('edit-clients', function (\App\Models\User $user) {
             return $user->role->hasPermission('clients', 'edit');
         });
+
+        \Illuminate\Support\Facades\Gate::define('view-users', function (\App\Models\User $user) {
+            return $user->role->hasPermission('users', 'view');
+        });
+
+        \Illuminate\Support\Facades\Gate::define('create-users', function (\App\Models\User $user) {
+            return $user->role->hasPermission('users', 'create');
+        });
+
+        \Illuminate\Support\Facades\Gate::define('edit-users', function (\App\Models\User $user) {
+            return $user->role->hasPermission('users', 'edit');
+        });
     }
 }

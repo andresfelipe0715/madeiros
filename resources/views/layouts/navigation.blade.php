@@ -27,6 +27,12 @@
                             {{ __('Clientes') }}
                         </x-nav-link>
                     @endcan
+
+                    @can('view-users')
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('Usuarios') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -99,6 +105,12 @@
             @can('view-clients')
                 <x-responsive-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
                     {{ __('Clientes') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('view-users')
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('Usuarios') }}
                 </x-responsive-nav-link>
             @endcan
         </div>

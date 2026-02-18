@@ -121,6 +121,12 @@ class DefaultDataSeeder extends Seeder
                 ['role_id' => $adminRole->id, 'resource_type' => 'performance'],
                 ['can_view' => true, 'can_create' => false, 'can_edit' => false]
             );
+
+            // Grant Users permission
+            RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'users'],
+                ['can_view' => true, 'can_create' => true, 'can_edit' => true]
+            );
         }
 
         $otherRoles = Role::where('name', '!=', 'Admin')->get();
@@ -141,6 +147,12 @@ class DefaultDataSeeder extends Seeder
             RolePermission::updateOrCreate(
                 ['role_id' => $role->id, 'resource_type' => 'clients'],
                 ['can_view' => false, 'can_create' => false, 'can_edit' => false]
+            );
+
+            // Deny user permissions for others by default
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'users'],
+                ['can_view' => false, 'can_edit' => false, 'can_create' => false]
             );
         }
 

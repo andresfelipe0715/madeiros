@@ -1,0 +1,34 @@
+﻿
+Warning: Module "openssl" is already loaded in Unknown on line 0
+
+   FAIL  Tests\Feature\UserCRUDTest
+  Γ£ô it allowsΓÇª  0.44s  
+  Γ£ô it allowsΓÇª  0.03s  
+  Γ£ô it locks dΓÇª 0.03s  
+  Γ¿» it deniesΓÇª  0.04s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\FeΓÇª   
+  Expected response status code [403] but received 302.
+Failed asserting that 302 is identical to 403.
+
+The following errors occurred during the last request:
+
+El nombre es obligatorio.
+El documento es obligatorio.
+La contrase├▒a es obligatoria.
+El rol es obligatorio.
+El campo active es obligatorio.
+
+  at tests\Feature\UserCRUDTest.php:72
+     68Γûò     $badUser = User::factory()->create(['role_id' => $badRole->id]);
+     69Γûò     // No 'users' permission for this role
+     70Γûò 
+     71Γûò     $this->actingAs($badUser)->get(route('users.index'))->assertForbidden();
+  Γ₧£  72Γûò     $this->actingAs($badUser)->post(route('users.store'), [])->assertForbidden();
+     73Γûò });
+     74Γûò
+
+
+  Tests:    1 failed, 3 passed (10 assertions)
+  Duration: 0.77s
+

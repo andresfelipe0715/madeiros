@@ -1,0 +1,84 @@
+﻿
+Warning: Module "openssl" is already loaded in Unknown on line 0
+
+   FAIL  Tests\Feature\UserCRUDTest
+  Γ¿» it allowsΓÇª  0.38s  
+  Γ¿» it allowsΓÇª  0.02s  
+  Γ¿» it locks dΓÇª 0.02s  
+  Γ¿» it deniesΓÇª  0.02s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\UserCRUDTest > it allows admin to view users list  RouteNotFoundException   
+  Route [users.index] not defined.
+
+  at vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+    522Γûò             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    523Γûò             return $url;
+    524Γûò         }
+    525Γûò 
+  Γ₧£ 526Γûò         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    527Γûò     }
+    528Γûò 
+    529Γûò     /**
+    530Γûò      * Get the URL for a given route instance.
+
+  1   vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+  2   vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\UserCRUDTest > it allows admin to create a user  RouteNotFoundException   
+  Route [users.store] not defined.
+
+  at vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+    522Γûò             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    523Γûò             return $url;
+    524Γûò         }
+    525Γûò 
+  Γ₧£ 526Γûò         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    527Γûò     }
+    528Γûò 
+    529Γûò     /**
+    530Γûò      * Get the URL for a given route instance.
+
+  1   vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+  2   vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\UserCRUDTest > it locks document field if user has orders  RouteNotFoundException   
+  Route [users.update] not defined.
+
+  at vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+    522Γûò             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    523Γûò             return $url;
+    524Γûò         }
+    525Γûò 
+  Γ₧£ 526Γûò         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    527Γûò     }
+    528Γûò 
+    529Γûò     /**
+    530Γûò      * Get the URL for a given route instance.
+
+  1   vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+  2   vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\UserCRUDTest > it denies access to non-authorized roles  RouteNotFoundException   
+  Route [users.index] not defined.
+
+  at vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+    522Γûò             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    523Γûò             return $url;
+    524Γûò         }
+    525Γûò 
+  Γ₧£ 526Γûò         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    527Γûò     }
+    528Γûò 
+    529Γûò     /**
+    530Γûò      * Get the URL for a given route instance.
+
+  1   vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+  2   vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+
+
+  Tests:    4 failed (0 assertions)
+  Duration: 0.66s
+
