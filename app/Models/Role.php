@@ -25,19 +25,29 @@ class Role extends Model
         return $this->belongsToMany(Stage::class, 'role_stages');
     }
 
-    public function orderPermission(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function permissions(): HasMany
     {
-        return $this->hasOne(RoleOrderPermission::class);
-    }
-
-    public function clientPermission(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(RoleClientPermission::class);
+        return $this->hasMany(RolePermission::class);
     }
 
     public function visibilityPermission(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(RoleVisibilityPermission::class);
+    }
+
+    /**
+     * Check if the role has a specific permission for a resource.
+     */
+    public function hasPermission(string $resource, string $action): bool
+    {
+        $permission = $this->permissions->firstWhere('resource_type', $resource);
+
+        if (!$permission) {
+            return false;
+        }
+
+        $field = 'can_' . $action;
+        return (bool) ($permission->{$field} ?? false);
     }
 
     protected static function booted(): void

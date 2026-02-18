@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Role;
 
-class RoleClientPermission extends Model
+class RolePermission extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'role_id',
+        'resource_type',
         'can_view',
         'can_create',
         'can_edit',
@@ -23,7 +24,7 @@ class RoleClientPermission extends Model
         'can_edit' => 'boolean',
     ];
 
-    public function role(): BelongsTo
+    public function role()
     {
         return $this->belongsTo(Role::class);
     }

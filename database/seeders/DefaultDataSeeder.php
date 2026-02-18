@@ -4,8 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Role;
-use App\Models\RoleClientPermission;
-use App\Models\RoleOrderPermission;
+use App\Models\RolePermission;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -106,28 +105,29 @@ class DefaultDataSeeder extends Seeder
             $adminRole->stages()->sync(Stage::pluck('id')->toArray());
 
             // Grant all Order permissions
-            RoleOrderPermission::updateOrCreate(
-                ['role_id' => $adminRole->id],
+            RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'orders'],
                 ['can_view' => true, 'can_edit' => true, 'can_create' => true]
             );
 
             // Grant all Client permissions
-            RoleClientPermission::updateOrCreate(
-                ['role_id' => $adminRole->id],
+            RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'clients'],
                 ['can_view' => true, 'can_create' => true, 'can_edit' => true]
             );
         }
 
         $otherRoles = Role::where('name', '!=', 'Admin')->get();
         foreach ($otherRoles as $role) {
-            RoleOrderPermission::updateOrCreate(
-                ['role_id' => $role->id],
+            // Default: View only for orders
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'orders'],
                 ['can_view' => false, 'can_edit' => false, 'can_create' => false]
             );
 
             // Deny client permissions for others by default
-            RoleClientPermission::updateOrCreate(
-                ['role_id' => $role->id],
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'clients'],
                 ['can_view' => false, 'can_create' => false, 'can_edit' => false]
             );
         }

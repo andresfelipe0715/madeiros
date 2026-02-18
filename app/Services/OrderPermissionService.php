@@ -11,7 +11,7 @@ class OrderPermissionService
      */
     public function canView(User $user): bool
     {
-        return (bool) ($user->role->orderPermission->can_view ?? false);
+        return $user->role->hasPermission('orders', 'view');
     }
 
     /**
@@ -19,7 +19,7 @@ class OrderPermissionService
      */
     public function canEdit(User $user): bool
     {
-        return (bool) ($user->role->orderPermission->can_edit ?? false);
+        return $user->role->hasPermission('orders', 'edit');
     }
 
     /**
@@ -27,6 +27,6 @@ class OrderPermissionService
      */
     public function canCreate(User $user): bool
     {
-        return (bool) ($user->role->orderPermission->can_create ?? false);
+        return $user->role->hasPermission('orders', 'create');
     }
 }

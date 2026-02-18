@@ -17,7 +17,7 @@ class StageAuthorizationService
             ->where('stages.id', $stageId)
             ->exists();
 
-        if (! $hasRoleAccess) {
+        if (!$hasRoleAccess) {
             return false;
         }
 
@@ -26,12 +26,12 @@ class StageAuthorizationService
             ->where('stage_id', $stageId)
             ->first();
 
-        if (! $targetOrderStage) {
+        if (!$targetOrderStage) {
             return false;
         }
 
-        // 3. Admin Override: Users with role_order_permissions.can_edit = true can bypass the queue
-        $canOverride = $user->role->orderPermission?->can_edit ?? false;
+        // 3. Admin Override: Users with orders.can_edit = true can bypass the queue
+        $canOverride = $user->role->hasPermission('orders', 'edit');
         if ($canOverride) {
             return true;
         }
@@ -59,7 +59,7 @@ class StageAuthorizationService
         // and are "ready" for it (their own internal sequence is complete)
         // and have a lower ID (original creation order)
         // and ARE NOT marked as Pendiente (is_pending = false)
-        return ! \App\Models\OrderStage::where('stage_id', $stageId)
+        return !\App\Models\OrderStage::where('stage_id', $stageId)
             ->where('order_id', '<', $order->id)
             ->whereNull('completed_at')
             ->where('is_pending', false) // Skip pending orders in queue
