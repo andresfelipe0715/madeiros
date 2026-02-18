@@ -27,18 +27,9 @@
                         <th>Material</th>
                         <th>Herrajería</th>
                         <th>Manual</th>
-                        @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
-                            <th>Archivo Orden</th>
-                            <th>Archivo Proyecto</th>
-                        @endif
-                        @if($normName === 'corte')
-                            <th>Archivo Máquina</th>
-                        @endif
+                        <th>Archivos</th>
                         <th>Fecha Envío</th>
                         <th>Estado</th>
-                        @if($normName === 'corte')
-                            <th>Tiempo</th>
-                        @endif
                         <th>Observaciones</th>
                         <th>Acciones</th>
                     </tr>
@@ -89,36 +80,14 @@
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            @if(in_array($normName, ['corte', 'enchape', 'servicios especiales', 'revision', 'entrega']))
-                                <td>
-                                    @if($orderFile)
-                                        <a href="{{ $orderFile->file_url }}" target="_blank" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-file-earmark-pdf"></i> PDF
-                                        </a>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($projectFile)
-                                        <a href="{{ $projectFile->file_url }}" target="_blank"
-                                            class="btn btn-sm btn-outline-info">Ver</a>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                            @endif
-                            @if($normName === 'corte')
-                                <td>
-                                    @if($machineFile)
-                                        <a href="{{ $machineFile->file_url }}" target="_blank"
-                                            class="btn btn-sm btn-outline-info">Ver</a>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                            @endif
-                            <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                            <td>
+                                <button type="button" class="btn btn-link btn-sm text-primary p-0 d-flex align-items-center" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#filesModal{{ $orderStage->id }}">
+                                    <i class="bi bi-files me-1"></i> Ver archivos
+                                </button>
+                            </td>
+                            <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                             <td>
                                 @if($orderStage->completed_at)
                                     <span class="badge bg-success">Finalizado</span>
@@ -136,17 +105,6 @@
                                     @endif
                                 @endif
                             </td>
-                            @if($normName === 'corte')
-                                <td>
-                                    @if($orderStage->started_at && !$orderStage->completed_at)
-                                        {{ $orderStage->started_at->diffForHumans(null, true) }}
-                                    @elseif($orderStage->completed_at && $orderStage->started_at)
-                                        {{ $orderStage->started_at->diff($orderStage->completed_at)->format('%H:%I:%S') }}
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                            @endif
                             <td class="px-3">
                                 <div style="cursor: pointer;" data-bs-toggle="modal"
                                     data-bs-target="#notesModal{{ $orderStage->id }}">

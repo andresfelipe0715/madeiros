@@ -15,6 +15,13 @@ class OrderLog extends Model
         'action',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
+    }
+
     /**
      * Parse a remit action string into structured data.
      * remit|from:{from_id}|to:{to_id}|reason:{text}
