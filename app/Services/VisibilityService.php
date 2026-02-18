@@ -32,8 +32,8 @@ class VisibilityService
     protected function check(string $field): bool
     {
         // If no record exists, default to TRUE as per requirements (fail-safe)
-        if (! $this->permissions) {
-            return $field !== 'can_view_performance'; // performance defaults to FALSE
+        if (!$this->permissions) {
+            return true;
         }
 
         return (bool) $this->permissions->{$field};
@@ -56,6 +56,6 @@ class VisibilityService
 
     public function canViewPerformance(): bool
     {
-        return $this->check('can_view_performance');
+        return $this->user->role->hasPermission('performance', 'view');
     }
 }

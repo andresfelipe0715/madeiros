@@ -242,7 +242,6 @@ No ENUMs are used. Lookup tables are used instead.
 - roles
 - users
 - clients
-- role_client_permissions
 - orders
 - stages
 - order_stages
@@ -251,26 +250,22 @@ No ENUMs are used. Lookup tables are used instead.
 - order_logs
 - order_tracking_links
 - role_stages
-- role_order_permissions
+- role_permissions
 - role_visibility_permissions
 ---
 
-### Role Order Permissions
+### Role Permissions
 
-- This table defines which roles are allowed to **create, view, or edit orders**.
+- This table defines which roles are allowed to **view, create, or edit** specific resources.
+- Resources currently include: `orders`, `clients`, `performance`.
 - It is separate from `role_stages`, which controls stage access.
 - Columns:
   - `role_id` → links to `roles` table
-  - `can_view` → whether the role can see all orders
-  - `can_edit` → whether the role can edit orders
-  - `can_create` → whether the role can create new orders
-- This table is **managed by developers**, not admins.
-- When checking permissions for order actions:
-  - `/orders/create` → `can_create`
-  - Orders List `/orders` → `can_view`
-  - Order edit `/orders/{order}/edit` → `can_edit`
-- Roles not included in this table have no access to these order actions by default.
-- This allows dynamic control over which roles can manage orders without hardcoding Admin or Secretaria roles.
+  - `resource_type` → string identifying the resource (e.g., 'orders', 'clients', 'performance')
+  - `can_view` → boolean permission to view the resource
+  - `can_create` → boolean permission to create the resource
+  - `can_edit` → boolean permission to edit the resource
+- This table allows dynamic control over resource management without hardcoding role logic.
 ---
 ## SQL Schema
 
@@ -316,19 +311,19 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
     material VARCHAR(255) NOT NULL,
-    lleva_herrajeria TINYINT(1) NOT NULL DEFAULT 0,
-    lleva_manual_armado TINYINT(1) NOT NULL DEFAULT 0,
     notes VARCHAR(300) NULL,
     invoice_number VARCHAR(50) NOT NULL UNIQUE,
     created_by INT NOT NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     delivered_at TIMESTAMP NULL,
     delivered_by INT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    lleva_herrajeria TINYINT(1) NOT NULL DEFAULT 0,
+    lleva_manual_armado TINYINT(1) NOT NULL DEFAULT 0,
     herrajeria_delivered_at TIMESTAMP NULL,
     herrajeria_delivered_by INT NULL,
     manual_armado_delivered_at TIMESTAMP NULL,
     manual_armado_delivered_by INT NULL,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
     FOREIGN KEY (delivered_by) REFERENCES users(id),
@@ -340,18 +335,18 @@ CREATE TABLE order_stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     stage_id INT NOT NULL,
-    sequence INT NOT NULL,
     notes VARCHAR(300) NULL,
     started_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL,
     started_by INT NULL,
     completed_by INT NULL,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    sequence INT NOT NULL,
     is_pending TINYINT(1) NOT NULL DEFAULT 0,
     pending_reason VARCHAR(250) NULL,
     pending_marked_by INT NULL,
     pending_marked_at TIMESTAMP NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (stage_id) REFERENCES stages(id),
     FOREIGN KEY (started_by) REFERENCES users(id),
@@ -408,25 +403,17 @@ CREATE TABLE role_stages (
 );
 
 
-CREATE TABLE role_order_permissions (
+CREATE TABLE role_permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL UNIQUE,
-    can_view BOOLEAN NOT NULL DEFAULT 0,
-    can_edit BOOLEAN NOT NULL DEFAULT 0,
-    can_create BOOLEAN NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-);
-CREATE TABLE role_client_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL UNIQUE,
+    role_id INT NOT NULL,
+    resource_type VARCHAR(100) NOT NULL,
     can_view BOOLEAN NOT NULL DEFAULT 0,
     can_create BOOLEAN NOT NULL DEFAULT 0,
     can_edit BOOLEAN NOT NULL DEFAULT 0,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    UNIQUE (role_id, resource_type)
 );
 
 CREATE TABLE role_visibility_permissions (
@@ -435,7 +422,6 @@ CREATE TABLE role_visibility_permissions (
     can_view_files TINYINT(1) NOT NULL DEFAULT 1,
     can_view_order_file TINYINT(1) NOT NULL DEFAULT 1,
     can_view_machine_file TINYINT(1) NOT NULL DEFAULT 1,
-    can_view_performance TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE

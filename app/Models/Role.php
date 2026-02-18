@@ -57,7 +57,6 @@ class Role extends Model
                 'can_view_files' => true,
                 'can_view_order_file' => true,
                 'can_view_machine_file' => true,
-                'can_view_performance' => false,
             ]);
         });
     }

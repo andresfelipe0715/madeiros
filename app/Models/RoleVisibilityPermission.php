@@ -11,7 +11,6 @@ class RoleVisibilityPermission extends Model
         'can_view_files',
         'can_view_order_file',
         'can_view_machine_file',
-        'can_view_performance',
     ];
 
     protected function casts(): array
@@ -20,7 +19,6 @@ class RoleVisibilityPermission extends Model
             'can_view_files' => 'boolean',
             'can_view_order_file' => 'boolean',
             'can_view_machine_file' => 'boolean',
-            'can_view_performance' => 'boolean',
         ];
     }
 
