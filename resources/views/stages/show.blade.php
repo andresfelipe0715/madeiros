@@ -53,7 +53,7 @@
     <!-- Modals for Remitir -->
     @foreach($orders as $order)
         @php $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id); @endphp
-        @if(strtolower($stage->name) !== 'entrega' && strtolower($stage->name) !== 'corte')
+        @if($stage->can_remit)
             <div class="modal fade" id="remitirModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content border-0 shadow">
@@ -96,6 +96,11 @@
         @endif
     @endforeach
 
+@inject('visibility', 'App\Services\VisibilityService')
+@php
+    $permissions = $visibility::forUser(auth()->user());
+@endphp
+
     <!-- Modals for Files -->
     @foreach($orders as $order)
         @php 
@@ -113,7 +118,7 @@
                     </div>
                     <div class="modal-body p-4">
                         <div class="list-group list-group-flush">
-                            @if($orderFile)
+                            @if($orderFile && $permissions->canViewOrderFile())
                                 <a href="{{ $orderFile->file_url }}" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
                                     <div class="d-flex align-items-center">
                                         <i class="bi bi-file-earmark-pdf fs-4 text-danger me-3"></i>
@@ -126,7 +131,7 @@
                                 </a>
                             @endif
 
-                            @if($projectFile)
+                            @if($projectFile && $permissions->canViewFiles()) {{-- Project file falls under general files --}}
                                 <a href="{{ $projectFile->file_url }}" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
                                     <div class="d-flex align-items-center">
                                         <i class="bi bi-file-earmark-image fs-4 text-info me-3"></i>
@@ -139,7 +144,7 @@
                                 </a>
                             @endif
 
-                            @if($machineFile)
+                            @if($machineFile && $permissions->canViewMachineFile())
                                 <a href="{{ $machineFile->file_url }}" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
                                     <div class="d-flex align-items-center">
                                         <i class="bi bi-cpu fs-4 text-dark me-3"></i>
@@ -152,10 +157,17 @@
                                 </a>
                             @endif
 
-                            @if(!$orderFile && !$projectFile && !$machineFile)
+                            @php
+                                $visibleFiles = 0;
+                                if ($orderFile && $permissions->canViewOrderFile()) $visibleFiles++;
+                                if ($projectFile && $permissions->canViewFiles()) $visibleFiles++;
+                                if ($machineFile && $permissions->canViewMachineFile()) $visibleFiles++;
+                            @endphp
+
+                            @if($visibleFiles === 0)
                                 <div class="text-center py-4 text-muted">
                                     <i class="bi bi-folder-x display-4 opacity-50 mb-3 d-block"></i>
-                                    No hay archivos adjuntos para este pedido.
+                                    No hay archivos accesibles para este pedido o no tienes permisos para verlos.
                                 </div>
                             @endif
                         </div>

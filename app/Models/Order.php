@@ -103,12 +103,12 @@ class Order extends Model
             return $currentStage->stage->name;
         }
 
-        // Logic for persistent "Entrega" stage when extras are pending
-        $entregaStage = $this->orderStages->first(fn ($os) => strtolower($os->stage->name) === 'entrega');
+        // Logic for persistent delivery stage when extras are pending
+        $entregaStage = $this->orderStages->first(fn($os) => $os->stage->is_delivery_stage);
         if (
             $entregaStage && $entregaStage->completed_at && (
-                ($this->lleva_herrajeria && ! $this->herrajeria_delivered_at) ||
-                ($this->lleva_manual_armado && ! $this->manual_armado_delivered_at)
+                ($this->lleva_herrajeria && !$this->herrajeria_delivered_at) ||
+                ($this->lleva_manual_armado && !$this->manual_armado_delivered_at)
             )
         ) {
             return $entregaStage->stage->name;

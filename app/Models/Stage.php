@@ -13,7 +13,16 @@ class Stage extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['name', 'default_sequence'];
+    protected $fillable = ['name', 'default_sequence', 'active', 'can_remit', 'is_delivery_stage'];
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+            'can_remit' => 'boolean',
+            'is_delivery_stage' => 'boolean',
+        ];
+    }
 
     public function orderStages(): HasMany
     {

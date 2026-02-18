@@ -12,17 +12,16 @@ class OrderStageController extends Controller
 {
     public function __construct(
         protected StageAuthorizationService $authService
-    ) {
-    }
+    ) {}
 
     public function start(OrderStage $orderStage)
     {
         $user = Auth::user();
 
         // 1. Basic Authorization (Role Access + Internal Sequence + Queue/Admin Override)
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             // Check if it's just a queue issue to provide better feedback
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
@@ -46,7 +45,7 @@ class OrderStageController extends Controller
 
     public function pause(OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -63,8 +62,8 @@ class OrderStageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
@@ -91,7 +90,7 @@ class OrderStageController extends Controller
             $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
 
             // 4. Update the Order only if current sequence is the max and no stages remain incomplete
-            if ($orderStage->sequence == $maxSequence && !$hasIncompleteStages) {
+            if ($orderStage->sequence == $maxSequence && ! $hasIncompleteStages) {
                 $order->update([
                     'delivered_at' => now(),
                     'delivered_by' => Auth::id(),
@@ -106,18 +105,23 @@ class OrderStageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
+        // 1.5. DB-Driven Validation: Check if remit is allowed from this stage
+        if (! $orderStage->stage->can_remit) {
+            return back()->withErrors(['auth' => 'No se permite remitir pedidos desde esta etapa.']);
+        }
+
         // Prevent remitting if stage is pending
         if ($orderStage->is_pending) {
             return back()->withErrors([
-                'auth' => 'Este pedido está marcado como pendiente y no puede procesarse.'
+                'auth' => 'Este pedido está marcado como pendiente y no puede procesarse.',
             ]);
         }
 
@@ -143,7 +147,7 @@ class OrderStageController extends Controller
                 ->where('stage_id', $targetStageId)
                 ->first();
 
-            if (!$targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
+            if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
                 abort(400, 'Invalid remittance target.');
             }
 
@@ -179,7 +183,7 @@ class OrderStageController extends Controller
 
     public function updateNotes(Request $request, OrderStage $orderStage)
     {
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -197,7 +201,7 @@ class OrderStageController extends Controller
     public function deliverHardware(OrderStage $orderStage)
     {
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -212,7 +216,7 @@ class OrderStageController extends Controller
     public function deliverManual(OrderStage $orderStage)
     {
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -229,7 +233,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can mark as pending
-        if (!($user->role->orderPermission?->can_edit ?? false)) {
+        if (! ($user->role->orderPermission?->can_edit ?? false)) {
             return back()->withErrors(['auth' => 'No tiene permisos para marcar como pendiente.']);
         }
 
@@ -250,7 +254,7 @@ class OrderStageController extends Controller
         \App\Models\OrderLog::create([
             'order_id' => $orderStage->order_id,
             'user_id' => Auth::id(),
-            'action' => 'Etapa marcada como pendiente: ' . substr($request->pending_reason, 0, 370),
+            'action' => 'Etapa marcada como pendiente: '.substr($request->pending_reason, 0, 370),
         ]);
 
         return back()->with('status', 'Etapa marcada como pendiente.');
@@ -261,7 +265,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can remove pending status
-        if (!($user->role->orderPermission?->can_edit ?? false)) {
+        if (! ($user->role->orderPermission?->can_edit ?? false)) {
             return back()->withErrors(['auth' => 'No tiene permisos para quitar el estado pendiente.']);
         }
 

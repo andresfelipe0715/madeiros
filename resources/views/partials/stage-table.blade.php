@@ -1,7 +1,8 @@
+@inject('visibility', 'App\Services\VisibilityService')
 @php
     $stageName = $stage->name;
-    // Normalize stage name for condition checks
-    $normName = strtolower($stageName);
+    $isAdmin = auth()->user()->hasRole('Admin');
+    $permissions = $visibility::forUser(auth()->user());
 @endphp
 
 <div class="card mb-5 border-0 shadow-sm overflow-hidden">
@@ -81,11 +82,15 @@
                                 @endif
                             </td>
                             <td>
-                                <button type="button" class="btn btn-link btn-sm text-primary p-0 d-flex align-items-center" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#filesModal{{ $orderStage->id }}">
-                                    <i class="bi bi-files me-1"></i> Ver archivos
-                                </button>
+                                @if($permissions->canViewFiles())
+                                    <button type="button" class="btn btn-link btn-sm text-primary p-0 d-flex align-items-center" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#filesModal{{ $orderStage->id }}">
+                                        <i class="bi bi-files me-1"></i> Ver archivos
+                                    </button>
+                                @else
+                                    <span class="text-muted small"><i class="bi bi-lock"></i> Restringido</span>
+                                @endif
                             </td>
                             <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                             <td>
@@ -164,7 +169,7 @@
                                                     <button type="submit" class="btn btn-sm btn-success btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
                                                         {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
                                                         {{ $orderStage->is_pending ? 'title="No se puede procesar mientras esté pendiente."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
-                                                        {{ $normName === 'entrega' ? 'Entrega del mueble realizada' : 'Finalizar' }}
+                                                        {{ $stage->is_delivery_stage ? 'Entrega del mueble realizada' : 'Finalizar' }}
                                                     </button>
                                                 </form>
                                             @endif
@@ -172,7 +177,7 @@
                                             <span class="text-muted small">No autorizado</span>
                                         @endif
 
-                                        @if($normName !== 'entrega' && $normName !== 'corte' && $canAct)
+                                        @if($stage->can_remit && $canAct)
                                             <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}" 
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#remitirModal{{ $orderStage->id }}"
@@ -202,7 +207,7 @@
 
                                     {{-- Group B: Entregas (Right) --}}
                                     <div class="d-flex flex-wrap gap-2">
-                                        @if($normName === 'entrega' && $canAct)
+                                        @if($stage->is_delivery_stage && $canAct)
                                             @if($order->lleva_herrajeria && !$order->herrajeria_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-hardware', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de herrajería?')">
                                                     @csrf

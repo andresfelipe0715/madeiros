@@ -63,6 +63,9 @@ Roles are stored in a lookup table, not enums.
 - Stages define possible process steps (e.g. corte, enchape, revision)
 - Stages are static lookup data
 - Each order selects which stages it will go through
+- **Control Flags**:
+    - `can_remit`: Controls if the "Remitir" button appears for this stage.
+    - `is_delivery_stage`: Identifies stages that handle final furniture/hardware delivery.
 
 ---
 
@@ -249,6 +252,7 @@ No ENUMs are used. Lookup tables are used instead.
 - order_tracking_links
 - role_stages
 - role_order_permissions
+- role_visibility_permissions
 ---
 
 ### Role Order Permissions
@@ -303,7 +307,9 @@ CREATE TABLE clients (
 CREATE TABLE stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
-    default_sequence INT NOT NULL DEFAULT 0
+    default_sequence INT NOT NULL DEFAULT 0,
+    can_remit TINYINT(1) NOT NULL DEFAULT 1,
+    is_delivery_stage TINYINT(1) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE orders (
@@ -418,6 +424,18 @@ CREATE TABLE role_client_permissions (
     can_view BOOLEAN NOT NULL DEFAULT 0,
     can_create BOOLEAN NOT NULL DEFAULT 0,
     can_edit BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE role_visibility_permissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_id INT NOT NULL UNIQUE,
+    can_view_files TINYINT(1) NOT NULL DEFAULT 1,
+    can_view_order_file TINYINT(1) NOT NULL DEFAULT 1,
+    can_view_machine_file TINYINT(1) NOT NULL DEFAULT 1,
+    can_view_performance TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE

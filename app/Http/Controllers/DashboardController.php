@@ -11,7 +11,8 @@ class DashboardController extends Controller
 {
     public function __construct(
         protected StageAuthorizationService $authService
-    ) {}
+    ) {
+    }
 
     /**
      * Show the main dashboard menu.
@@ -36,14 +37,14 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Authorization: Check if user has access to this stage
-        if (! $user->role->stages->contains($stage->id)) {
+        if (!$user->role->stages->contains($stage->id)) {
             abort(403, 'No tiene acceso a este módulo.');
         }
 
         // Fetch orders for this stage (next pending in sequence) with pagination
         $query = Order::query();
 
-        if (strtolower($stage->name) === 'entrega') {
+        if ($stage->is_delivery_stage) {
             $query->where(function ($q) use ($stage) {
                 // Case A: Furniture not yet delivered (standard queue logic)
                 $q->whereHas('orderStages', function ($sub) use ($stage) {

@@ -32,9 +32,15 @@ class User extends Authenticatable
             'active' => 'boolean',
         ];
     }
+
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role?->name === $roleName;
     }
 
     public function createdOrders(): HasMany
