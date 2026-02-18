@@ -27,7 +27,8 @@ class OrderManagementController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'LIKE', "%{$search}%")
                     ->orWhereHas('client', function ($sub) use ($search) {
-                        $sub->where('name', 'LIKE', "%{$search}%");
+                        $sub->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('document', 'LIKE', "%{$search}%");
                     });
             });
         }

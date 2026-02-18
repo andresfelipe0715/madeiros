@@ -22,7 +22,7 @@
                             <i class="bi bi-search text-muted"></i>
                         </span>
                         <input type="text" name="search" class="form-control border-0 py-2 shadow-none"
-                            placeholder="Buscar por factura o nombre de cliente..." value="{{ request('search') }}"
+                            placeholder="Factura, cliente o documento..." value="{{ request('search') }}"
                             onkeyup="debounceSubmit(this.form)">
                     </div>
 
@@ -60,10 +60,30 @@
                                 @forelse($orders as $order)
                                     <tr>
                                         <td class="px-4 py-3">#{{ $order->id }}</td>
-                                        <td class="px-4 py-3">{{ Str::limit($order->client->name, 50) }}</td>
+                                        <td class="px-4 py-3">
+                                            @if(Str::length($order->client->name) > 50)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#clientDetailModal{{ $order->id }}">
+                                                    {{ Str::limit($order->client->name, 50) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $order->client->name }}
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
                                         <td class="px-4 py-3">{{ $order->invoice_number }}</td>
-                                        <td class="px-4 py-3">{{ Str::limit($order->material, 50) }}</td>
+                                        <td class="px-4 py-3">
+                                            @if(Str::length($order->material) > 50)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#materialDetailModal{{ $order->id }}">
+                                                    {{ Str::limit($order->material, 50) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $order->material }}
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">
                                             @if($order->lleva_herrajeria)
                                                 @if($order->herrajeria_delivered_at)
@@ -129,7 +149,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-4 py-5 text-center text-muted">
+                                        <td colspan="11" class="px-4 py-5 text-center text-muted">
                                             No se encontraron órdenes.
                                         </td>
                                     </tr>
@@ -146,6 +166,54 @@
             </div>
         </div>
     </div>
+
+    {{-- Modals Loop --}}
+    @foreach($orders as $order)
+        {{-- Modal de Detalle de Cliente --}}
+        @if(Str::length($order->client->name) > 50)
+            <div class="modal fade" id="clientDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title">Nombre del Cliente - Orden #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->client->name }}</p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Modal de Detalle de Material --}}
+        @if(Str::length($order->material) > 50)
+            <div class="modal fade" id="materialDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title">Detalle de Material - Orden #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->material }}</p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
     <style>
         /* Search bar fixes */
         .search-pill input {

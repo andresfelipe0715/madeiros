@@ -7,6 +7,7 @@ use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
@@ -18,7 +19,7 @@ beforeEach(function () {
     $this->user = User::factory()->create(['role_id' => $this->role->id]);
 
     // Bypass all gates for the test
-    Gate::before(fn() => true);
+    Gate::before(fn () => true);
 
     // Setup Stages
     $this->stage1 = Stage::firstOrCreate(['name' => 'Corte', 'default_sequence' => 1]);
@@ -32,12 +33,12 @@ beforeEach(function () {
     $this->order1 = Order::factory()->create([
         'client_id' => $this->clientA->id,
         'invoice_number' => 'FAC-001',
-        'created_by' => $this->user->id
+        'created_by' => $this->user->id,
     ]);
     $this->order2 = Order::factory()->create([
         'client_id' => $this->clientB->id,
         'invoice_number' => 'FAC-002',
-        'created_by' => $this->user->id
+        'created_by' => $this->user->id,
     ]);
 
     // Add stages to orders
@@ -59,6 +60,16 @@ it('filters orders by client name in admin list', function () {
     actingAs($this->user);
 
     $response = get(route('orders.index', ['search' => 'Acme']));
+
+    $response->assertStatus(200);
+    $response->assertSee('Acme Corp');
+    $response->assertDontSee('Globex');
+});
+
+it('filters orders by client document', function () {
+    actingAs($this->user);
+
+    $response = get(route('orders.index', ['search' => '11111']));
 
     $response->assertStatus(200);
     $response->assertSee('Acme Corp');
@@ -98,8 +109,8 @@ it('preserves search query in pagination', function () {
     for ($i = 0; $i < 20; $i++) {
         Order::factory()->create([
             'client_id' => $this->clientA->id,
-            'invoice_number' => 'EXTRA-FAC-' . $i,
-            'created_by' => $this->user->id
+            'invoice_number' => 'EXTRA-FAC-'.$i,
+            'created_by' => $this->user->id,
         ]);
     }
 
