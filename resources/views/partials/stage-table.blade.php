@@ -97,7 +97,10 @@
                                 @if($orderStage->completed_at)
                                     <span class="badge bg-success">Finalizado</span>
                                 @elseif($orderStage->is_pending)
-                                    <span class="badge bg-danger" title="Pendiente: {{ $orderStage->pending_reason }}">Pendiente</span>
+                                    <span class="badge bg-danger" title="Razón: {{ $orderStage->pending_reason }}">Pendiente</span>
+                                    <div class="text-xs text-danger mt-1 fw-bold" style="font-size: 0.7rem; line-height: 1;">
+                                        <i class="bi bi-shield-lock-fill"></i> Solicitar desbloqueo al Admin
+                                    </div>
                                 @elseif($orderStage->started_at)
                                     <span class="badge bg-warning text-dark">En proceso</span>
                                     @if(!$isNext)
@@ -144,7 +147,7 @@
                                         @if($canAct)
                                             @if(!$orderStage->started_at)
                                                 @if($orderStage->is_pending)
-                                                    <button type="button" class="btn btn-sm btn-primary btn-action opacity-50" disabled title="No se puede procesar mientras esté pendiente.">
+                                                    <button type="button" class="btn btn-sm btn-primary btn-action opacity-50" disabled title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee.">
                                                         Iniciar
                                                     </button>
                                                 @else
@@ -168,7 +171,7 @@
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-success btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
                                                         {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
-                                                        {{ $orderStage->is_pending ? 'title="No se puede procesar mientras esté pendiente."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
+                                                        {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
                                                         {{ $stage->is_delivery_stage ? 'Entrega del mueble realizada' : 'Finalizar' }}
                                                     </button>
                                                 </form>
@@ -182,7 +185,7 @@
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#remitirModal{{ $orderStage->id }}"
                                                 {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
-                                                {{ $orderStage->is_pending ? 'title="No se puede procesar mientras esté pendiente."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
+                                                {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
                                                 Remitir
                                             </button>
                                         @endif
@@ -211,13 +214,19 @@
                                             @if($order->lleva_herrajeria && !$order->herrajeria_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-hardware', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de herrajería?')">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action">Entregar herrajería</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action"
+                                                        {{ $orderStage->is_pending ? 'disabled title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : '' }}>
+                                                        Entregar herrajería
+                                                    </button>
                                                 </form>
                                             @endif
                                             @if($order->lleva_manual_armado && !$order->manual_armado_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-manual', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de manual de armado?')">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action">Entregar manual de armado</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action"
+                                                        {{ $orderStage->is_pending ? 'disabled title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : '' }}>
+                                                        Entregar manual de armado
+                                                    </button>
                                                 </form>
                                             @endif
                                         @endif

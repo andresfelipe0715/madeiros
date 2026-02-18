@@ -36,7 +36,7 @@ class UpdateOrderRequest extends FormRequest
         return [
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number,'.$orderId,
             'material' => 'required|string|max:255',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:300',
             'lleva_herrajeria' => 'boolean',
             'lleva_manual_armado' => 'boolean',
         ];

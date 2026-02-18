@@ -40,7 +40,7 @@
                                     <label for="invoice_number" class="form-label fw-bold">Número de Factura / Pedido</label>
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-hash"></i></span>
-                                        <input type="text" name="invoice_number" id="invoice_number" class="form-control border-start-0 @error('invoice_number') is-invalid @enderror" value="{{ old('invoice_number') }}" required placeholder="e.g. FAC-1234">
+                                        <input type="text" name="invoice_number" id="invoice_number" class="form-control border-start-0 @error('invoice_number') is-invalid @enderror" value="{{ old('invoice_number') }}" required placeholder="e.g. FAC-1234" maxlength="50">
                                     </div>
                                     @error('invoice_number')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -51,7 +51,7 @@
                                     <label for="material" class="form-label fw-bold">Material</label>
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-box-seam-fill"></i></span>
-                                        <input type="text" name="material" id="material" class="form-control border-start-0 @error('material') is-invalid @enderror" value="{{ old('material') }}" required placeholder="e.g. Melamina Roble 18mm">
+                                        <input type="text" name="material" id="material" class="form-control border-start-0 @error('material') is-invalid @enderror" value="{{ old('material') }}" required placeholder="e.g. Melamina Roble 18mm" maxlength="255">
                                     </div>
                                     @error('material')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -62,7 +62,7 @@
                                     <label for="notes" class="form-label fw-bold">Notas Especiales <span class="text-muted fw-normal small">(Opcional)</span></label>
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted align-items-start pt-2"><i class="bi bi-sticky-fill"></i></span>
-                                        <textarea name="notes" id="notes" class="form-control border-start-0 @error('notes') is-invalid @enderror" rows="3" placeholder="Detalles sobre cortes, acabados o servicios específicos...">{{ old('notes') }}</textarea>
+                                        <textarea name="notes" id="notes" class="form-control border-start-0 @error('notes') is-invalid @enderror" rows="3" placeholder="Detalles sobre cortes, acabados o servicios específicos..." maxlength="300">{{ old('notes') }}</textarea>
                                     </div>
                                     @error('notes')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>

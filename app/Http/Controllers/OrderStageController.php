@@ -205,6 +205,10 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
+        if ($orderStage->is_pending) {
+            return back()->withErrors(['auth' => 'No se puede entregar herrajería mientras el pedido esté pendiente.']);
+        }
+
         $orderStage->order->update([
             'herrajeria_delivered_at' => now(),
             'herrajeria_delivered_by' => $user->id,
@@ -218,6 +222,10 @@ class OrderStageController extends Controller
         $user = Auth::user();
         if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
+        }
+
+        if ($orderStage->is_pending) {
+            return back()->withErrors(['auth' => 'No se puede entregar el manual mientras el pedido esté pendiente.']);
         }
 
         $orderStage->order->update([

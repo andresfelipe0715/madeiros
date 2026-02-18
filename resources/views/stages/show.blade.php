@@ -79,7 +79,7 @@
                                 </div>
                                 <div class="mb-0">
                                     <label class="form-label font-weight-bold">Motivo / Notas</label>
-                                    <textarea name="notes" class="form-control shadow-none @error('notes') is-invalid @enderror" rows="3" placeholder="Indique el motivo por el cual se remite el pedido..." required>{{ old('notes') }}</textarea>
+                                    <textarea name="notes" class="form-control shadow-none @error('notes') is-invalid @enderror" rows="3" placeholder="Indique el motivo por el cual se remite el pedido..." required maxlength="250">{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -240,7 +240,8 @@
                                                     <h6 class="text-xs font-weight-bold text-warning mb-0 text-uppercase">Estado: Pendiente (Bloqueado)</h6>
                                                     <small class="x-small text-muted">{{ $orderStage->pending_marked_at?->format('d/m/Y H:i') ?? '' }}</small>
                                                 </div>
-                                                <p class="mb-0 text-dark small text-break"><span class="fw-bold">Razón:</span> {{ $orderStage->pending_reason }}</p>
+                                                <p class="mb-1 text-dark small text-break"><span class="fw-bold">Razón:</span> {{ $orderStage->pending_reason }}</p>
+                                                <p class="mb-0 text-danger small fw-bold"><i class="bi bi-shield-lock-fill"></i> Debe solicitar al administrador que desbloquee este pedido.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -256,7 +257,8 @@
                                                 class="form-control shadow-none border-light bg-light-soft @if(!$canEdit) bg-light @endif" 
                                                 rows="4" 
                                                 placeholder="Agregar detalles sobre el progreso en esta etapa..."
-                                                {{ !$canEdit ? 'readonly' : '' }}>{{ $orderStage->notes }}</textarea>
+                                                {{ !$canEdit ? 'readonly' : '' }}
+                                                maxlength="300">{{ $orderStage->notes }}</textarea>
                                             @if($canEdit)
                                                 <div class="mt-2 text-end">
                                                     <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Actualizar notas</button>

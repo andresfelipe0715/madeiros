@@ -66,7 +66,7 @@
                                     <input type="text"
                                         class="form-control @error('invoice_number') is-invalid @enderror"
                                         id="invoice_number" name="invoice_number"
-                                        value="{{ old('invoice_number', $order->invoice_number) }}" required {{ $isDisabled }}>
+                                        value="{{ old('invoice_number', $order->invoice_number) }}" required {{ $isDisabled }} maxlength="50">
                                     @error('invoice_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -77,7 +77,7 @@
                                         class="form-label text-muted small text-uppercase font-weight-bold">Material</label>
                                     <input type="text" class="form-control @error('material') is-invalid @enderror"
                                         id="material" name="material" value="{{ old('material', $order->material) }}"
-                                        required {{ $isDisabled }}>
+                                        required {{ $isDisabled }} maxlength="255">
                                     @error('material')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -88,7 +88,8 @@
                                         class="form-label text-muted small text-uppercase font-weight-bold">Notas
                                         Especiales</label>
                                     <textarea class="form-control @error('notes') is-invalid @enderror" id="notes"
-                                        name="notes" rows="3" {{ $isDisabled }}>{{ old('notes', $order->notes) }}</textarea>
+                                        name="notes" rows="3" {{ $isDisabled }}
+                                        maxlength="300">{{ old('notes', $order->notes) }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

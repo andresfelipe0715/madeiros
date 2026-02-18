@@ -32,7 +32,8 @@
                                         class="form-label text-muted small text-uppercase font-weight-bold">Nombre
                                         Completo</label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        id="name" name="name" value="{{ old('name', $client->name) }}" required>
+                                        id="name" name="name" value="{{ old('name', $client->name) }}" required
+                                        maxlength="150">
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -44,7 +45,7 @@
                                         NIT</label>
                                     <input type="text" class="form-control @error('document') is-invalid @enderror"
                                         id="document" name="document" value="{{ old('document', $client->document) }}"
-                                        required {{ $hasOrders ? 'disabled' : '' }}>
+                                        required {{ $hasOrders ? 'disabled' : '' }} maxlength="50">
                                     @if($hasOrders)
                                         <div class="form-text text-danger small fw-bold">
                                             <i class="bi bi-info-circle me-1"></i>
@@ -62,7 +63,8 @@
                                         class="form-label text-muted small text-uppercase font-weight-bold">Teléfono
                                         (Opcional)</label>
                                     <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                        id="phone" name="phone" value="{{ old('phone', $client->phone) }}">
+                                        id="phone" name="phone" value="{{ old('phone', $client->phone) }}"
+                                        maxlength="30">
                                     @error('phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
