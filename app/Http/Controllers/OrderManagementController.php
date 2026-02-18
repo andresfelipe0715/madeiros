@@ -21,9 +21,20 @@ class OrderManagementController extends Controller
     {
         Gate::authorize('view-orders');
 
-        $orders = Order::with(['client', 'orderStages.stage', 'createdBy'])
-            ->latest()
-            ->paginate(15);
+        $query = Order::with(['client', 'orderStages.stage', 'createdBy']);
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'LIKE', "%{$search}%")
+                    ->orWhereHas('client', function ($sub) use ($search) {
+                        $sub->where('name', 'LIKE', "%{$search}%");
+                    });
+            });
+        }
+
+        $orders = $query->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('orders.index', compact('orders'));
     }

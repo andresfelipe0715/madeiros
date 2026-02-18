@@ -90,8 +90,19 @@ class DashboardController extends Controller
             });
         }
 
+        // Search filtering
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'LIKE', "%{$search}%")
+                    ->orWhereHas('client', function ($sub) use ($search) {
+                        $sub->where('name', 'LIKE', "%{$search}%");
+                    });
+            });
+        }
+
         $orders = $query->with(['client', 'orderStages.stage', 'orderFiles.fileType', 'createdBy'])
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         // 1. Fetch relevant remit logs in a single query for the orders on this page
         $orderIds = $orders->pluck('id');

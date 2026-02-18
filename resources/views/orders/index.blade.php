@@ -14,6 +14,29 @@
 
     <div class="py-4">
         <div class="container-fluid px-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <form action="{{ route('orders.index') }}" method="GET" class="d-flex align-items-center">
+                    <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-white search-pill"
+                        style="width:350px;">
+                        <span class="input-group-text bg-white border-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-0 py-2 shadow-none"
+                            placeholder="Buscar por factura o nombre de cliente..." value="{{ request('search') }}"
+                            onkeyup="debounceSubmit(this.form)">
+                    </div>
+
+                    @if(request('search'))
+                        <a href="{{ route('orders.index') }}"
+                            class="btn btn-link btn-sm text-decoration-none text-muted ms-2">Limpiar</a>
+                    @endif
+                </form>
+                <div class="text-muted small">
+                    Mostrando {{ $orders->firstItem() ?? 0 }} - {{ $orders->lastItem() ?? 0 }} de {{ $orders->total() }}
+                    órdenes
+                </div>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -123,4 +146,19 @@
             </div>
         </div>
     </div>
+    <style>
+        /* Search bar fixes */
+        .search-pill input {
+            padding-left: 1rem;
+            /* remove extra space inside input */
+            outline: none;
+            /* remove blue focus line */
+        }
+
+        .search-pill .input-group-text {
+            padding-left: 0rem;
+            /* adjust icon spacing */
+            padding-right: 0rem;
+        }
+    </style>
 </x-app-layout>

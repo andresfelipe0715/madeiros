@@ -35,6 +35,24 @@
             {{ $slot }}
         </main>
     </div>
+
+    <script>
+        let searchTimeout = null;
+        function debounceSubmit(form) {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            searchTimeout = setTimeout(() => {
+                const searchInput = form.querySelector('input[name="search"]');
+                const value = searchInput ? searchInput.value.trim() : '';
+
+                // Only submut if value is empty (reset) or >= 2 chars
+                if (value.length === 0 || value.length >= 2) {
+                    form.submit();
+                }
+            }, 500); // 500ms delay
+        }
+    </script>
 </body>
 
 </html>

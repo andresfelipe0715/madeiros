@@ -18,7 +18,16 @@ class ClientController extends Controller
     {
         Gate::authorize('view-clients');
 
-        $clients = Client::latest()->paginate(15);
+        $query = Client::query();
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('document', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $clients = $query->latest()->paginate(15)->withQueryString();
 
         return view('clients.index', compact('clients'));
     }

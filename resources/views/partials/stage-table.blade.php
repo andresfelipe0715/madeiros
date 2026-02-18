@@ -6,15 +6,32 @@
 @endphp
 
 <div class="card mb-5 border-0 shadow-sm overflow-hidden">
-    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-end">
+    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
         <div>
             <span class="text-uppercase text-xs font-bold text-primary tracking-wider mb-1 d-block opacity-75">Módulo de
                 Producción</span>
             <h4 class="mb-0 font-weight-bolder">{{ $stageName }}</h4>
         </div>
-        <div class="text-end">
+        <div class="d-flex align-items-center gap-3">
+            <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
+                <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-light search-pill" 
+                    style="width: 250px; transition: border-color 0.2s ease-in-out;">
+                    <span class="input-group-text bg-light border-0 pe-0 ps-3">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control bg-light border-0 ps-0 shadow-none" 
+                        placeholder="Buscar por cliente o factura..." 
+                        value="{{ request('search') }}"
+                        onkeyup="debounceSubmit(this.form)"
+                        onfocus="this.parentElement.style.borderColor = '#0d6efd'"
+                        onblur="this.parentElement.style.borderColor = '#dee2e6'">
+                </div>
+                @if(request('search'))
+                    <a href="{{ url()->current() }}" class="btn btn-link btn-sm text-decoration-none text-muted ms-2">Limpiar</a>
+                @endif
+            </form>
             <span class="badge bg-soft-primary text-primary rounded-pill">
-                {{ $orders->count() }} de {{ $orders->total() }} pedidos en cola
+                {{ $orders->total() }} pedidos en cola
             </span>
         </div>
     </div>
@@ -49,8 +66,30 @@
                         @endphp
                         <tr>
                             <td>{{ $order->id }}</td>
-                            <td>{{ $order->client->name }}</td>
-                            <td>{{ $order->material }}</td>
+                            <td>
+                                @if(Str::length($order->client->name) > 50)
+                                    <span style="cursor: pointer;" 
+                                          data-bs-toggle="modal" 
+                                          data-bs-target="#clientDetailModal{{ $orderStage->id }}">
+                                        {{ Str::limit($order->client->name, 50) }}
+                                        <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                    </span>
+                                @else
+                                    {{ $order->client->name }}
+                                @endif
+                            </td>
+                            <td>
+                                @if(Str::length($order->material) > 50)
+                                    <span style="cursor: pointer;" 
+                                          data-bs-toggle="modal" 
+                                          data-bs-target="#materialDetailModal{{ $orderStage->id }}">
+                                        {{ Str::limit($order->material, 50) }}
+                                        <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                    </span>
+                                @else
+                                    {{ $order->material }}
+                                @endif
+                            </td>
                             <td>
                                 @if($order->lleva_herrajeria)
                                     @if($order->herrajeria_delivered_at)
@@ -246,36 +285,78 @@
             {{ $orders->links() }}
         </div>
     </div>
-    </style>
 
-    {{-- Modal para marcar como pendiente --}}
+    {{-- Modals Loop --}}
     @foreach($orders as $order)
         @php $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id); @endphp
-        @if($isAdmin && $orderStage && !$orderStage->completed_at && !$orderStage->started_at && !$orderStage->is_pending)
-            <div class="modal fade" id="pendingModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form action="{{ route('order-stages.mark-as-pending', $orderStage->id) }}" method="POST">
-                            @csrf
-                            <div class="modal-header">
-                                <h5 class="modal-title">Marcar pedido #{{ $order->id }} como Pendiente</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Razón del pendiente <span class="text-danger">*</span></label>
-                                    <textarea name="pending_reason" class="form-control" rows="3" required maxlength="250" placeholder="Ej: Falta material, cliente solicitó retraso..."></textarea>
-                                    <div class="form-text">Máximo 250 caracteres.</div>
+        @if($orderStage)
+            {{-- Modal para marcar como pendiente --}}
+            @if($isAdmin && !$orderStage->completed_at && !$orderStage->started_at && !$orderStage->is_pending)
+                <div class="modal fade" id="pendingModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="{{ route('order-stages.mark-as-pending', $orderStage->id) }}" method="POST">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Marcar pedido #{{ $order->id }} como Pendiente</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-warning">Confirmar Pendiente</button>
-                            </div>
-                        </form>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Razón del pendiente <span class="text-danger">*</span></label>
+                                        <textarea name="pending_reason" class="form-control" rows="3" required maxlength="250" placeholder="Ej: Falta material, cliente solicitó retraso..."></textarea>
+                                        <div class="form-text">Máximo 250 caracteres.</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-warning">Confirmar Pendiente</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
+
+            {{-- Modal de Detalle de Cliente --}}
+            @if(Str::length($order->client->name) > 50)
+                <div class="modal fade" id="clientDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-dark text-white border-0">
+                                <h5 class="modal-title">Nombre del Cliente - Pedido #{{ $order->id }}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->client->name }}</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Modal de Detalle de Material --}}
+            @if(Str::length($order->material) > 50)
+                <div class="modal fade" id="materialDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-dark text-white border-0">
+                                <h5 class="modal-title">Detalle de Material - Pedido #{{ $order->id }}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4 text-left">
+                                <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->material }}</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         @endif
     @endforeach
 </div>
