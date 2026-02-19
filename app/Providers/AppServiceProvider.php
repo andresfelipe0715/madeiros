@@ -54,5 +54,9 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('edit-users', function (\App\Models\User $user) {
             return $user->role->hasPermission('users', 'edit');
         });
+
+        \Illuminate\Support\Facades\Gate::define('view-performance', function (\App\Models\User $user) {
+            return $user->role->hasPermission('performance', 'view');
+        });
     }
 }

@@ -154,6 +154,12 @@ class DefaultDataSeeder extends Seeder
                 ['role_id' => $role->id, 'resource_type' => 'users'],
                 ['can_view' => false, 'can_edit' => false, 'can_create' => false]
             );
+
+            // Deny performance permissions for others by default
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'performance'],
+                ['can_view' => false, 'can_create' => false, 'can_edit' => false]
+            );
         }
 
     }

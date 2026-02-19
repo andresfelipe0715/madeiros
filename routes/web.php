@@ -49,6 +49,10 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Users Management
     Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
+
+    // Performance Module
+    Route::get('/performance', [\App\Http\Controllers\PerformanceController::class, 'index'])->name('performance.index');
+    Route::get('/performance/details/{user}', [\App\Http\Controllers\PerformanceController::class, 'details'])->name('performance.details');
 });
 
 require __DIR__ . '/auth.php';

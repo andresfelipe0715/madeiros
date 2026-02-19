@@ -33,6 +33,12 @@
                             {{ __('Usuarios') }}
                         </x-nav-link>
                     @endcan
+
+                    @can('view-performance')
+                        <x-nav-link :href="route('performance.index')" :active="request()->routeIs('performance.*')">
+                            {{ __('Rendimiento') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -111,6 +117,12 @@
             @can('view-users')
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('Usuarios') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('view-performance')
+                <x-responsive-nav-link :href="route('performance.index')" :active="request()->routeIs('performance.*')">
+                    {{ __('Rendimiento') }}
                 </x-responsive-nav-link>
             @endcan
         </div>
