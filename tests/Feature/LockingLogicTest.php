@@ -3,8 +3,7 @@
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\Role;
-use App\Models\RoleClientPermission;
-use App\Models\RoleOrderPermission;
+use App\Models\RolePermission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -19,15 +18,17 @@ beforeEach(function () {
     $this->user = User::factory()->create(['role_id' => $this->role->id]);
 
     // Grant permissions
-    RoleOrderPermission::create([
+    RolePermission::create([
         'role_id' => $this->role->id,
+        'resource_type' => 'orders',
         'can_view' => true,
         'can_edit' => true,
         'can_create' => true,
     ]);
 
-    RoleClientPermission::create([
+    RolePermission::create([
         'role_id' => $this->role->id,
+        'resource_type' => 'clients',
         'can_view' => true,
         'can_edit' => true,
         'can_create' => true,

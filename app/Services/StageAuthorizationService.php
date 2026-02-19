@@ -12,28 +12,28 @@ class StageAuthorizationService
      */
     public function canActOnStage(User $user, Order $order, int $stageId): bool
     {
-        // 1. Non-admin users can only act on stages linked to their role via role_stages
+        // 1. Admin Override: Users with orders.can_edit = true can bypass role access, sequence and queue
+        $canOverride = $user->role->hasPermission('orders', 'edit');
+        if ($canOverride) {
+            return true;
+        }
+
+        // 2. Non-admin users can only act on stages linked to their role via role_stages
         $hasRoleAccess = $user->role->stages()
             ->where('stages.id', $stageId)
             ->exists();
 
-        if (!$hasRoleAccess) {
+        if (! $hasRoleAccess) {
             return false;
         }
 
-        // 2. The order must require that stage
+        // 3. The order must require that stage
         $targetOrderStage = $order->orderStages()
             ->where('stage_id', $stageId)
             ->first();
 
-        if (!$targetOrderStage) {
+        if (! $targetOrderStage) {
             return false;
-        }
-
-        // 3. Admin Override: Users with orders.can_edit = true can bypass the queue
-        $canOverride = $user->role->hasPermission('orders', 'edit');
-        if ($canOverride) {
-            return true;
         }
 
         // 4. Internal Sequence: All previous required stages in this order must be completed
@@ -59,7 +59,7 @@ class StageAuthorizationService
         // and are "ready" for it (their own internal sequence is complete)
         // and have a lower ID (original creation order)
         // and ARE NOT marked as Pendiente (is_pending = false)
-        return !\App\Models\OrderStage::where('stage_id', $stageId)
+        return ! \App\Models\OrderStage::where('stage_id', $stageId)
             ->where('order_id', '<', $order->id)
             ->whereNull('completed_at')
             ->where('is_pending', false) // Skip pending orders in queue

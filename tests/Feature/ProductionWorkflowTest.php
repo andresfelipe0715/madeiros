@@ -4,7 +4,7 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderStage;
 use App\Models\Role;
-use App\Models\RoleOrderPermission;
+use App\Models\RolePermission;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,15 +23,15 @@ beforeEach(function () {
     // 3. Setup Roles
     $this->corteRole = Role::create(['name' => 'Corte User']);
     $this->corteRole->stages()->attach($this->corte->id);
-    RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+    RolePermission::create(['role_id' => $this->corteRole->id, 'resource_type' => 'orders', 'can_edit' => false]);
 
     $this->adminRole = Role::create(['name' => 'Admin Role']);
     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
-    RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+    RolePermission::create(['role_id' => $this->adminRole->id, 'resource_type' => 'orders', 'can_edit' => true]);
 
     $this->enchapeRole = Role::create(['name' => 'Enchape User']);
     $this->enchapeRole->stages()->attach($this->enchape->id);
-    RoleOrderPermission::create(['role_id' => $this->enchapeRole->id, 'can_edit' => false]);
+    RolePermission::create(['role_id' => $this->enchapeRole->id, 'resource_type' => 'orders', 'can_edit' => false]);
 
     // 4. Setup Users
     $this->corteUser = User::create([

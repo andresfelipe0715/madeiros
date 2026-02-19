@@ -41,6 +41,7 @@ class StoreOrderRequest extends FormRequest
             'order_file.file' => 'El archivo de la orden debe ser un archivo válido.',
             'order_file.mimes' => 'El archivo de la orden debe ser un PDF.',
             'order_file.max' => 'El archivo de la orden no debe pesar más de 10MB.',
+            'order_file.uploaded' => 'El archivo excedió el límite permitido por el servidor (PHP) o falló la conexión.',
             'notes.max' => 'Las notas no deben exceder los 300 caracteres.',
         ];
     }

@@ -1,0 +1,127 @@
+﻿php : PHP Warning:  Module 
+"openssl" is already 
+loaded in Unknown on line 0
+At line:1 char:1
++ php artisan test tests/Fe
+ature/ProductionWorkflowTes
+t.php > test_debu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified    : 
+(PHP Warning:  M.    
+..known on line 0:S    
+tring) [], RemoteEx    
+ception
+    + FullyQualifiedErr    
+orId : NativeComman    
+dError
+ 
+
+Warning: Module "openssl" is already loaded in Unknown on line 0
+
+Warning: Module "openssl" is already loaded in Unknown on line 0
+PHP Warning:  Module "openssl" is already loaded in Unknown on line 0
+
+   FAIL  Tests\Feature\ProductionWorkflowTest
+  Γ¿» it blocks a regular user from starting an order if it is not next in queue
+  Γ¿» it allows a regular user to start the next order in queue
+  Γ¿» it does NOT allow an admin to override the queue
+  Γ¿» it blocks finishing an order if it is not next in queue
+  Γ¿» it blocks a regular user from remitting an order if it is not next in queue
+  Γ¿» it does NOT allow an admin to remit any order if not next in queue
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAΓÇª  ErrorException   
+  include(C:\Users\Andres\Desktop\apps\madeiros\vendor\composer/../../app/Models/RoleOrderPermission.php): Failed to open stream: No such file or directory
+
+  at tests\Feature\ProductionWorkflowTest.php:26
+     22Γûò 
+     23Γûò     // 3. Setup Roles
+     24Γûò     $this->corteRole = Role::create(['name' => 'Corte User']);
+     25Γûò     $this->corteRole->stages()->attach($this->corte->id);
+  Γ₧£  26Γûò     RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+     27Γûò 
+     28Γûò     $this->adminRole = Role::create(['name' => 'Admin Role']);
+     29Γûò     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
+     30Γûò     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAΓÇª  ErrorException   
+  include(C:\Users\Andres\Desktop\apps\madeiros\vendor\composer/../../app/Models/RoleOrderPermission.php): Failed to open stream: No such file or directory
+
+  at tests\Feature\ProductionWorkflowTest.php:26
+     22Γûò 
+     23Γûò     // 3. Setup Roles
+     24Γûò     $this->corteRole = Role::create(['name' => 'Corte User']);
+     25Γûò     $this->corteRole->stages()->attach($this->corte->id);
+  Γ₧£  26Γûò     RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+     27Γûò 
+     28Γûò     $this->adminRole = Role::create(['name' => 'Admin Role']);
+     29Γûò     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
+     30Γûò     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAΓÇª  ErrorException   
+  include(C:\Users\Andres\Desktop\apps\madeiros\vendor\composer/../../app/Models/RoleOrderPermission.php): Failed to open stream: No such file or directory
+
+  at tests\Feature\ProductionWorkflowTest.php:26
+     22Γûò 
+     23Γûò     // 3. Setup Roles
+     24Γûò     $this->corteRole = Role::create(['name' => 'Corte User']);
+     25Γûò     $this->corteRole->stages()->attach($this->corte->id);
+  Γ₧£  26Γûò     RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+     27Γûò 
+     28Γûò     $this->adminRole = Role::create(['name' => 'Admin Role']);
+     29Γûò     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
+     30Γûò     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAΓÇª  ErrorException   
+  include(C:\Users\Andres\Desktop\apps\madeiros\vendor\composer/../../app/Models/RoleOrderPermission.php): Failed to open stream: No such file or directory
+
+  at tests\Feature\ProductionWorkflowTest.php:26
+     22Γûò 
+     23Γûò     // 3. Setup Roles
+     24Γûò     $this->corteRole = Role::create(['name' => 'Corte User']);
+     25Γûò     $this->corteRole->stages()->attach($this->corte->id);
+  Γ₧£  26Γûò     RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+     27Γûò 
+     28Γûò     $this->adminRole = Role::create(['name' => 'Admin Role']);
+     29Γûò     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
+     30Γûò     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAΓÇª  ErrorException   
+  include(C:\Users\Andres\Desktop\apps\madeiros\vendor\composer/../../app/Models/RoleOrderPermission.php): Failed to open stream: No such file or directory
+
+  at tests\Feature\ProductionWorkflowTest.php:26
+     22Γûò 
+     23Γûò     // 3. Setup Roles
+     24Γûò     $this->corteRole = Role::create(['name' => 'Corte User']);
+     25Γûò     $this->corteRole->stages()->attach($this->corte->id);
+  Γ₧£  26Γûò     RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+     27Γûò 
+     28Γûò     $this->adminRole = Role::create(['name' => 'Admin Role']);
+     29Γûò     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
+     30Γûò     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAΓÇª  ErrorException   
+  include(C:\Users\Andres\Desktop\apps\madeiros\vendor\composer/../../app/Models/RoleOrderPermission.php): Failed to open stream: No such file or directory
+
+  at tests\Feature\ProductionWorkflowTest.php:26
+     22Γûò 
+     23Γûò     // 3. Setup Roles
+     24Γûò     $this->corteRole = Role::create(['name' => 'Corte User']);
+     25Γûò     $this->corteRole->stages()->attach($this->corte->id);
+  Γ₧£  26Γûò     RoleOrderPermission::create(['role_id' => $this->corteRole->id, 'can_edit' => false]);
+     27Γûò 
+     28Γûò     $this->adminRole = Role::create(['name' => 'Admin Role']);
+     29Γûò     $this->adminRole->stages()->attach([$this->corte->id, $this->enchape->id]);
+     30Γûò     RoleOrderPermission::create(['role_id' => $this->adminRole->id, 'can_edit' => true]);
+
+
+  Tests:    6 failed (0 assertions)
+  Duration: 0.88s
+

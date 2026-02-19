@@ -241,7 +241,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can mark as pending
-        if (! ($user->role->orderPermission?->can_edit ?? false)) {
+        if (! $user->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para marcar como pendiente.']);
         }
 
@@ -273,7 +273,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can remove pending status
-        if (! ($user->role->orderPermission?->can_edit ?? false)) {
+        if (! $user->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para quitar el estado pendiente.']);
         }
 

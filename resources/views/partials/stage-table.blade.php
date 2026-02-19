@@ -1,7 +1,7 @@
 @inject('visibility', 'App\Services\VisibilityService')
 @php
     $stageName = $stage->name;
-    $isAdmin = auth()->user()->hasRole('Admin');
+    $isAdmin = auth()->user()->role->hasPermission('orders', 'edit');
     $permissions = $visibility::forUser(auth()->user());
 @endphp
 
@@ -62,7 +62,7 @@
                             
                             $isNext = $authService->isNextInQueue($order, $stage->id);
                             $canAct = $authService->canActOnStage(auth()->user(), $order, $stage->id);
-                            $isAdmin = auth()->user()->role->orderPermission?->can_edit ?? false;
+                            $isAdmin = auth()->user()->role->hasPermission('orders', 'edit');
                         @endphp
                         <tr>
                             <td>{{ $order->id }}</td>
