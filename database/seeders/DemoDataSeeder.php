@@ -89,79 +89,22 @@ class DemoDataSeeder extends Seeder
 
             /*
             |--------------------------------------------------------------------------
-            | Determine progression depth
+            | Create all stages as unstarted
             |--------------------------------------------------------------------------
             */
 
-            $r = rand(1, 100);
-
-            if ($r <= 25) {
-                // not started
-                continue;
-            }
-
-            if ($r <= 40) {
-                // waiting first stage
-                continue;
-            }
-
-            // spread mid workflow across stages
-            if ($r <= 80) {
-                $progressionDepth = rand(1, $stages->count() - 1);
-            } else {
-                // fully completed
-                $progressionDepth = $stages->count();
-            }
-
-            $currentTime = $createdDate->copy()->addMinutes(20);
-
-            foreach ($stages as $index => $stage) {
-
-                if ($index >= $progressionDepth) {
-                    break;
-                }
-
-                $worker = $users->random()->id;
-
-                $start = $currentTime->copy()->addMinutes(rand(5, 60));
-                $duration = rand(10, 120);
-                $finish = $start->copy()->addMinutes($duration);
-
+            foreach ($stages as $stage) {
                 DB::table('order_stages')->insert([
                     'order_id' => $orderId,
                     'stage_id' => $stage->id,
                     'sequence' => $stage->default_sequence,
-                    'started_at' => $start,
-                    'completed_at' => $finish,
-                    'started_by' => $worker,
-                    'completed_by' => $worker,
-                    'created_at' => $start,
-                    'updated_at' => $finish,
+                    'started_at' => null,
+                    'completed_at' => null,
+                    'started_by' => null,
+                    'completed_by' => null,
+                    'created_at' => $createdDate,
+                    'updated_at' => $createdDate,
                 ]);
-
-                DB::table('order_logs')->insert([
-                    'order_id' => $orderId,
-                    'user_id' => $worker,
-                    'action' => "Etapa completada: {$stage->name}",
-                    'created_at' => $finish
-                ]);
-
-                $currentTime = $finish->copy();
-
-                if ($stage->is_delivery_stage) {
-
-                    DB::table('orders')->where('id', $orderId)->update([
-                        'delivered_at' => $finish,
-                        'delivered_by' => $worker
-                    ]);
-
-                    DB::table('order_tracking_links')->insert([
-                        'order_id' => $orderId,
-                        'token' => Str::random(32),
-                        'expires_at' => now()->addDays(30),
-                        'created_at' => $finish
-                    ]);
-                }
             }
         }
 
