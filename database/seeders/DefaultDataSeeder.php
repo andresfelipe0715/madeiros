@@ -30,7 +30,10 @@ class DefaultDataSeeder extends Seeder
         foreach ($stagesData as $name => $sequence) {
             $stages[$name] = Stage::updateOrCreate(
                 ['name' => $name],
-                ['default_sequence' => $sequence]
+                [
+                    'default_sequence' => $sequence,
+                    'is_delivery_stage' => ($name === 'Entrega'),
+                ]
             );
         }
 
