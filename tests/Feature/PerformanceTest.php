@@ -145,3 +145,49 @@ it('shows benchmarking insights', function () {
     $response->assertSee('Fast User');
     $response->assertSee('Slow User');
 });
+
+it('filters details by stage_id', function () {
+    $stage1 = Stage::create(['name' => 'Corte', 'default_sequence' => 10]);
+    $stage2 = Stage::create(['name' => 'Ensamble', 'default_sequence' => 20]);
+    $order = Order::factory()->create();
+
+    // User completes one stage of type 1
+    OrderStage::create([
+        'order_id' => $order->id,
+        'stage_id' => $stage1->id,
+        'started_at' => Carbon::now()->subHours(2),
+        'completed_at' => Carbon::now()->subHours(1),
+        'completed_by' => $this->admin->id,
+        'sequence' => 10,
+    ]);
+
+    // And one stage of type 2
+    OrderStage::create([
+        'order_id' => $order->id,
+        'stage_id' => $stage2->id,
+        'started_at' => Carbon::now()->subHours(2),
+        'completed_at' => Carbon::now()->subHours(1),
+        'completed_by' => $this->admin->id,
+        'sequence' => 20,
+    ]);
+
+    // Request with stage_id filter for Stage 1
+    $response = $this->actingAs($this->admin)->getJson(route('performance.details', [
+        'user' => $this->admin->id,
+        'stage_id' => $stage1->id
+    ]));
+
+    $response->assertOk();
+    $response->assertJsonCount(1, 'data'); // Should only see 1 record
+    $response->assertJsonPath('data.0.stage_name', 'Corte');
+
+    // Request with stage_id filter for Stage 2
+    $response = $this->actingAs($this->admin)->getJson(route('performance.details', [
+        'user' => $this->admin->id,
+        'stage_id' => $stage2->id
+    ]));
+
+    $response->assertOk();
+    $response->assertJsonCount(1, 'data');
+    $response->assertJsonPath('data.0.stage_name', 'Ensamble');
+});

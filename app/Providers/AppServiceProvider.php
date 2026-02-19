@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Pagination\Paginator::useBootstrapFive();
+
         \Illuminate\Support\Facades\Gate::define('view-orders', function (\App\Models\User $user) {
             return $user->role->hasPermission('orders', 'view');
         });

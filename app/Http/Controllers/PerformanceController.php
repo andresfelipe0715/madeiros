@@ -123,7 +123,7 @@ class PerformanceController extends Controller
             }
         }
 
-        return view('performance.index', compact('users', 'benchmarking', 'dateRange', 'dateFrom', 'dateTo'));
+        return view('performance.index', compact('users', 'benchmarking', 'stagesList', 'dateRange', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -134,6 +134,8 @@ class PerformanceController extends Controller
         Gate::authorize('view-performance');
 
         $dateRange = $request->input('date_range', 90);
+        $stageId = $request->input('stage_id'); // New Stage Filter
+
         $dateTo = Carbon::now();
         $dateFrom = match ($dateRange) {
             '7' => Carbon::now()->subDays(7),
@@ -150,12 +152,17 @@ class PerformanceController extends Controller
             $dateTo = Carbon::now()->endOfDay();
         }
 
-        $stages = \App\Models\OrderStage::where('completed_by', $user->id)
+        $query = \App\Models\OrderStage::where('completed_by', $user->id)
             ->whereNotNull('started_at')
             ->whereNotNull('completed_at')
             ->whereRaw('completed_at >= started_at')
-            ->whereBetween('completed_at', [$dateFrom, $dateTo])
-            ->with(['order', 'stage'])
+            ->whereBetween('completed_at', [$dateFrom, $dateTo]);
+
+        if ($stageId && $stageId !== 'all') {
+            $query->where('stage_id', $stageId);
+        }
+
+        $stages = $query->with(['order', 'stage'])
             ->latest('completed_at')
             ->paginate(15);
 

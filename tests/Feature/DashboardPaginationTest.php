@@ -16,6 +16,7 @@ beforeEach(function () {
     $this->user = User::factory()->create(['role_id' => $this->role->id]);
     $this->client = Client::factory()->create();
     $this->stage = Stage::create(['name' => 'Corte', 'default_sequence' => 1]);
+    $this->role->stages()->attach($this->stage);
 });
 
 it('paginates orders in the dashboard stage view', function () {
