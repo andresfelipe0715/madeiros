@@ -18,8 +18,8 @@ beforeEach(function () {
     $this->stage = Stage::firstOrCreate(['name' => 'Corte'], ['default_sequence' => 10]);
 
     // Ensure permission
-    \App\Models\RoleOrderPermission::updateOrCreate(
-        ['role_id' => $this->role->id],
+    \App\Models\RolePermission::updateOrCreate(
+        ['role_id' => $this->role->id, 'resource_type' => 'orders'],
         ['can_create' => true, 'can_view' => true]
     );
 });

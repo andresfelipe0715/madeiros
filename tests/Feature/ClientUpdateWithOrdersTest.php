@@ -2,18 +2,19 @@
 
 use App\Models\Client;
 use App\Models\Order;
-use App\Models\User;
 use App\Models\Role;
-use App\Models\Permission;
+use App\Models\User;
+
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     // Setup Admin user with permissions
     $role = Role::create(['name' => 'Admin']);
 
-    // Application uses RoleClientPermission
-    \App\Models\RoleClientPermission::create([
+    // Application uses RolePermission
+    \App\Models\RolePermission::create([
         'role_id' => $role->id,
+        'resource_type' => 'clients',
         'can_view' => true,
         'can_create' => true,
         'can_edit' => true,
@@ -26,7 +27,7 @@ it('allows updating client name and phone even if orders exist', function () {
     $client = Client::factory()->create([
         'name' => 'Original Name',
         'document' => '123456',
-        'phone' => '111111'
+        'phone' => '111111',
     ]);
 
     Order::factory()->create(['client_id' => $client->id]);
@@ -49,7 +50,7 @@ it('allows updating client name and phone even if orders exist', function () {
 it('prevents updating document if orders exist', function () {
     $client = Client::factory()->create([
         'name' => 'Original Name',
-        'document' => '123456'
+        'document' => '123456',
     ]);
 
     Order::factory()->create(['client_id' => $client->id]);
@@ -68,7 +69,7 @@ it('prevents updating document if orders exist', function () {
 it('allows updating document if NO orders exist', function () {
     $client = Client::factory()->create([
         'name' => 'Original Name',
-        'document' => '123456'
+        'document' => '123456',
     ]);
 
     // No orders created

@@ -6,12 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('client_id')->constrained('clients');
+            $table->string('material', 255);
+            $table->string('notes', 300)->nullable();
+            $table->string('invoice_number', 50)->unique();
+            $table->foreignId('created_by')->constrained('users');
+            $table->timestamp('delivered_at')->nullable();
+            $table->foreignId('delivered_by')->nullable()->constrained('users');
+            $table->timestamps();
+            $table->boolean('lleva_herrajeria')->default(false);
+            $table->boolean('lleva_manual_armado')->default(false);
             $table->timestamp('herrajeria_delivered_at')->nullable();
             $table->unsignedBigInteger('herrajeria_delivered_by')->nullable();
             $table->timestamp('manual_armado_delivered_at')->nullable();
@@ -22,20 +30,8 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropForeign(['herrajeria_delivered_by']);
-            $table->dropForeign(['manual_armado_delivered_by']);
-            $table->dropColumn([
-                'herrajeria_delivered_at',
-                'herrajeria_delivered_by',
-                'manual_armado_delivered_at',
-                'manual_armado_delivered_by',
-            ]);
-        });
+        Schema::dropIfExists('orders');
     }
 };

@@ -70,12 +70,12 @@ class DefaultDataSeeder extends Seeder
 
             // 3. Create one test user per role
             // Using document as a unique identifier for testing
-            $document = $roleCodes[$roleName] . '_123';
+            $document = $roleCodes[$roleName].'_123';
 
             User::firstOrCreate(
                 ['document' => $document],
                 [
-                    'name' => $roleName . ' Test',
+                    'name' => $roleName.' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
@@ -139,12 +139,6 @@ class DefaultDataSeeder extends Seeder
                 ['role_id' => $role->id, 'resource_type' => 'orders'],
                 ['can_view' => false, 'can_edit' => false, 'can_create' => false]
             );
-
-            $role->visibilityPermission()->create([
-                'can_view_files' => true,
-                'can_view_order_file' => true,
-                'can_view_machine_file' => true,
-            ]);
 
             // Deny client permissions for others by default
             RolePermission::updateOrCreate(

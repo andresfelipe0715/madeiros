@@ -3,7 +3,7 @@
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\Role;
-use App\Models\RoleOrderPermission;
+use App\Models\RolePermission;
 use App\Models\Stage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,8 +19,9 @@ beforeEach(function () {
     $this->user = User::factory()->create(['role_id' => $this->role->id]);
 
     // Grant permissions
-    RoleOrderPermission::create([
+    RolePermission::create([
         'role_id' => $this->role->id,
+        'resource_type' => 'orders',
         'can_view' => true,
         'can_edit' => true,
         'can_create' => true,
@@ -91,6 +92,6 @@ it('shows the correct values in the orders list', function () {
 
     $response = $this->get(route('orders.index'));
     $response->assertSuccessful();
-    $response->assertSee('Sí');
-    $response->assertSee('No');
+    $response->assertSee('Pendiente');
+    $response->assertSee('N/A');
 });

@@ -13,8 +13,8 @@ class AdminOrderPermissionsSeeder extends Seeder
     {
         $adminRole = \App\Models\Role::where('name', 'Admin')->first();
         if ($adminRole) {
-            \App\Models\RoleOrderPermission::updateOrCreate(
-                ['role_id' => $adminRole->id],
+            \App\Models\RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'orders'],
                 ['can_view' => true, 'can_edit' => true, 'can_create' => true]
             );
         }

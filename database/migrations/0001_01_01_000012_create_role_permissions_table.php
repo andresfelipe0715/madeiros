@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('role_client_permissions', function (Blueprint $table) {
+        Schema::create('role_permissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id')->unique()->constrained('roles')->onDelete('cascade');
+            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
+            $table->string('resource_type', 100);
             $table->boolean('can_view')->default(false);
             $table->boolean('can_create')->default(false);
+            $table->boolean('can_edit')->default(false);
             $table->timestamps();
+
+            $table->unique(['role_id', 'resource_type']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('role_client_permissions');
+        Schema::dropIfExists('role_permissions');
     }
 };
