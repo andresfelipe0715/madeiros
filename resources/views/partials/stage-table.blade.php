@@ -79,15 +79,23 @@
                                 @endif
                             </td>
                             <td>
-                                @if(Str::length($order->material) > 50)
+                                @php
+                                    $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
+                                    $materialLabels = $activeMaterials->map(function($om) {
+                                        return $om->material->name . ($om->notes ? " - {$om->notes}" : "");
+                                    });
+                                    $materialText = $materialLabels->implode(', ');
+                                @endphp
+
+                                @if(Str::length($materialText) > 50)
                                     <span style="cursor: pointer;" 
                                           data-bs-toggle="modal" 
                                           data-bs-target="#materialDetailModal{{ $orderStage->id }}">
-                                        {{ Str::limit($order->material, 50) }}
+                                        {{ Str::limit($materialText, 50) }}
                                         <i class="bi bi-info-circle text-primary small ms-1"></i>
                                     </span>
                                 @else
-                                    {{ $order->material }}
+                                    {{ $materialText ?: '-' }}
                                 @endif
                             </td>
                             <td>
@@ -339,24 +347,33 @@
             @endif
 
             {{-- Modal de Detalle de Material --}}
-            @if(Str::length($order->material) > 50)
-                <div class="modal fade" id="materialDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content border-0 shadow">
-                            <div class="modal-header bg-dark text-white border-0">
-                                <h5 class="modal-title">Detalle de Material - Pedido #{{ $order->id }}</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body p-4 text-left">
-                                <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->material }}</p>
-                            </div>
-                            <div class="modal-footer border-0">
-                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
-                            </div>
+            @php
+                $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
+            @endphp
+            <div class="modal fade" id="materialDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title">Detalle de Materiales - Pedido #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <ul class="list-group list-group-flush">
+                                @foreach($activeMaterials as $om)
+                                    <li class="list-group-item px-0 border-0">
+                                        <div class="fw-bold">{{ $om->material->name }}</div>
+                                        @if($om->notes)
+                                            <div class="small text-muted">{{ $om->notes }}</div>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
                         </div>
                     </div>
                 </div>
-            @endif
-        @endif
+            </div>
     @endforeach
 </div>

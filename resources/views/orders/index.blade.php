@@ -74,15 +74,26 @@
                                         <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
                                         <td class="px-4 py-3">{{ $order->invoice_number }}</td>
                                         <td class="px-4 py-3">
-                                            @if(Str::length($order->material) > 50)
-                                                <span style="cursor: pointer;" data-bs-toggle="modal"
-                                                    data-bs-target="#materialDetailModal{{ $order->id }}">
-                                                    {{ Str::limit($order->material, 50) }}
-                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                            @php
+                                                $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
+                                                $cancelledMaterials = $order->orderMaterials->filter(fn($om) => !is_null($om->cancelled_at));
+                                                $materialLabels = $activeMaterials->map(function ($om) {
+                                                    return $om->material->name . ($om->notes ? " - {$om->notes}" : "");
+                                                });
+                                                $materialText = $materialLabels->implode(', ');
+                                            @endphp
+
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-truncate" style="max-width: 150px;">
+                                                    {{ $materialText ?: '-' }}
                                                 </span>
-                                            @else
-                                                {{ $order->material }}
-                                            @endif
+                                                <button type="button" class="btn btn-link btn-sm p-0 ms-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#materialDetailModal{{ $order->id }}"
+                                                    title="Ver detalle completo">
+                                                    <i class="bi bi-info-circle text-primary"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3">
                                             @if($order->lleva_herrajeria)
@@ -192,26 +203,67 @@
         @endif
 
         {{-- Modal de Detalle de Material --}}
-        @if(Str::length($order->material) > 50)
-            <div class="modal fade" id="materialDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content border-0 shadow">
-                        <div class="modal-header bg-dark text-white border-0">
-                            <h5 class="modal-title">Detalle de Material - Orden #{{ $order->id }}</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-4 text-start">
-                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->material }}</p>
-                        </div>
-                        <div class="modal-footer border-0">
-                            <button type="button" class="btn btn-light rounded-pill px-4"
-                                data-bs-dismiss="modal">Cerrar</button>
-                        </div>
+        @php
+            $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
+            $cancelledMaterials = $order->orderMaterials->filter(fn($om) => !is_null($om->cancelled_at));
+        @endphp
+        <div class="modal fade" id="materialDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-dark text-white border-0">
+                        <h5 class="modal-title">Detalle de Materiales - Orden #{{ $order->id }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-start">
+                        <h6 class="small fw-bold text-primary text-uppercase mb-3">Materiales Activos</h6>
+                        @if($activeMaterials->isEmpty())
+                            <p class="text-muted small">No hay materiales activos.</p>
+                        @else
+                            <ul class="list-group list-group-flush mb-4">
+                                @foreach($activeMaterials as $om)
+                                    <li class="list-group-item px-0 border-0 py-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold">{{ $om->material->name }}</span>
+                                            <span class="badge bg-light text-dark border">{{ $om->estimated_quantity }}</span>
+                                        </div>
+                                        @if($om->notes)
+                                            <div class="small text-muted">{{ $om->notes }}</div>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if($cancelledMaterials->isNotEmpty())
+                            <h6 class="small fw-bold text-danger text-uppercase mb-3">Materiales Cancelados</h6>
+                            <ul class="list-group list-group-flush">
+                                @foreach($cancelledMaterials as $om)
+                                    <li class="list-group-item px-0 border-0 py-1 opacity-75">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span
+                                                class="text-danger fw-bold text-decoration-line-through">{{ $om->material->name }}</span>
+                                            <span class="badge bg-danger-subtle text-danger">{{ $om->estimated_quantity }}
+                                                (Cancelado)</span>
+                                        </div>
+                                        @if($om->notes)
+                                            <div class="small text-muted">{{ $om->notes }}</div>
+                                        @endif
+                                        <div class="extra-small text-muted">
+                                            Cancelado el {{ $om->cancelled_at->format('d/m/Y H:i') }}
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4"
+                            data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
-        @endif
+        </div>
     @endforeach
 
     <style>

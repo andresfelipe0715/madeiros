@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddStageRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Material;
 use App\Models\Order;
 use App\Models\OrderStage;
 use App\Models\Stage;
+use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -14,6 +16,10 @@ use Illuminate\View\View;
 
 class OrderManagementController extends Controller
 {
+    public function __construct(
+        protected InventoryService $inventory
+    ) {}
+
     /**
      * Display a listing of the orders.
      */
@@ -47,12 +53,13 @@ class OrderManagementController extends Controller
     {
         Gate::authorize('edit-orders');
 
-        $order->load(['client', 'orderStages.stage']);
+        $order->load(['client', 'orderStages.stage', 'orderMaterials.material']);
 
         $allStages = Stage::orderBy('default_sequence')->get();
+        $materials = Material::all();
         $finalStageId = Stage::orderBy('default_sequence', 'desc')->value('id');
 
-        return view('orders.edit', compact('order', 'allStages', 'finalStageId'));
+        return view('orders.edit', compact('order', 'allStages', 'finalStageId', 'materials'));
     }
 
     /**
@@ -66,7 +73,21 @@ class OrderManagementController extends Controller
         $data['lleva_herrajeria'] = $request->has('lleva_herrajeria');
         $data['lleva_manual_armado'] = $request->has('lleva_manual_armado');
 
-        $order->update($data);
+        try {
+            DB::transaction(function () use ($order, $data) {
+                $order->update([
+                    'invoice_number' => $data['invoice_number'],
+                    'notes' => $data['notes'] ?? null,
+                    'lleva_herrajeria' => $data['lleva_herrajeria'],
+                    'lleva_manual_armado' => $data['lleva_manual_armado'],
+                ]);
+
+                // Handle Material Adjustments
+                $this->inventory->adjust($order, $data['materials']);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
 
         return redirect()->route('orders.index')
             ->with('success', 'Orden actualizada exitosamente.');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Client;
+use App\Models\Material;
 use App\Models\Order;
 use App\Models\Role;
 use App\Models\RolePermission;
@@ -29,6 +30,7 @@ beforeEach(function () {
 
     $this->client = Client::factory()->create();
     $this->stage = Stage::create(['name' => 'Corte', 'default_sequence' => 1]);
+    $this->material = Material::create(['name' => 'Wood', 'stock_quantity' => 100]);
 });
 
 it('can create an order with hardware and manual fields', function () {
@@ -37,10 +39,12 @@ it('can create an order with hardware and manual fields', function () {
     $response = post(route('orders.store'), [
         'client_id' => $this->client->id,
         'invoice_number' => 'TEST-123',
-        'material' => 'Wood',
         'lleva_herrajeria' => '1',
         'lleva_manual_armado' => '1',
         'stages' => [$this->stage->id],
+        'materials' => [
+            ['material_id' => $this->material->id, 'estimated_quantity' => 1],
+        ],
     ]);
 
     $response->assertRedirect(route('orders.index'));
@@ -56,7 +60,6 @@ it('can update an order and uncheck hardware and manual fields', function () {
     $order = Order::create([
         'client_id' => $this->client->id,
         'invoice_number' => 'TEST-123',
-        'material' => 'Wood',
         'lleva_herrajeria' => true,
         'lleva_manual_armado' => true,
         'created_by' => $this->user->id,
@@ -65,9 +68,11 @@ it('can update an order and uncheck hardware and manual fields', function () {
     // Update with checkboxes missing (which happens when unchecked in HTML)
     $response = put(route('orders.update', $order), [
         'invoice_number' => 'TEST-123-MOD',
-        'material' => 'Wood Modified',
         // 'lleva_herrajeria' is missing
         // 'lleva_manual_armado' is missing
+        'materials' => [
+            ['material_id' => $this->material->id, 'estimated_quantity' => 1],
+        ],
     ]);
 
     $response->assertRedirect(route('orders.index'));
@@ -81,13 +86,17 @@ it('can update an order and uncheck hardware and manual fields', function () {
 it('shows the correct values in the orders list', function () {
     actingAs($this->user);
 
-    Order::create([
+    $order = Order::create([
         'client_id' => $this->client->id,
         'invoice_number' => 'TEST-123',
-        'material' => 'Wood',
         'lleva_herrajeria' => true,
         'lleva_manual_armado' => false,
         'created_by' => $this->user->id,
+    ]);
+
+    $order->orderMaterials()->create([
+        'material_id' => $this->material->id,
+        'estimated_quantity' => 1,
     ]);
 
     $response = $this->get(route('orders.index'));

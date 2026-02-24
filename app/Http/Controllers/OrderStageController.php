@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrderStage;
-use App\Services\StageAuthorizationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +10,8 @@ use Illuminate\Support\Facades\DB;
 class OrderStageController extends Controller
 {
     public function __construct(
-        protected StageAuthorizationService $authService
+        protected \App\Services\StageAuthorizationService $authService,
+        protected \App\Services\InventoryService $inventory
     ) {}
 
     public function start(OrderStage $orderStage)
@@ -95,6 +95,9 @@ class OrderStageController extends Controller
                     'delivered_at' => now(),
                     'delivered_by' => Auth::id(),
                 ]);
+
+                // Consume materials
+                $this->inventory->consume($order);
             }
         });
 

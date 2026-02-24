@@ -47,14 +47,61 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-4">
-                                    <label for="material" class="form-label fw-bold">Material</label>
-                                    <div class="input-group custom-input-group">
-                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-box-seam-fill"></i></span>
-                                        <input type="text" name="material" id="material" class="form-control border-start-0 @error('material') is-invalid @enderror" value="{{ old('material') }}" required placeholder="e.g. Melamina Roble 18mm" maxlength="255">
+                                <div class="mb-4" x-data="{ materials: {{ json_encode(old('materials', [['material_id' => '', 'estimated_quantity' => '', 'notes' => '']])) }} }">
+                                    <label class="form-label fw-bold">Reserva de Inventario</label>
+                                    <p class="text-muted small mb-2">Seleccione los materiales y añada notas opcionales (ej: color, espesor, corte).</p>
+                                    
+                                    <div class="bg-light p-3 rounded-3 border">
+                                        <template x-for="(material, index) in materials" :key="index">
+                                            <div class="mb-3 pb-3 border-bottom last-child-no-border">
+                                                <div class="row g-2 mb-2 align-items-center">
+                                                    <div class="col-md-8 col-7">
+                                                        <select :name="`materials[${index}][material_id]`" x-model="material.material_id" class="form-select border-0 shadow-sm" required>
+                                                            <option value="">Seleccione material...</option>
+                                                            @foreach($materials as $m)
+                                                                <option value="{{ $m->id }}">{{ $m->name }} (Disp: {{ $m->availableQuantity() }})</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3 col-4">
+                                                        <div class="input-group input-group-sm shadow-sm">
+                                                            <input type="number" :name="`materials[${index}][estimated_quantity]`" x-model="material.estimated_quantity" class="form-control border-0" placeholder="Cant." min="0.01" step="0.01" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-1 text-end">
+                                                        <button type="button" @click="if(materials.length > 1) materials.splice(index, 1)" class="btn btn-link text-danger p-0">
+                                                            <i class="bi bi-x-circle-fill"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-2">
+                                                    <div class="col-12">
+                                                        <div class="position-relative">
+                                                            <input type="text" 
+                                                                :name="`materials[${index}][notes]`" 
+                                                                x-model="material.notes" 
+                                                                class="form-control form-control-sm border-0 shadow-sm" 
+                                                                placeholder="Notas: ej. Canto grueso, proveedor alterno..." 
+                                                                maxlength="50">
+                                                            <div class="position-absolute end-0 top-50 translate-middle-y me-2 text-muted x-small" 
+                                                                :class="material.notes.length >= 50 ? 'text-danger fw-bold' : ''"
+                                                                x-text="material.notes.length + '/50'">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <button type="button" @click="materials.push({ material_id: '', estimated_quantity: '', notes: '' })" class="btn btn-sm btn-outline-primary mt-2 rounded-pill">
+                                            <i class="bi bi-plus-lg me-1"></i> Añadir Material
+                                        </button>
                                     </div>
-                                    @error('material')
+                                    @error('materials')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    @error('materials.*')
+                                        <div class="invalid-feedback d-block">Error en los materiales seleccionados.</div>
                                     @enderror
                                 </div>
 
@@ -254,6 +301,12 @@ select:-webkit-autofill {
 
     .form-switch .form-check-input:checked {
         background-position: right center;
+    }
+
+    .last-child-no-border:last-child {
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
     }
      
     </style>

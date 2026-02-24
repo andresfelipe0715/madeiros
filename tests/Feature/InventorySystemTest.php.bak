@@ -1,0 +1,65 @@
+<?php
+
+use App\Models\Material;
+use App\Models\Order;
+use App\Models\User;
+use App\Models\Client;
+use App\Models\Stage;
+use App\Models\Role;
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->role = Role::create(['name' => 'Admin']);
+    RolePermission::create([
+        'role_id' => $this->role->id,
+        'resource_type' => 'orders',
+        'can_create' => true,
+        'can_edit' => true,
+        'can_view' => true,
+    ]);
+    $this->user = User::factory()->create(['role_id' => $this->role->id]);
+});
+
+it('reserves materials on store', function () {
+    $material = Material::factory()->create(['stock_quantity' => 10, 'reserved_quantity' => 0]);
+    $client = Client::factory()->create();
+    $stage = Stage::factory()->create();
+
+    $response = $this->actingAs($this->user)->post(route('orders.store'), [
+        'client_id' => $client->id,
+        'material' => 'Test',
+        'invoice_number' => 'INV-TEST-001',
+        'stages' => [$stage->id],
+        'materials' => [
+            ['material_id' => $material->id, 'estimated_quantity' => 2]
+        ]
+    ]);
+
+    $response->assertRedirect();
+
+    $material->refresh();
+    expect((float) $material->reserved_quantity)->toBe(2.0);
+});
+
+it('fails if stock insufficient', function () {
+    $material = Material::factory()->create(['stock_quantity' => 1, 'reserved_quantity' => 0]);
+    $client = Client::factory()->create();
+    $stage = Stage::factory()->create();
+
+    $response = $this->actingAs($this->user)->post(route('orders.store'), [
+        'client_id' => $client->id,
+        'material' => 'Test',
+        'invoice_number' => 'INV-TEST-002',
+        'stages' => [$stage->id],
+        'materials' => [
+            ['material_id' => $material->id, 'estimated_quantity' => 5]
+        ]
+    ]);
+
+    // Our service throws Exception, which stays as 500 if not handled in Controller
+    $response->assertStatus(500);
+});

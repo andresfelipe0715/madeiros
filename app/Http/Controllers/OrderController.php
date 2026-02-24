@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Client;
+use App\Models\Material;
 use App\Models\Order;
 use App\Models\OrderStage;
 use App\Models\Stage;
+use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +18,10 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        protected InventoryService $inventory
+    ) {}
+
     /**
      * Show the form for creating a new order.
      */
@@ -23,13 +30,14 @@ class OrderController extends Controller
         Gate::authorize('create-orders');
 
         $stages = Stage::orderBy('default_sequence')->get();
+        $materials = Material::all();
 
         $selectedClient = null;
         if (old('client_id')) {
             $selectedClient = Client::find(old('client_id'));
         }
 
-        return view('orders.create', compact('stages', 'selectedClient'));
+        return view('orders.create', compact('stages', 'selectedClient', 'materials'));
     }
 
     /**
@@ -44,13 +52,15 @@ class OrderController extends Controller
         $order = DB::transaction(function () use ($validated, $request) {
             $order = Order::create([
                 'client_id' => $validated['client_id'],
-                'material' => $validated['material'],
                 'lleva_herrajeria' => $request->has('lleva_herrajeria'),
                 'lleva_manual_armado' => $request->has('lleva_manual_armado'),
                 'invoice_number' => $validated['invoice_number'],
                 'notes' => $validated['notes'] ?? null,
                 'created_by' => Auth::id(),
             ]);
+
+            // Handle Material Reservations
+            $this->inventory->reserve($order, $validated['materials']);
 
             // Get selected stages and sort them by default_sequence
             $selectedStages = Stage::whereIn('id', $validated['stages'])
@@ -85,5 +95,42 @@ class OrderController extends Controller
 
         return redirect()->route('orders.index')
             ->with('success', 'Orden creada exitosamente.');
+    }
+
+    /**
+     * Show the form for editing the order.
+     */
+    public function edit(Order $order): View
+    {
+        Gate::authorize('edit-orders');
+
+        $allStages = Stage::orderBy('default_sequence')->get();
+        $materials = Material::all();
+        $finalStageId = Stage::where('is_delivery_stage', true)->value('id');
+
+        return view('orders.edit', compact('order', 'allStages', 'finalStageId', 'materials'));
+    }
+
+    /**
+     * Update the order in storage.
+     */
+    public function update(UpdateOrderRequest $request, Order $order): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        DB::transaction(function () use ($order, $validated, $request) {
+            $order->update([
+                'invoice_number' => $validated['invoice_number'],
+                'notes' => $validated['notes'] ?? null,
+                'lleva_herrajeria' => $request->has('lleva_herrajeria'),
+                'lleva_manual_armado' => $request->has('lleva_manual_armado'),
+            ]);
+
+            // Handle Material Adjustments
+            $this->inventory->adjust($order, $validated['materials']);
+        });
+
+        return redirect()->route('orders.index')
+            ->with('success', 'Orden actualizada exitosamente.');
     }
 }

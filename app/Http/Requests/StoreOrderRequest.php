@@ -18,7 +18,6 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'client_id' => 'required|exists:clients,id',
-            'material' => 'required|string|max:255',
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number',
             'notes' => 'nullable|string|max:300',
             'lleva_herrajeria' => 'boolean',
@@ -26,6 +25,10 @@ class StoreOrderRequest extends FormRequest
             'stages' => 'required|array|min:1',
             'stages.*' => 'exists:stages,id',
             'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB
+            'materials' => 'required|array|min:1',
+            'materials.*.material_id' => 'required|exists:materials,id',
+            'materials.*.estimated_quantity' => 'required|numeric|min:0.01',
+            'materials.*.notes' => 'nullable|string|max:50',
         ];
     }
 
@@ -34,10 +37,10 @@ class StoreOrderRequest extends FormRequest
         return [
             'client_id.required' => 'El cliente es obligatorio.',
             'client_id.exists' => 'El cliente seleccionado no es válido.',
-            'material.required' => 'El material es obligatorio.',
             'stages.required' => 'Debe seleccionar al menos una etapa.',
             'stages.min' => 'Debe seleccionar al menos una etapa.',
             'stages.*.exists' => 'Una de las etapas seleccionadas no es válida.',
+            'materials.*.notes.max' => 'La nota del material no debe exceder los 50 caracteres.',
             'order_file.file' => 'El archivo de la orden debe ser un archivo válido.',
             'order_file.mimes' => 'El archivo de la orden debe ser un PDF.',
             'order_file.max' => 'El archivo de la orden no debe pesar más de 10MB.',

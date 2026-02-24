@@ -12,18 +12,7 @@ class UpdateOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if (! Gate::allows('edit-orders')) {
-            return false;
-        }
-
-        $order = $this->route('order');
-
-        // Block updates if order already has a delivery date
-        if ($order && $order->delivered_at) {
-            return false;
-        }
-
-        return true;
+        return Gate::allows('edit-orders');
     }
 
     /**
@@ -35,10 +24,16 @@ class UpdateOrderRequest extends FormRequest
 
         return [
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number,'.$orderId,
-            'material' => 'required|string|max:255',
             'notes' => 'nullable|string|max:300',
             'lleva_herrajeria' => 'boolean',
             'lleva_manual_armado' => 'boolean',
+            'materials' => 'required|array|min:1',
+            'materials.*.id' => 'nullable|exists:order_materials,id',
+            'materials.*.material_id' => 'required|exists:materials,id',
+            'materials.*.estimated_quantity' => 'required|numeric|min:0.01',
+            'materials.*.actual_quantity' => 'nullable|numeric|min:0',
+            'materials.*.notes' => 'nullable|string|max:50',
+            'materials.*.cancelled' => 'nullable|boolean',
         ];
     }
 }

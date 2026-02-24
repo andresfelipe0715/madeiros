@@ -83,6 +83,18 @@ class Order extends Model
         return $this->hasMany(OrderLog::class);
     }
 
+    public function orderMaterials(): HasMany
+    {
+        return $this->hasMany(OrderMaterial::class);
+    }
+
+    public function materials(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Material::class, 'order_materials')
+            ->withPivot(['id', 'estimated_quantity', 'actual_quantity', 'cancelled_at'])
+            ->withTimestamps();
+    }
+
     public function trackingLinks(): HasMany
     {
         return $this->hasMany(OrderTrackingLink::class);
@@ -104,11 +116,11 @@ class Order extends Model
         }
 
         // Logic for persistent delivery stage when extras are pending
-        $entregaStage = $this->orderStages->first(fn($os) => $os->stage->is_delivery_stage);
+        $entregaStage = $this->orderStages->first(fn ($os) => $os->stage->is_delivery_stage);
         if (
             $entregaStage && $entregaStage->completed_at && (
-                ($this->lleva_herrajeria && !$this->herrajeria_delivered_at) ||
-                ($this->lleva_manual_armado && !$this->manual_armado_delivered_at)
+                ($this->lleva_herrajeria && ! $this->herrajeria_delivered_at) ||
+                ($this->lleva_manual_armado && ! $this->manual_armado_delivered_at)
             )
         ) {
             return $entregaStage->stage->name;

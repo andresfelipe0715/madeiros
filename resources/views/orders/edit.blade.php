@@ -71,17 +71,164 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+<div class="mb-3"
+    x-data="{
+        materials: {{ json_encode(old('materials', $order->orderMaterials->map(fn($om) => [
+            'id' => $om->id,
+            'material_id' => $om->material_id,
+            'material_name' => $om->material->name,
+            'estimated_quantity' => $om->estimated_quantity,
+            'actual_quantity' => $om->actual_quantity,
+            'notes' => $om->notes ?? '',
+            'cancelled' => $om->cancelled_at !== null,
+            'cancelled_at' => $om->cancelled_at ? $om->cancelled_at->format('Y-m-d H:i') : null,
+        ])->toArray())) }}.map(m => ({
+            ...m,
+            cancelled: m.cancelled == 1 || m.cancelled === true || m.cancelled === '1'
+        }))
+    }">
 
-                                <div class="mb-3">
-                                    <label for="material"
-                                        class="form-label text-muted small text-uppercase font-weight-bold">Material</label>
-                                    <input type="text" class="form-control @error('material') is-invalid @enderror"
-                                        id="material" name="material" value="{{ old('material', $order->material) }}"
-                                        required {{ $isDisabled }} maxlength="255">
-                                    @error('material')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <label class="form-label text-muted small text-uppercase font-weight-bold mb-0">
+            Reserva de Materiales
+        </label>
+        <span class="badge bg-secondary rounded-pill"
+            x-text="materials.filter(m => !m.cancelled).length + ' Activos'"></span>
+    </div>
+
+    <!-- ACTIVE MATERIALS -->
+    <div class="bg-light p-3 rounded border mb-3">
+        <h6 class="small fw-bold text-primary mb-3">Materiales Activos</h6>
+
+        <template x-for="(material, index) in materials" :key="index">
+            <template x-if="!material.cancelled">
+                <div class="mb-3 pb-3 border-bottom last-child-no-border">
+                    <div class="row g-2 mb-2 align-items-center">
+                        <input type="hidden" :name="`materials[${index}][id]`" x-model="material.id">
+                        <input type="hidden" :name="`materials[${index}][cancelled]`" value="0">
+
+                        <div class="col-md-6 col-12">
+                            <select :name="`materials[${index}][material_id]`"
+                                x-model="material.material_id"
+                                class="form-select form-select-sm" {{ $isDisabled }}>
+                                <option value="">Seleccionar Material...</option>
+                                @foreach($materials as $m)
+                                    <option value="{{ $m->id }}">
+                                        {{ $m->name }} (Stock: {{ $m->stock_quantity }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 col-8">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0">Cant.</span>
+                                <input type="number"
+                                    :name="`materials[${index}][estimated_quantity]`"
+                                    x-model="material.estimated_quantity"
+                                    class="form-control border-start-0"
+                                    placeholder="Est."
+                                    min="0.01"
+                                    step="0.01"
+                                    {{ $isDisabled }}>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 col-4 text-end">
+                            @if(!$order->delivered_at)
+                                <template x-if="material.id">
+                                    <button type="button"
+                                        @click="if(confirm('¿Cancelar este material? El stock reservado será liberado.')) { material.cancelled = true }"
+                                        class="btn btn-sm btn-outline-danger border-0">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        <span class="small">Cancelar</span>
+                                    </button>
+                                </template>
+                                <template x-if="!material.id">
+                                    <button type="button"
+                                        @click="materials.splice(index, 1)"
+                                        class="btn btn-sm btn-outline-danger border-0">
+                                        <i class="bi bi-trash me-1"></i>
+                                        <span class="small">Quitar</span>
+                                    </button>
+                                </template>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <div class="position-relative">
+                                <input type="text"
+                                    :name="`materials[${index}][notes]`"
+                                    x-model="material.notes"
+                                    class="form-control form-control-sm"
+                                    placeholder="Notas (ej. Color, medidas...)"
+                                    maxlength="50"
+                                    {{ $isDisabled }}>
+                                <div class="position-absolute end-0 top-50 translate-middle-y me-2 text-muted"
+                                    style="font-size: .65rem;"
+                                    x-text="material.notes.length + '/50'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </template>
+
+        @if(!$order->delivered_at)
+        <button type="button"
+            @click="materials.push({ id:null, material_id:'', estimated_quantity:'', notes:'', cancelled:false })"
+            class="btn btn-sm btn-outline-primary mt-2 rounded-pill">
+            <i class="bi bi-plus-lg me-1"></i>
+            Añadir Material
+        </button>
+        @endif
+    </div>
+
+    <!-- CANCELLED MATERIALS -->
+    <template x-if="materials.some(m => m.cancelled)">
+        <div class="p-3 rounded border border-danger-subtle bg-danger-subtle bg-opacity-10 opacity-75">
+            <h6 class="small fw-bold text-danger mb-3">Materiales Cancelados</h6>
+
+            <template x-for="(material, index) in materials" :key="'cancelled-'+index">
+                <template x-if="material.cancelled">
+                    <div class="mb-2 pb-2 border-bottom border-danger-subtle last-child-no-border">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="text-danger small fw-bold"
+                                    x-text="material.material_name || 'Nuevo Material'"></span>
+
+                                <div class="text-muted extra-small">
+                                    Cant: <span x-text="material.estimated_quantity"></span>
+                                    <template x-if="material.notes">
+                                        <span> | <span x-text="material.notes"></span></span>
+                                    </template>
                                 </div>
+
+                                <div class="extra-small text-danger mt-1">
+                                    <i class="bi bi-calendar-x me-1"></i>
+                                    Cancelado <span x-text="material.cancelled_at"></span>
+                                </div>
+                            </div>
+
+                            <input type="hidden" :name="`materials[${index}][id]`" x-model="material.id">
+                            <input type="hidden" :name="`materials[${index}][material_id]`" x-model="material.material_id">
+                            <input type="hidden" :name="`materials[${index}][estimated_quantity]`" x-model="material.estimated_quantity">
+                            <input type="hidden" :name="`materials[${index}][notes]`" x-model="material.notes">
+                            <input type="hidden" :name="`materials[${index}][cancelled]`" value="1">
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </template>
+
+    @error('materials')
+        <div class="text-danger small mt-1">{{ $message }}</div>
+    @enderror
+
+</div>
 
                                 <div class="mb-3">
                                     <label for="notes"
@@ -122,7 +269,7 @@
 
                 <!-- Production Workflow -->
                 <div class="col-md-7 mb-4">
-                    <div class="card shadow-sm h-100">
+                    <div class="card shadow-sm">
                         <div class="card-header bg-white py-3">
                             <h5 class="card-title mb-0">Ruta de Producción (Flujo de Trabajo)</h5>
                         </div>
@@ -207,6 +354,12 @@
 
         .form-switch .form-check-input:checked {
             background-position: right center;
+        }
+
+        .last-child-no-border:last-child {
+            border-bottom: none !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
         }
     </style>
 </x-app-layout>
