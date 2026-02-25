@@ -440,6 +440,7 @@ CREATE TABLE order_materials (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     material_id INT NOT NULL,
+    notes VARCHAR(50) NULL,
     estimated_quantity DECIMAL(12,2) NOT NULL,
     actual_quantity DECIMAL(12,2) NULL,
     cancelled_at TIMESTAMP NULL,

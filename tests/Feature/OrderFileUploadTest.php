@@ -16,12 +16,16 @@ beforeEach(function () {
     $this->user = User::factory()->create(['role_id' => $this->role->id]);
     $this->client = Client::factory()->create();
     $this->stage = Stage::firstOrCreate(['name' => 'Corte'], ['default_sequence' => 10]);
-
     // Ensure permission
     \App\Models\RolePermission::updateOrCreate(
         ['role_id' => $this->role->id, 'resource_type' => 'orders'],
         ['can_create' => true, 'can_view' => true]
     );
+
+    $this->material = \App\Models\Material::factory()->create([
+        'name' => 'Test Material',
+        'stock_quantity' => 100,
+    ]);
 });
 
 it('can upload a PDF file when creating an order', function () {
@@ -32,7 +36,9 @@ it('can upload a PDF file when creating an order', function () {
     $response = $this->post(route('orders.store'), [
         'client_id' => $this->client->id,
         'invoice_number' => 'TEST-PDF-123',
-        'material' => 'Test Material',
+        'materials' => [
+            ['material_id' => $this->material->id, 'estimated_quantity' => 2],
+        ],
         'stages' => [$this->stage->id],
         'order_file' => $file,
     ]);
@@ -70,7 +76,9 @@ it('rejects non-PDF files', function () {
     $response = $this->post(route('orders.store'), [
         'client_id' => $this->client->id,
         'invoice_number' => 'TEST-JPG-123',
-        'material' => 'Test Material',
+        'materials' => [
+            ['material_id' => $this->material->id, 'estimated_quantity' => 2],
+        ],
         'stages' => [$this->stage->id],
         'order_file' => $file,
     ]);
@@ -86,7 +94,9 @@ it('works without a file (optional)', function () {
     $response = $this->post(route('orders.store'), [
         'client_id' => $this->client->id,
         'invoice_number' => 'TEST-NO-FILE',
-        'material' => 'Test Material',
+        'materials' => [
+            ['material_id' => $this->material->id, 'estimated_quantity' => 2],
+        ],
         'stages' => [$this->stage->id],
     ]);
 

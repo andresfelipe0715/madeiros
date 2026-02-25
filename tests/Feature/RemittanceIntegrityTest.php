@@ -1,18 +1,26 @@
 <?php
 
+use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderStage;
-use App\Models\Stage;
-use App\Models\Client;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\Stage;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->role = Role::create(['name' => 'Admin']);
+    \App\Models\RolePermission::create([
+        'role_id' => $this->role->id,
+        'resource_type' => 'orders',
+        'can_view' => true,
+        'can_edit' => true,
+    ]);
+    $this->role->refresh();
     $this->user = User::factory()->create(['role_id' => $this->role->id]);
     $this->client = Client::factory()->create();
 

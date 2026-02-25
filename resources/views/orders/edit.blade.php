@@ -156,6 +156,24 @@
                         </div>
                     </div>
 
+                    @if($order->delivered_at)
+                    <div class="row g-2 mb-2">
+                        <div class="col-12">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-primary text-white border-primary">Consumo Real</span>
+                                <input type="number"
+                                    :name="`materials[${index}][actual_quantity]`"
+                                    x-model="material.actual_quantity"
+                                    class="form-control border-primary"
+                                    placeholder="Consumo Real"
+                                    min="0"
+                                    step="0.01"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="row g-2">
                         <div class="col-12">
                             <div class="position-relative">

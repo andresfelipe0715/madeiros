@@ -75,31 +75,35 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'Este pedido está marcado como pendiente y no puede procesarse.']);
         }
 
-        DB::transaction(function () use ($orderStage) {
-            // 1. Mark current stage as completed
-            $orderStage->update([
-                'completed_at' => now(),
-                'completed_by' => Auth::id(),
-            ]);
-
-            // 2. Load fresh order data to ensure we have the latest state and correct model type
-            $order = \App\Models\Order::find($orderStage->order_id);
-
-            // 3. Determine if this is the last stage and all are completed using Eloquent
-            $maxSequence = $order->orderStages()->max('sequence');
-            $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
-
-            // 4. Update the Order only if current sequence is the max and no stages remain incomplete
-            if ($orderStage->sequence == $maxSequence && ! $hasIncompleteStages) {
-                $order->update([
-                    'delivered_at' => now(),
-                    'delivered_by' => Auth::id(),
+        try {
+            DB::transaction(function () use ($orderStage) {
+                // 1. Mark current stage as completed
+                $orderStage->update([
+                    'completed_at' => now(),
+                    'completed_by' => Auth::id(),
                 ]);
 
-                // Consume materials
-                $this->inventory->consume($order);
-            }
-        });
+                // 2. Load fresh order data to ensure we have the latest state and correct model type
+                $order = \App\Models\Order::find($orderStage->order_id);
+
+                // 3. Determine if this is the last stage and all are completed using Eloquent
+                $maxSequence = $order->orderStages()->max('sequence');
+                $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
+
+                // 4. Update the Order only if current sequence is the max and no stages remain incomplete
+                if ($orderStage->sequence == $maxSequence && ! $hasIncompleteStages) {
+                    $order->update([
+                        'delivered_at' => now(),
+                        'delivered_by' => Auth::id(),
+                    ]);
+
+                    // Consume materials
+                    $this->inventory->consume($order);
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('status', 'Etapa finalizada.');
     }
@@ -141,47 +145,60 @@ class OrderStageController extends Controller
             return back()->withErrors($e->errors())->withInput()->with('failed_remit_id', $orderStage->id);
         }
 
-        return DB::transaction(function () use ($request, $orderStage) {
-            $order = $orderStage->order;
-            $targetStageId = $request->target_stage_id;
+        try {
+            return DB::transaction(function () use ($request, $orderStage) {
+                $order = $orderStage->order;
+                $targetStageId = $request->target_stage_id;
 
-            // Integrity Check: target_stage_id must belong to the same order and have a lower sequence
-            $targetStage = $order->orderStages()
-                ->where('stage_id', $targetStageId)
-                ->first();
+                // Integrity Check: target_stage_id must belong to the same order and have a lower sequence
+                $targetStage = $order->orderStages()
+                    ->where('stage_id', $targetStageId)
+                    ->first();
 
-            if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
-                abort(400, 'Invalid remittance target.');
-            }
+                if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
+                    abort(400, 'Invalid remittance target.');
+                }
 
-            $targetSequence = $targetStage->sequence;
-            $reason = str_replace(['|', ':'], [' ', ' '], $request->notes); // Sanitize to avoid format breakage
+                $targetSequence = $targetStage->sequence;
+                $reason = str_replace(['|', ':'], [' ', ' '], $request->notes); // Sanitize to avoid format breakage
 
-            // 1. Create the structured log entry
-            \App\Models\OrderLog::create([
-                'order_id' => $order->id,
-                'user_id' => Auth::id(),
-                'action' => "remit|from:{$orderStage->stage_id}|to:{$targetStageId}|reason:{$reason}",
-            ]);
-
-            // 2. Clear delivery status if it was delivered
-            $order->update([
-                'delivered_at' => null,
-                'delivered_by' => null,
-            ]);
-
-            // 3. Reset execution data of all stages starting from target back to current
-            $order->orderStages()
-                ->where('sequence', '>=', $targetSequence)
-                ->update([
-                    'started_at' => null,
-                    'completed_at' => null,
-                    'started_by' => null,
-                    'completed_by' => null,
+                // 1. Create the structured log entry
+                \App\Models\OrderLog::create([
+                    'order_id' => $order->id,
+                    'user_id' => Auth::id(),
+                    'action' => "remit|from:{$orderStage->stage_id}|to:{$targetStageId}|reason:{$reason}",
                 ]);
 
-            return back()->with('status', 'Pedido remitido.');
-        });
+                // 1.5 Handle Delivery Reversal if applicable
+                if ($order->delivered_at) {
+                    $this->inventory->reverseConsumption($order);
+                }
+
+                // 2. Clear ALL delivery status fields
+                $order->update([
+                    'delivered_at' => null,
+                    'delivered_by' => null,
+                    'herrajeria_delivered_at' => null,
+                    'herrajeria_delivered_by' => null,
+                    'manual_armado_delivered_at' => null,
+                    'manual_armado_delivered_by' => null,
+                ]);
+
+                // 3. Reset execution data of all stages starting from target back to current
+                $order->orderStages()
+                    ->where('sequence', '>=', $targetSequence)
+                    ->update([
+                        'started_at' => null,
+                        'completed_at' => null,
+                        'started_by' => null,
+                        'completed_by' => null,
+                    ]);
+
+                return back()->with('status', 'Pedido remitido.');
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     public function updateNotes(Request $request, OrderStage $orderStage)

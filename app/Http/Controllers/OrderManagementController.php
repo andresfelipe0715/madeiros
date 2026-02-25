@@ -68,22 +68,29 @@ class OrderManagementController extends Controller
     public function update(UpdateOrderRequest $request, Order $order): RedirectResponse
     {
         Gate::authorize('edit-orders');
-
-        $data = $request->validated();
-        $data['lleva_herrajeria'] = $request->has('lleva_herrajeria');
-        $data['lleva_manual_armado'] = $request->has('lleva_manual_armado');
+        $validated = $request->validated();
 
         try {
-            DB::transaction(function () use ($order, $data) {
-                $order->update([
-                    'invoice_number' => $data['invoice_number'],
-                    'notes' => $data['notes'] ?? null,
-                    'lleva_herrajeria' => $data['lleva_herrajeria'],
-                    'lleva_manual_armado' => $data['lleva_manual_armado'],
-                ]);
+            DB::transaction(function () use ($order, $validated, $request) {
+                if ($order->delivered_at) {
+                    // POST-DELIVERY: Only actual_quantity corrections allowed
+                    foreach ($validated['materials'] as $data) {
+                        $om = $order->orderMaterials()->findOrFail($data['id']);
+                        if (array_key_exists('actual_quantity', $data) && (float) $data['actual_quantity'] != (float) $om->actual_quantity) {
+                            $this->inventory->correctActual($om, (float) $data['actual_quantity']);
+                        }
+                    }
+                } else {
+                    // BEFORE DELIVERY: Standard update
+                    $order->update([
+                        'invoice_number' => $validated['invoice_number'],
+                        'notes' => $validated['notes'] ?? null,
+                        'lleva_herrajeria' => $request->has('lleva_herrajeria'),
+                        'lleva_manual_armado' => $request->has('lleva_manual_armado'),
+                    ]);
 
-                // Handle Material Adjustments
-                $this->inventory->adjust($order, $data['materials']);
+                    $this->inventory->adjust($order, $validated['materials']);
+                }
             });
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();

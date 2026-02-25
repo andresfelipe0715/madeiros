@@ -71,7 +71,7 @@ class InventoryService
                     // Logic Transitions:
 
                     // 1. WAS ACTIVE -> NOW CANCELLED
-                    if (!$om->cancelled_at && $cancelled) {
+                    if (! $om->cancelled_at && $cancelled) {
                         $material->decrement('reserved_quantity', $om->estimated_quantity);
                         $om->update(['cancelled_at' => now(), 'notes' => $data['notes'] ?? $om->notes]);
 
@@ -82,7 +82,7 @@ class InventoryService
                         ]);
                     }
                     // 2. WAS CANCELLED -> NOW ACTIVE (Restoration)
-                    elseif ($om->cancelled_at && !$cancelled) {
+                    elseif ($om->cancelled_at && ! $cancelled) {
                         if ($material->availableQuantity() < $newEstimated) {
                             throw new Exception("Stock insuficiente para restaurar: {$material->name}");
                         }
@@ -181,28 +181,92 @@ class InventoryService
         });
     }
 
-    /**
-     * Convert reservations into final consumption upon delivery.
-     * Rule: stock -= actual (or estimated if actual is null), reserved -= estimated.
-     */
     public function consume(Order $order): void
     {
         DB::transaction(function () use ($order) {
             $activeMaterials = $order->orderMaterials()->active()->get();
 
             foreach ($activeMaterials as $om) {
-                $material = $om->material()->lockForUpdate()->first();
-                $consumption = $om->actual_quantity ?? $om->estimated_quantity;
+                $material = $om->material()->first();
 
-                // stock_quantity -= consumption
-                // reserved_quantity -= estimated_quantity
-                $material->decrement('stock_quantity', $consumption);
+                // Step 1 - Ensure actual usage exists
+                if ($om->actual_quantity === null) {
+                    $om->update(['actual_quantity' => $om->estimated_quantity]);
+                }
+
+                $finalActual = $om->fresh()->actual_quantity;
+
+                // Step 2 & 3 - Release reservation & Deduct stock
+                // materials.reserved_quantity -= estimated_quantity
+                // materials.stock_quantity -= actual_quantity
+
+                if ($material->stock_quantity < $finalActual) {
+                    throw new Exception("Stock insuficiente para: {$material->name}. No se puede finalizar la entrega.");
+                }
+
                 $material->decrement('reserved_quantity', $om->estimated_quantity);
+                $material->decrement('stock_quantity', $finalActual);
 
                 \App\Models\OrderLog::create([
                     'order_id' => $order->id,
                     'user_id' => \Illuminate\Support\Facades\Auth::id(),
-                    'action' => "inventory|consume|material:{$material->name}|qty_estimated:{$om->estimated_quantity}|qty_actual:{$consumption}",
+                    'action' => "inventory|consume|material:{$material->name}|qty_estimated:{$om->estimated_quantity}|qty_actual:{$finalActual}",
+                ]);
+            }
+        });
+    }
+
+    /**
+     * Correct actual consumption after delivery.
+     * Difference = new - old. Adjust stock based on difference.
+     */
+    public function correctActual(\App\Models\OrderMaterial $om, float $newActual): void
+    {
+        DB::transaction(function () use ($om, $newActual) {
+            $material = $om->material()->first();
+            $oldActual = (float) $om->actual_quantity;
+            $diff = $newActual - $oldActual;
+
+            if ($diff > 0 && $material->stock_quantity < $diff) {
+                throw new Exception("Stock insuficiente para corregir consumo: {$material->name}");
+            }
+
+            $material->decrement('stock_quantity', $diff);
+            $om->update(['actual_quantity' => $newActual]);
+
+            \App\Models\OrderLog::create([
+                'order_id' => $om->order_id,
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'action' => "inventory|correction|material:{$material->name}|old:{$oldActual}|new:{$newActual}|diff:{$diff}",
+            ]);
+        });
+    }
+
+    /**
+     * Undo consumption and restore reservations when an order is remitted/reopened.
+     */
+    public function reverseConsumption(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $activeMaterials = $order->orderMaterials()->active()->get();
+
+            foreach ($activeMaterials as $om) {
+                $material = $om->material()->first();
+
+                $actualUsed = (float) $om->actual_quantity;
+                $estimated = (float) $om->estimated_quantity;
+
+                // Restore stock and re-reserve
+                $material->increment('stock_quantity', $actualUsed);
+                $material->increment('reserved_quantity', $estimated);
+
+                // Reset actual_quantity for the reopened order
+                $om->update(['actual_quantity' => null]);
+
+                \App\Models\OrderLog::create([
+                    'order_id' => $order->id,
+                    'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                    'action' => "inventory|reverse_consumption|material:{$material->name}|restored_stock:{$actualUsed}|re_reserved:{$estimated}",
                 ]);
             }
         });

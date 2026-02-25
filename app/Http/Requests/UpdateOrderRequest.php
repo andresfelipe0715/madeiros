@@ -20,7 +20,17 @@ class UpdateOrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        $orderId = $this->route('order')->id ?? $this->order;
+        $order = $this->route('order');
+        $orderId = is_object($order) ? $order->id : $order;
+        $isDelivered = is_object($order) ? $order->delivered_at : \App\Models\Order::where('id', $order)->whereNotNull('delivered_at')->exists();
+
+        if ($isDelivered) {
+            return [
+                'materials' => 'required|array|min:1',
+                'materials.*.id' => 'required|exists:order_materials,id',
+                'materials.*.actual_quantity' => 'required|numeric|min:0',
+            ];
+        }
 
         return [
             'invoice_number' => 'required|string|max:50|unique:orders,invoice_number,'.$orderId,
