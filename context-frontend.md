@@ -1,260 +1,72 @@
-# Frontend Context – Madeiros Project
+# Frontend Context
 
-This file stores all frontend-specific rules, modules, and role-based behaviors for the production tracking app.
+## Architecture Overview
+The frontend is a server-rendered application using **Laravel Blade**, **Bootstrap 5**, and **Alpine.js** for client-side interactivity.
 
----
-
-## Module: Corte
-**Role:** Empleado de corte
-
-**Orders shown:**  
-- All orders that require Corte.
-
-**Table columns:**  
-- ID  
-- Nombre de cliente  
-- Tipo de Material  
-- Archivo de la Orden (PDF, read-only)
-- Archivo máquina (TBD)  
-- Fecha envío  
-- Estado de proyecto (e.g., Pendiente para corte, En corte)  
-- Tiempo de corte  
-- Observaciones de corte  
-- Observaciones generales  
-- Acciones
-
-**Actions:**  
-- Iniciar  
-- Pausar  
-- Finalizar (sends the order to the next stage)
-
-**Special rules:**  
-- Once an order is finished in this stage, it moves to the next stage in the workflow.  
-- The current stage no longer shows this order; the next stage sees it as the next up.
+### Key Technologies
+- **Bootstrap 5 & Icons**: Core layout and UI elements.
+- **Alpine.js**: Manages dynamic UI states (modals, material adjustment forms, file visibility).
+- **TomSelect**: Used for searchable material/client dropdowns.
+- **Debounced Search**: Stage modules use debounced inputs to filter orders without full page reloads.
 
 ---
 
-## Module: Enchape
-**Role:** Empleado de enchape
+## Core Components
 
-**Orders shown:**  
-- All orders that require Enchape and have completed the previous stage (Corte).
+### Modular Stage Table (`partials/stage-table.blade.php`)
+This is the primary component for all production stage modules.
+- **Stateful Status**: Uses `isNext` pulsing badges to highlight the next order in the queue.
+- **Dynamic Actions**: Action buttons (Start, Pause, Finish) are rendered conditionally based on:
+    - User role stage access.
+    - Global resource permissions.
+    - Order sequence position.
+    - Queue priority (`StageAuthorizationService`).
+- **Pervasive Modals**: 
+    - Material detail modals.
+    - Notes management.
+    - "Mark as Pending" forms with reason tracking.
 
-**Table columns:**  
-- ID  
-- Nombre de cliente  
-- Tipo de Material  
-Archivo de la Orden (PDF, read-only if exists)
-- Fecha envío  
-- Estado de proyecto (e.g., Listo para Enchape, Enchapando)  
-- Observaciones Enchape  
-- Observaciones generales  
-- Acciones  
-- Remitir a (stage before this one)
-
-**Actions:**  
-- Iniciar  
-- Pausar  
-- Finalizar (sends the order to the next stage)
-
-**Special rules:**  
-- Same as Corte: finished orders move forward, current stage no longer sees it.
+### Material Management Form (`orders/edit.blade.php`)
+Managed via **Alpine.js** to handle complex material state:
+- **Differential Tracking**: Tracks changes between estimated and actual stock usage.
+- **Independent Cancellation**: Supports cancelling individual items within a material list.
+- **Real-time Validation**: Enforces note character limits (50 chars for materials, 300 for order) and positive quantities.
 
 ---
 
-## Module: Servicios Especiales
-**Role:** Empleado de servicios especiales
+## Visibility & Permissions Layer
+Access control is enforced at both the backend (Gates) and frontend (VisibilityService).
 
-**Orders shown:**  
-- All orders that require Servicios Especiales and have completed prior required stages.
+### VisibilityService
+Toggles UI components based on `role_visibility_permissions`:
+- `can_view_files`: Global toggle for the files column.
+- `can_view_order_file`: Specific toggle for the primary order PDF.
+- `can_view_machine_file`: Specific toggle for technical stage files.
 
-**Table columns:**  
-- ID  
-- Nombre de cliente  
-- Tipo de Material  
-- Fecha envío  
-- Estado de proyecto (e.g., Listo para Servicios Especiales, En proceso)  
-Archivo de la Orden (PDF, read-only if exists) 
-- Observaciones Servicios Especiales  
-- Observaciones generales  
-- Acciones  
-- Remitir a (stage before this one)
-
-**Actions:**  
-- Iniciar  
-- Pausar  
-- Finalizar (sends the order to the next stage)
-
-**Special rules:**  
-- Finished orders move forward; current stage no longer sees it.
+### Interactive Rules
+- **Delivery Lock**: Material adjustments are disabled once `delivered_at` is set, unless the user has `orders.edit` permission for corrections.
+- **Role-Based Menus**: Sidebar and top-bar links are generated based on `role_permissions`.
 
 ---
 
-## Module: Revision
-**Role:** Empleado de revisión
+## Modules & Views
 
-**Orders shown:**  
-- All orders that have passed the required stages for that order.
+### Stage Modules (Corte, Enchape, etc.)
+- **Role Association**: Each module is accessible only to users whose role is linked to that stage in `role_stages`.
+- **Columns**: ID, Client, Materials (estimated), Status, Actions.
 
-**Table columns:**  
-- ID  
-- Nombre de cliente  
-- Tipo de Material  
--Archivo de la Orden (PDF, read-only if exists)
-- Fecha envío  
-- Estado de proyecto (e.g., Listo para Revisión, En revisión)  
-- Observaciones Enchape  
-- Observaciones generales  
-- Acciones  
-- Remitir a (stage before this one)
+### Order Management (`orders.index`)
+- **Global View**: Authorized users can see the entire production pipeline.
+- **Current Stage Logic**: Displays "Entregada" if all stages are finished, or the name of the active stage.
 
-**Actions:**  
-- Iniciar  
-- Pausar  
-- Finalizar (sends the order to the next stage)
+### Client Management
+- Accessible only to roles with `clients` resource permission.
+- Unified search by Document or Name.
 
-**Special rules:**  
-- Finished orders move forward; current stage no longer sees it.
-
----
-## Module: Orders List
-**Role:** Admin (or any other role authorized to manage orders, e.g., Secretaria)
-
-**Orders shown:**  
-* Users with these roles can see **all orders**, regardless of which user created them.
-
-**Table columns:**  
-* ID  
-* Nombre de cliente  
-* Material  
-* Current Stage (next stage to act on, or “Completed” if delivered)  
-* Created At  
-* Actions (Edit, Add Stage, Remove Stage)
-
-**Actions:**  
-* **Edit:** Authorized users can **only update** the following fields:  
-  - Número de factura/pedido (must remain unique)  
-  - Material  
-  - Notas especiales  
-  - Ruta de producción (the stages assigned to the order)  
-* **Add Stage:** Can only add stages **after the current stage** of the order.  
-* **Remove Stage:** Can only remove stages **not yet started** (`started_at` is null).  
-
-**Special rules:**  
-* After creating a new order, redirect to this Orders List view instead of going to the first stage.  
-* Stage workflow integrity must be maintained.  
-* Only users with roles authorized to manage orders can access this module.  
-* Invoice numbers (`Número de factura/pedido`) must be unique across all orders.  
-* Use `/orders/create` (`create.blade.php`) as a reference for how to structure the update/edit form.
----
-
-## Module: Entrega
-**Role:** Empleado de entrega
-
-**Orders shown:**  
-- Orders that have completed Revision.
-
-**Table columns:**  
-- ID  
-- Nombre de cliente  
-- Tipo de Material  
-- Fecha envío  
-- Estado de proyecto (e.g., Listo para entrega)  
--Archivo de la Orden (PDF, read-only if exists)
-- Observaciones generales  
-- Acciones
-
-**Actions:**  
-- Iniciar  
-- Pausar  
-- Finalizar (marks order as delivered, sets `delivered_at` and `delivered_by`)
-
-**Special rules:**  
-- Finished orders are marked as delivered; current stage no longer shows it.  
-- Users cannot interact with production stages; only delivery actions are allowed.
-
----
-## Module: Clients
-**Role:** Admin (or any future role authorized via Gate)
-
-**Clients shown:**  
-- Only users authorized with `view-clients` can see the list.
-- Currently, only Admin can view clients, but the system should allow extending to other roles later.
-
-**Table columns:**  
-- ID  
-- Nombre  
-- Documento  
-- Teléfono  
-- Fecha de creación  
-
-**Actions:**  
-- **Create Client:** Only visible to users authorized with `create-clients`.  
-- **Update Client:** Only visible to users authorized with `edit-clients`.  
-- **No Delete:** Clients cannot be deleted.  
-
-**Special rules:**  
-- Admin can create and update clients; other roles cannot.  
-- Clients are permanent and cannot be removed.  
-- Created clients can immediately be assigned to orders when creating or editing an order.  
-- Frontend buttons or links for creating clients should respect Gate permissions.  
-- Access control is entirely managed via Laravel Gates:
-  - `view-clients` → can see the Clients list
-  - `create-clients` → can create new clients
-  - `edit-clients` → can update existing clients
-- No roles are hardcoded; new roles can be granted permissions simply by assigning these Gate abilities.
-- Frontend buttons and links must respect these Gate permissions, so users without access do not see or interact with forbidden actions.
----
-## Notes on Role-Stage Access
-- Each role can access one or more stages as defined in the `role_stages` table.  
-- Default workflow: Corte → Enchape → Servicios Especiales → Revision → Entrega  
-- Orders can skip stages if configured at creation.  
-- Admin always has access to all stages.  
-- Each module only shows orders for stages the user has permission to act on.  
-- Actions available per module: Start, Pause, Finish, Add Notes (except Entrega, which only finishes/delivers).  
--  “Remitir a” sends the order back to the immediately previous completed stage and resets the current stage timestamps.
----
-
-
-## Module: Order Creation
-**Role:** Admin (or any role with `can_create` on orders)
-
-**Route:**
-- `GET /orders/create`
-- `POST /orders`
-
-**Form fields:**
-- Cliente
-- Número de factura/pedido (unique)
-- Material
-- Notas especiales
-- Ruta de producción (stages selection)
-- **Archivo de la Orden (PDF, optional, order-level)**
-
-**Archivo de la Orden rules:**
-- Optional
-- Single file input
-- PDF only
-- Uploaded at order creation time
-- Stored in external storage (Google Drive)
-- Database stores public file URL only
-- Creates exactly ONE row in `order_files`
-- Uses a dedicated `file_types` value (e.g. `archivo_orden`)
-
-**Hard constraints:**
-- One input = one file
-- Multi-file inputs are forbidden
-- File cannot be replaced or deleted in v1
-- Stages cannot upload or modify files
-
-**Visibility:**
-- Read-only
-- Visible in all stage modules as reference material
 ---
 
 ## Build Configuration
+- **Sass Policy**: Suppressed deprecation warnings for modern Bootstrap 5 builds.
+- **Vite/Mix**: Standard Laravel bundling for JS/CSS assets.
 
-**Sass Deprecations**
-- We have explicitly silenced Sass deprecation warnings in `vite.config.js` to handle Bootstrap 5's legacy Sass usage.
-- Silenced warnings: `import`, `if-function`, `global-builtin`, `color-functions`.
-- This ensures clean build output without noise from `node_modules`.
+For database schema and backend logic, see CONTEXT.md.

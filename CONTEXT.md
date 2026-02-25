@@ -18,436 +18,269 @@ Constraints:
 ## Tech Stack
 
 Backend:
-- Laravel (PHP)
-- MySQL / PostgreSQL compatible schema
+- Laravel 12 (PHP 8.2)
+- SQLite (Development) / MySQL / PostgreSQL compatible schema
 - Bcrypt hashing for authentication
 
 Frontend:
-- Server-rendered views (no SPA requirement)
-- Simple role-based UI
+- Server-rendered views (Blade)
+- Bootstrap 5 + Vanilla CSS
+- Alpine.js for interactive state (e.g., Material Adjustments)
+- TomSelect for searchable dropdowns
 
 Storage:
-- Local storage in Laravel `storage/app/orders/` (or `public/orders/` if you want public access)
-- Database stores relative file paths only (e.g., `orders/12345.pdf`)
+- Local storage for order files
+- Database stores relative file paths or public URLs depending on the driver
 
 Auth:
 - Staff users authenticate via password
-- Clients do NOT have accounts
-- Clients access order status via expiring tokenized link
+- Role-based access control managed via lookup tables and Laravel Gates
+- Clients access order status via expiring tokenized links
 
 ---
 
 ## Core Concepts
 
-### Users
-- Staff only
-- Each user has ONE role
-- Users can be deactivated
-- Passwords are stored as bcrypt hashes
-
-Roles are stored in a lookup table, not enums.
-
----
+### Users & Roles
+- Staff only; each user has ONE role.
+- Roles and Users are soft-managed via lookup tables.
+- Permissions are granular:
+  - `role_stages`: Determines which stages a user can start/finish.
+  - `role_permissions`: Controls access to resources (orders, clients, performance).
+  - `role_visibility_permissions`: Toggles UI elements like file view buttons.
 
 ### Orders
-- An order represents one delivery / job
-- Each order belongs to a client
-- Orders do NOT have a fixed workflow
-- Projects may include extras: Hardware (herrajería) and Assembly Manual
-- Delivery of the main product (furniture) and extras happen independently
-- System tracks delivery traceability (timestamp and user) for each component separately
+- An order represents one job/delivery.
+- Belongs to a client and is associated with multiple materials.
+- **Workflow Persistence**: Orders with "Extras" (Herrajería/Manual) stay in the Entrega module until ALL components are delivered.
 
 ---
 
-### Stages
-- Stages define possible process steps (e.g. corte, enchape, revision)
-- Stages are static lookup data
-- Each order selects which stages it will go through
-- **Control Flags**:
-    - `can_remit`: Controls if the "Remitir" button appears for this stage.
-    - `is_delivery_stage`: Identifies stages that handle final furniture/hardware delivery.
+### Workflow Engine (Order Stages)
+
+- **Linear & Custom**: Each order has its own sequence of stages.
+- **Resequencing**: Adding/Removing stages triggers dynamic sequence shifting to maintain a gap-less 1-N order.
+- **Integrity Rule**: New stages cannot be inserted BEFORE a stage that has already been completed.
+- **Status Lifecycle**:
+  - Not started (started_at IS NULL)
+  - In progress (started_at IS NOT NULL)
+  - Completed (completed_at IS NOT NULL)
+  - **Pendiente (Blocked)**: Marked by Admin with a reason; blocks Start/Finish actions.
 
 ---
 
-### Role Stage Access
-
-- Roles define what stages a user is allowed to work on
-- A role may be allowed to work on multiple stages
-- A stage may be worked on by multiple roles
-- This allows temporary or permanent overlap between roles when understaffed
-- Authorization is data-driven, not hardcoded
----
-### Order Stages (Workflow Engine)
-
-This is the heart of the system.
-
-- Each order has its own set of stages
-- Stages are linear per order
-- A stage can be:
-  - Not started
-  - In progress
-  - Completed
-  - **Pendiente (Skipped)**: Temporarily blocked (skip from queue, traceability reason required).
-
-Tracked fields (Pendiente):
-- is_pending
-- pending_reason (max 250)
-- pending_marked_by
-- pending_marked_at
-
-Tracked fields:
-- started_at
-- completed_at
-- started_by
-- completed_by
-
-Users must click:
-- "Start" to begin a stage
-- "Finish" to complete a stage
-
-Duration is calculated from timestamps.
+### Inventory & Materials
+- **Reservation System**: Stock is reserved (`reserved_quantity`) upon order creation.
+- **Differential Adjustment**: Editing an order's materials adjusts the `reserved_quantity` based on the difference (NEW - OLD).
+- **Consumption Lifecycle**: 
+  - On final stage completion, reserved quantity is released, and `stock_quantity` is deducted.
+  - **Post-Delivery Correction**: Authorized users can update `actual_quantity` after delivery, triggering stock reconciliation.
 
 ---
 
-## Order File (Archivo de la Orden)
-
-There is exactly ONE canonical file associated with an order in v1.
-
-**Ownership and lifecycle**
-- The file belongs to the ORDER, not to any stage
-- It is uploaded ONLY at order creation
-- It never changes during production stages
-
-**Upload rules**
-- Single file input
-- PDF only
-- Optional
-- Uploaded at `/orders/create`
-- Stored in local storage (`storage/app/public/order/` or `public/order/`)
-- Database stores relative path only (e.g., `order/archivo_orden_123.pdf`)
-- Creates exactly ONE row in `order_files`
-- Uses `file_types = archivo_orden`
-
-**Hard prohibitions (all versions)**
-- Stages MUST NOT upload files
-- Stages MUST NOT replace files
-- Stages MUST NOT delete files
-- Multi-file inputs are forbidden
-- Multi-select inputs are forbidden
-
-**Visibility**
-- Read-only
-- Visible in all stage modules as reference material
-- If no file exists, nothing is shown
-
-**Out of scope (v1)**
-- File replacement
-- File deletion
-- Multiple order-level files
-
-**Extending files in future versions**
-- Supporting additional order-level files requires:
-  - Creating a new `file_types` row
-  - Adding exactly ONE new single-file input to `/orders/create`
-- Each file type maps to one input and one `order_files` row
-- No file type may accept multiple files
-- No stage may introduce new file inputs
+### Traceability (Order Logs)
+- Logs all critical actions (Start, Finish, Remit, Inventory Adjustments).
+- **Structured Action Grammar**:
+  - `inventory|reserve|material:X|qty:Y`
+  - `remit|from:ID|to:ID|reason:TEXT`
+  - `inventory|consume|material:X|qty_est:Y|qty_act:Z`
 
 ---
-
-### Order Logs
-
-- Used for auditing and traceability
-- Logs important actions only
-- Not used as the primary source of state
-
----
-
-### Client Tracking Links
-
-- Generated ONLY after the final stage (revision) is completed
-- Token-based, no login
-- Expiring access
-- Read-only view
-
-Each link:
-- Belongs to one order
-- Has an expiration date
-- Can be regenerated if needed
-
----
-
-### Delivery Workflow
-
-- **Main Delivery**: Marking the final stage as "Entrega del mueble realizada" tracks when the product leaves the factory.
-- **Independent Extras**: Hardware and manuals can be marked as delivered independently from the main product.
-- **Stage Persistence**: An order remains visible in the "Entrega" module until ALL required components (Furniture, Hardware, and Manual) have been delivered. It only disappears from the production queue when no required delivery remains pending.
-- **Traceability**: Each delivery component (Furniture, Hardware, Manual) stores its own `delivered_at` and `delivered_by` data.
-- **Operational Flexibility**: Main delivery is NOT blocked if extras are still pending.
-- **Conditional UI**: Buttons for extras delivery only appear if the order specifically requires them.
-
----
-
-## Database Design Principles
-
-- No ENUMs
-- Lookup tables for roles, stages, and file types
-- Clear separation of concerns
-- Foreign keys for integrity
-- Portability across SQL engines
-
----
-
-## Security Rules
-
-- Staff can only interact with stages allowed for their role
-- Admin can see everything
-- Clients cannot modify anything
-- Tracking tokens must expire
-
----
-
-## Non-Goals
-
-- No client accounts
-- No password recovery system for clients
-- No real-time notifications
-- No complex permission matrix
-
----
-
-## Development Philosophy
-
-- Simplicity over cleverness
-- Business rules in application layer
-- Database is a source of truth
-- Build for clarity, not abstraction
-
-
-
-
 
 ## Database Schema (Authoritative)
 
-This project uses a relational SQL database.
-The schema below is the single source of truth.
-The AI must NOT invent tables, columns, enums, or relationships outside of this definition.
+This project uses a relational SQL database. The schema below is the single source of truth. No ENUMs are used; lookup tables are mandatory.
 
-No ENUMs are used. Lookup tables are used instead.
+### Table List
+- `roles`: RBAC groups
+- `users`: Staff accounts
+- `clients`: Order owners
+- `orders`: Core job data
+- `stages`: Global stage definitions
+- `order_stages`: The order-specific workflow
+- `materials`: Global stock tracking
+- `order_materials`: Order-specific material usage (Pivot)
+- `file_types`: Lookup for file categories
+- `order_files`: File metadata and paths
+- `order_logs`: Audit trail
+- `order_tracking_links`: Client access tokens
+- `role_stages`: Process permissions
+- `role_permissions`: Resource permissions
+- `role_visibility_permissions`: UI/Visibility permissions
 
 ---
 
-### Tables Overview
-
-- roles
-- users
-- clients
-- orders
-- stages
-- order_stages
-- file_types
-- order_files
-- order_logs
-- order_tracking_links
-- role_stages
-- role_permissions
-- role_visibility_permissions
----
-
-### Role Permissions
-
-- This table defines which roles are allowed to **view, create, or edit** specific resources.
-- Resources currently include: `orders`, `clients`, `performance`.
-- It is separate from `role_stages`, which controls stage access.
-- Columns:
-  - `role_id` → links to `roles` table
-  - `resource_type` → string identifying the resource (e.g., 'orders', 'clients', 'performance')
-  - `can_view` → boolean permission to view the resource
-  - `can_create` → boolean permission to create the resource
-  - `can_edit` → boolean permission to edit the resource
-- This table allows dynamic control over resource management without hardcoding role logic.
----
-## SQL Schema
+### SQL Schema
 
 ```sql
 CREATE TABLE roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    active TINYINT(1) NOT NULL DEFAULT 1
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE, -- INDEX: Unique
+    active BOOLEAN NOT NULL DEFAULT 1
 );
 
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    role_id INTEGER NOT NULL, -- INDEX: FK
     name VARCHAR(150) NOT NULL,
-    document VARCHAR(50) NOT NULL UNIQUE,
+    document VARCHAR(50) NOT NULL UNIQUE, -- INDEX: Unique
     password VARCHAR(255) NOT NULL,
-    active TINYINT(1) NOT NULL DEFAULT 1,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    active BOOLEAN NOT NULL DEFAULT 1,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 CREATE TABLE clients (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(150) NOT NULL,
-    document VARCHAR(50) NOT NULL UNIQUE,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL, -- INDEX: Explicit
+    document VARCHAR(50) NOT NULL UNIQUE, -- INDEX: Unique + Explicit
     phone VARCHAR(30) NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX (name),
-    INDEX (document)
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
 );
 
 CREATE TABLE stages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    default_sequence INT NOT NULL DEFAULT 0,
-    can_remit TINYINT(1) NOT NULL DEFAULT 1,
-    is_delivery_stage TINYINT(1) NOT NULL DEFAULT 0
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE, -- INDEX: Unique
+    default_sequence INTEGER NOT NULL DEFAULT 0,
+    can_remit BOOLEAN NOT NULL DEFAULT 1,
+    is_delivery_stage BOOLEAN NOT NULL DEFAULT 0
 );
 
 CREATE TABLE orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    client_id INT NOT NULL,
-    material VARCHAR(255) NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    client_id INTEGER NOT NULL, -- INDEX: FK
     notes VARCHAR(300) NULL,
-    invoice_number VARCHAR(50) NOT NULL UNIQUE,
-    created_by INT NOT NULL,
+    invoice_number VARCHAR(50) NOT NULL UNIQUE, -- INDEX: Unique
+    created_by INTEGER NOT NULL, -- INDEX: FK
     delivered_at TIMESTAMP NULL,
-    delivered_by INT NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    lleva_herrajeria TINYINT(1) NOT NULL DEFAULT 0,
-    lleva_manual_armado TINYINT(1) NOT NULL DEFAULT 0,
+    delivered_by INTEGER NULL, -- INDEX: FK
+    lleva_herrajeria BOOLEAN NOT NULL DEFAULT 0,
+    lleva_manual_armado BOOLEAN NOT NULL DEFAULT 0,
     herrajeria_delivered_at TIMESTAMP NULL,
-    herrajeria_delivered_by INT NULL,
+    herrajeria_delivered_by INTEGER NULL, -- INDEX: FK
     manual_armado_delivered_at TIMESTAMP NULL,
-    manual_armado_delivered_by INT NULL,
-    FOREIGN KEY (client_id) REFERENCES clients(id),
-    FOREIGN KEY (created_by) REFERENCES users(id),
-    FOREIGN KEY (delivered_by) REFERENCES users(id),
-    FOREIGN KEY (herrajeria_delivered_by) REFERENCES users(id),
-    FOREIGN KEY (manual_armado_delivered_by) REFERENCES users(id)
+    manual_armado_delivered_by INTEGER NULL, -- INDEX: FK
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (client_id) REFERENCES clients(id)
 );
 
 CREATE TABLE order_stages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    stage_id INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    order_id INTEGER NOT NULL, -- INDEX: FK
+    stage_id INTEGER NOT NULL, -- INDEX: FK
+    sequence INTEGER NOT NULL,
     notes VARCHAR(300) NULL,
     started_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL,
-    started_by INT NULL,
-    completed_by INT NULL,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    sequence INT NOT NULL,
-    is_pending TINYINT(1) NOT NULL DEFAULT 0,
+    started_by INTEGER NULL, -- INDEX: FK
+    completed_by INTEGER NULL, -- INDEX: FK
+    is_pending BOOLEAN NOT NULL DEFAULT 0,
     pending_reason VARCHAR(250) NULL,
-    pending_marked_by INT NULL,
+    pending_marked_by INTEGER NULL, -- INDEX: FK
     pending_marked_at TIMESTAMP NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    UNIQUE (order_id, stage_id), -- INDEX: Unique Composite
+    UNIQUE (order_id, sequence), -- INDEX: Unique Composite
     FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (stage_id) REFERENCES stages(id),
-    FOREIGN KEY (started_by) REFERENCES users(id),
-    FOREIGN KEY (completed_by) REFERENCES users(id),
-    FOREIGN KEY (pending_marked_by) REFERENCES users(id),
-    UNIQUE (order_id, stage_id),
-    UNIQUE (order_id, sequence)
+    FOREIGN KEY (stage_id) REFERENCES stages(id)
+);
+
+CREATE TABLE materials (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    stock_quantity DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    reserved_quantity DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+CREATE TABLE order_materials (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    order_id INTEGER NOT NULL, -- INDEX: FK
+    material_id INTEGER NOT NULL, -- INDEX: FK
+    estimated_quantity DECIMAL(12, 2) NOT NULL,
+    actual_quantity DECIMAL(12, 2) NULL,
+    notes VARCHAR(50) NULL,
+    cancelled_at TIMESTAMP NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+CREATE TABLE order_logs (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    order_id INTEGER NOT NULL, -- INDEX: FK
+    user_id INTEGER NOT NULL, -- INDEX: FK
+    action VARCHAR(400) NOT NULL,
+    created_at TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE file_types (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE -- INDEX: Unique
 );
 
 CREATE TABLE order_files (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    file_type_id INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    order_id INTEGER NOT NULL, -- INDEX: FK
+    file_type_id INTEGER NOT NULL, -- INDEX: FK
     file_path TEXT NOT NULL,
-    uploaded_by INT NOT NULL,
-    uploaded_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    uploaded_by INTEGER NOT NULL, -- INDEX: FK
+    uploaded_at TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (file_type_id) REFERENCES file_types(id),
     FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );
 
-CREATE TABLE order_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    user_id INT NOT NULL,
-    action VARCHAR(400) NOT NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
 CREATE TABLE order_tracking_links (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL UNIQUE,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    order_id INTEGER NOT NULL, -- INDEX: FK
+    token VARCHAR(255) NOT NULL UNIQUE, -- INDEX: Unique
     expires_at TIMESTAMP NOT NULL,
     used_at TIMESTAMP NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
 CREATE TABLE role_stages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL,
-    stage_id INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    role_id INTEGER NOT NULL, -- INDEX: FK
+    stage_id INTEGER NOT NULL, -- INDEX: FK
+    UNIQUE (role_id, stage_id), -- INDEX: Unique Composite
     FOREIGN KEY (role_id) REFERENCES roles(id),
-    FOREIGN KEY (stage_id) REFERENCES stages(id),
-    UNIQUE (role_id, stage_id)
+    FOREIGN KEY (stage_id) REFERENCES stages(id)
 );
 
-
 CREATE TABLE role_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    role_id INTEGER NOT NULL, -- INDEX: FK
     resource_type VARCHAR(100) NOT NULL,
     can_view BOOLEAN NOT NULL DEFAULT 0,
     can_create BOOLEAN NOT NULL DEFAULT 0,
     can_edit BOOLEAN NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-    UNIQUE (role_id, resource_type)
-);
-
-CREATE TABLE role_visibility_permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    role_id INT NOT NULL UNIQUE,
-    can_view_files TINYINT(1) NOT NULL DEFAULT 1,
-    can_view_order_file TINYINT(1) NOT NULL DEFAULT 1,
-    can_view_machine_file TINYINT(1) NOT NULL DEFAULT 1,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    UNIQUE (role_id, resource_type), -- INDEX: Unique Composite
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
-CREATE TABLE materials (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    stock_quantity DECIMAL(12,2) NOT NULL DEFAULT 0,
-    reserved_quantity DECIMAL(12,2) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE role_visibility_permissions (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    role_id INTEGER NOT NULL UNIQUE, -- INDEX: Unique + FK
+    can_view_files BOOLEAN NOT NULL DEFAULT 1,
+    can_view_order_file BOOLEAN NOT NULL DEFAULT 1,
+    can_view_machine_file BOOLEAN NOT NULL DEFAULT 1,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
+```
 
-CREATE TABLE order_materials (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    material_id INT NOT NULL,
-    notes VARCHAR(50) NULL,
-    estimated_quantity DECIMAL(12,2) NOT NULL,
-    actual_quantity DECIMAL(12,2) NULL,
-    cancelled_at TIMESTAMP NULL,
-    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
-);
-
-For frontend context, see context-frontend.md
+For frontend details and module-specific UI, see context-frontend.md.

@@ -196,6 +196,8 @@ class OrderStageController extends Controller
 
                 return back()->with('status', 'Pedido remitido.');
             });
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }

@@ -1,12 +1,13 @@
 <?php
 
+use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderStage;
-use App\Models\Stage;
-use App\Models\Client;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\Stage;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
@@ -25,7 +26,6 @@ it('paginates orders in the dashboard stage view', function () {
         $order = Order::create([
             'client_id' => $this->client->id,
             'created_by' => $this->user->id,
-            'material' => 'MDF',
             'invoice_number' => "FC-{$i}",
         ]);
 

@@ -33,7 +33,6 @@ it('allows remittance to a valid previous stage', function () {
     $order = Order::create([
         'client_id' => $this->client->id,
         'created_by' => $this->user->id,
-        'material' => 'MDF',
         'invoice_number' => 'FC-1',
     ]);
 
@@ -54,7 +53,6 @@ it('aborts with 400 if target stage does not belong to the order', function () {
     $order = Order::create([
         'client_id' => $this->client->id,
         'created_by' => $this->user->id,
-        'material' => 'MDF',
         'invoice_number' => 'FC-2',
     ]);
 
@@ -75,7 +73,6 @@ it('aborts with 400 if target stage sequence is >= current stage sequence', func
     $order = Order::create([
         'client_id' => $this->client->id,
         'created_by' => $this->user->id,
-        'material' => 'MDF',
         'invoice_number' => 'FC-3',
     ]);
 

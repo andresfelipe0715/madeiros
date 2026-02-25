@@ -41,6 +41,9 @@
                                 <div class="alert alert-warning border-0 shadow-sm mb-4">
                                     <i class="bi bi-info-circle me-2"></i>
                                     Esta orden no se puede editar porque ya tiene una fecha de entrega.
+                                    @if(auth()->user()->role->hasPermission('orders', 'edit') && $order->orderMaterials->whereNull('cancelled_at')->count() > 0)
+                                        <br><small><strong>Nota:</strong> Tiene permiso para actualizar el consumo real de los materiales.</small>
+                                    @endif
                                 </div>
                             @endif
 
@@ -50,6 +53,13 @@
 
                                 @php
                                     $isDisabled = $order->delivered_at ? 'disabled' : '';
+
+                                    $hasEditPermission = auth()->user()->role->hasPermission('orders', 'edit');
+                                    $hasActiveMaterials = $order->orderMaterials->whereNull('cancelled_at')->count() > 0;
+                                    
+                                    $canCorrectConsumption = $order->delivered_at && $hasActiveMaterials && $hasEditPermission;
+                                    
+                                    $btnDisabled = ($order->delivered_at && !$canCorrectConsumption) ? 'disabled' : '';
                                 @endphp
 
                                 <div class="mb-3">
@@ -276,7 +286,7 @@
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary" {{ $isDisabled }}>
+                                    <button type="submit" class="btn btn-primary" {{ $btnDisabled }}>
                                         {{ __('Actualizar Información') }}
                                     </button>
                                 </div>

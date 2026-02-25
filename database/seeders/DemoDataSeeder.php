@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Stage;
+use App\Models\User;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\User;
-use App\Models\Stage;
-use Faker\Factory as Faker;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
 
 class DemoDataSeeder extends Seeder
 {
@@ -30,6 +29,7 @@ class DemoDataSeeder extends Seeder
 
         if ($users->isEmpty() || $stages->isEmpty()) {
             $this->command->error('Users or stages missing.');
+
             return;
         }
 
@@ -46,7 +46,7 @@ class DemoDataSeeder extends Seeder
             $clients[] = [
                 'name' => $faker->company,
                 'document' => $faker->unique()->numerify('#########'),
-                'phone' => '3' . $faker->numerify('#########'),
+                'phone' => '3'.$faker->numerify('#########'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -61,7 +61,6 @@ class DemoDataSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $materials = ['Melamina Blanca', 'MDF RH', 'Triplex', 'Aglomerado', 'Pino'];
         $orderCount = 1000;
 
         $this->command->info("Creating $orderCount orders...");
@@ -73,8 +72,7 @@ class DemoDataSeeder extends Seeder
 
             $orderId = DB::table('orders')->insertGetId([
                 'client_id' => $faker->randomElement($clientIds),
-                'material' => $faker->randomElement($materials),
-                'invoice_number' => 'INV-' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
+                'invoice_number' => 'INV-'.str_pad($i + 1, 6, '0', STR_PAD_LEFT),
                 'created_by' => $creator,
                 'created_at' => $createdDate,
                 'updated_at' => $createdDate,
@@ -84,7 +82,7 @@ class DemoDataSeeder extends Seeder
                 'order_id' => $orderId,
                 'user_id' => $creator,
                 'action' => 'Orden creada',
-                'created_at' => $createdDate
+                'created_at' => $createdDate,
             ]);
 
             /*

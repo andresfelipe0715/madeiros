@@ -63,7 +63,6 @@ it('blocks a regular user from starting an order if it is not next in queue', fu
     // Create Order A
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Wood',
         'invoice_number' => 'INV-A',
         'created_by' => $this->adminUser->id,
     ]);
@@ -72,7 +71,6 @@ it('blocks a regular user from starting an order if it is not next in queue', fu
     // Create Order B
     $orderB = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Metal',
         'invoice_number' => 'INV-B',
         'created_by' => $this->adminUser->id,
     ]);
@@ -96,7 +94,6 @@ it('allows a regular user to start the next order in queue', function () {
     // Create Order A
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Wood',
         'invoice_number' => 'INV-A',
         'created_by' => $this->adminUser->id,
     ]);
@@ -116,7 +113,6 @@ it('allows an admin to override the queue', function () {
     // Create Order A
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Wood',
         'invoice_number' => 'INV-A',
         'created_by' => $this->adminUser->id,
     ]);
@@ -125,7 +121,6 @@ it('allows an admin to override the queue', function () {
     // Create Order B
     $orderB = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Metal',
         'invoice_number' => 'INV-B',
         'created_by' => $this->adminUser->id,
     ]);
@@ -145,7 +140,6 @@ it('blocks finishing an order if it is not next in queue', function () {
     // Create Order A
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Wood',
         'invoice_number' => 'INV-A',
         'created_by' => $this->adminUser->id,
     ]);
@@ -154,7 +148,6 @@ it('blocks finishing an order if it is not next in queue', function () {
     // Create Order B
     $orderB = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Metal',
         'invoice_number' => 'INV-B',
         'created_by' => $this->adminUser->id,
     ]);
@@ -182,7 +175,6 @@ it('blocks a regular user from remitting an order if it is not next in queue', f
     // Create Order A (Next in Enchape)
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Wood',
         'invoice_number' => 'INV-RA',
         'created_by' => $this->adminUser->id,
     ]);
@@ -192,7 +184,6 @@ it('blocks a regular user from remitting an order if it is not next in queue', f
     // Create Order B (Not Next in Enchape)
     $orderB = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Metal',
         'invoice_number' => 'INV-RB',
         'created_by' => $this->adminUser->id,
     ]);
@@ -217,7 +208,6 @@ it('allows an admin to remit any order (override)', function () {
     // Create Order A (Next)
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Wood',
         'invoice_number' => 'INV-OA',
         'created_by' => $this->adminUser->id,
     ]);
@@ -227,7 +217,6 @@ it('allows an admin to remit any order (override)', function () {
     // Create Order B (Not Next)
     $orderB = Order::create([
         'client_id' => $this->client->id,
-        'material' => 'Metal',
         'invoice_number' => 'INV-OB',
         'created_by' => $this->adminUser->id,
     ]);

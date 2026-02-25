@@ -16,8 +16,7 @@ class OrderFactory extends Factory
         return [
             'client_id' => Client::factory(),
             'created_by' => User::factory(),
-            'invoice_number' => 'FAC-' . $this->faker->unique()->numberBetween(1000, 9999),
-            'material' => $this->faker->word(),
+            'invoice_number' => 'FAC-'.$this->faker->unique()->numberBetween(1000, 9999),
             'lleva_herrajeria' => $this->faker->boolean(),
             'lleva_manual_armado' => $this->faker->boolean(),
         ];

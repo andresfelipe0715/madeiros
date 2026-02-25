@@ -111,6 +111,7 @@ it('prevents modifications once order is delivered', function () {
         'delivered_at' => now(),
     ]);
 
+    // Attempt to send pre-delivery fields (material_id, estimated_quantity) to a delivered order
     $response = $this->actingAs($this->user)
         ->put(route('orders.update', $order), [
             'invoice_number' => 'INV-001',
@@ -122,7 +123,8 @@ it('prevents modifications once order is delivered', function () {
             ],
         ]);
 
-    $response->assertSessionHas('error', 'No se pueden modificar materiales de una orden ya entregada.');
+    // Delivered orders only accept materials.*.id and materials.*.actual_quantity
+    $response->assertSessionHasErrors(['materials.0.id', 'materials.0.actual_quantity']);
 });
 
 it('restores a cancelled material instead of duplicating it', function () {
