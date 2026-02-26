@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Role;
 use App\Models\RolePermission;
 use App\Models\Stage;
+use App\Models\StageGroup;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -17,65 +18,64 @@ class DefaultDataSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Create Stage Groups
+        $groups = ['Corte', 'Enchape', 'Servicios Especiales', 'Revisión', 'Entrega'];
+        foreach ($groups as $groupName) {
+            StageGroup::firstOrCreate(['name' => $groupName]);
+        }
+
         // 1. Create Stages
         $stagesData = [
-            'Corte' => 10,
-            'Enchape' => 20,
-            'Servicios Especiales' => 30,
-            'Revisión' => 40,
-            'Entrega' => 50,
+            'Corte' => ['sequence' => 10, 'group' => 'Corte'],
+            'Enchape 1' => ['sequence' => 20, 'group' => 'Enchape'],
+            'Enchape 2' => ['sequence' => 30, 'group' => 'Enchape'],
+            'Servicios Especiales' => ['sequence' => 40, 'group' => 'Servicios Especiales'],
+            'Revisión' => ['sequence' => 50, 'group' => 'Revisión'],
+            'Entrega' => ['sequence' => 60, 'group' => 'Entrega'],
         ];
 
         $stages = [];
-        foreach ($stagesData as $name => $sequence) {
+        foreach ($stagesData as $name => $data) {
+            $group = StageGroup::where('name', $data['group'])->first();
+
             $stages[$name] = Stage::updateOrCreate(
                 ['name' => $name],
                 [
-                    'default_sequence' => $sequence,
+                    'default_sequence' => $data['sequence'],
+                    'stage_group_id' => $group->id,
                     'is_delivery_stage' => ($name === 'Entrega'),
                 ]
             );
         }
 
-        // 2. Create Roles and link to Stages
-        $rolesData = [
-            'Admin' => ['Corte', 'Enchape', 'Servicios Especiales', 'Revisión', 'Entrega'],
-            'Empleado de corte' => ['Corte'],
-            'Empleado de enchape' => ['Enchape'],
-            'Empleado de servicios especiales' => ['Servicios Especiales'],
-            'Empleado de revisión' => ['Revisión', 'Servicios Especiales'],
-            'Empleado de entrega' => ['Entrega'],
-        ];
+        // 2. Create Admin Role
+        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        $adminRole->stages()->sync(Stage::pluck('id')->toArray());
 
-        $roleCodes = [
-            'Admin' => 'admin',
-            'Empleado de corte' => 'corte',
-            'Empleado de enchape' => 'enchape',
-            'Empleado de servicios especiales' => 'especiales',
-            'Empleado de revisión' => 'revision',
-            'Empleado de entrega' => 'entrega',
-        ];
+        User::firstOrCreate(
+            ['document' => 'admin_123'],
+            [
+                'name' => 'Admin Test',
+                'role_id' => $adminRole->id,
+                'password' => Hash::make('password'),
+                'active' => true,
+            ]
+        );
 
-        foreach ($rolesData as $roleName => $assignedStages) {
+        // 3. Create a dedicated Role and User for each specific Stage
+        foreach ($stages as $stageName => $stageModel) {
+            $roleName = 'Empleado de ' . strtolower($stageName);
             $role = Role::firstOrCreate(['name' => $roleName]);
 
-            // Sync stages
-            $stageIds = [];
-            foreach ($assignedStages as $stageName) {
-                if (isset($stages[$stageName])) {
-                    $stageIds[] = $stages[$stageName]->id;
-                }
-            }
-            $role->stages()->sync($stageIds);
+            // Sync only this specific stage to this role
+            $role->stages()->sync([$stageModel->id]);
 
-            // 3. Create one test user per role
-            // Using document as a unique identifier for testing
-            $document = $roleCodes[$roleName].'_123';
-
+            // Create a test user for this role
+            $slug = strtolower(str_replace(' ', '_', $stageName));
             User::firstOrCreate(
-                ['document' => $document],
+                ['document' => $slug . '_123'],
                 [
-                    'name' => $roleName.' Test',
+                    'name' => $roleName . ' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
@@ -96,6 +96,20 @@ class DefaultDataSeeder extends Seeder
                     'name' => $client['name'],
                     'phone' => $client['phone'],
                 ]
+            );
+        }
+
+        // 5. Create Materials (Moved from MaterialSeeder)
+        $materialsData = [
+            ['name' => 'Melamina Blanca 18mm', 'stock_quantity' => 100],
+            ['name' => 'Melamina Roble 18mm', 'stock_quantity' => 50],
+            ['name' => 'Canto PVC 0.5mm', 'stock_quantity' => 500],
+        ];
+
+        foreach ($materialsData as $material) {
+            \App\Models\Material::updateOrCreate(
+                ['name' => $material['name']],
+                ['stock_quantity' => $material['stock_quantity']]
             );
         }
 

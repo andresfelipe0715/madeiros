@@ -23,7 +23,8 @@ class StoreOrderRequest extends FormRequest
             'lleva_herrajeria' => 'boolean',
             'lleva_manual_armado' => 'boolean',
             'stages' => 'required|array|min:1',
-            'stages.*' => 'exists:stages,id',
+            'stages.*.stage_id' => 'required|exists:stages,id',
+            'stages.*.sequence' => 'required|integer|min:1',
             'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB
             'materials' => 'required|array|min:1',
             'materials.*.material_id' => 'required|exists:materials,id',
@@ -47,5 +48,31 @@ class StoreOrderRequest extends FormRequest
             'order_file.uploaded' => 'El archivo excedió el límite permitido por el servidor (PHP) o falló la conexión.',
             'notes.max' => 'Las notas no deben exceder los 300 caracteres.',
         ];
+    }
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $stages = $this->input('stages', []);
+            if (!is_array($stages) || empty($stages)) {
+                return;
+            }
+
+            $sequences = [];
+            foreach ($stages as $stageData) {
+                if (isset($stageData['sequence'])) {
+                    $sequences[] = (int) $stageData['sequence'];
+                }
+            }
+
+            sort($sequences);
+            $expected = 1;
+            foreach ($sequences as $seq) {
+                if ($seq !== $expected) {
+                    $validator->errors()->add('stages', 'La secuencia de las etapas debe ser consecutiva y única.');
+                    break;
+                }
+                $expected++;
+            }
+        });
     }
 }

@@ -16,11 +16,11 @@
     </x-slot>
 
     @php
-        $stageMappings = [
+        $groupMappings = [
             'corte' => ['color' => '#64748b', 'bg' => 'rgba(100, 116, 139, 0.04)'],
             'enchape' => ['color' => '#3b82f6', 'bg' => 'rgba(59, 130, 246, 0.04)'],
             'servicios especiales' => ['color' => '#6366f1', 'bg' => 'rgba(99, 102, 241, 0.04)'],
-            'revision' => ['color' => '#f59e0b', 'bg' => 'rgba(245, 158, 11, 0.04)'],
+            'revisión' => ['color' => '#f59e0b', 'bg' => 'rgba(245, 158, 11, 0.04)'],
             'entrega' => ['color' => '#10b981', 'bg' => 'rgba(16, 185, 129, 0.04)'],
         ];
         $defaultMapping = ['color' => '#94a3b8', 'bg' => 'rgba(148, 163, 184, 0.04)'];
@@ -31,8 +31,8 @@
             <div class="row g-4">
                 @forelse($accessibleStages as $stage)
                     @php
-                        $normName = strtolower($stage->name);
-                        $mapping = $stageMappings[$normName] ?? $defaultMapping;
+                        $groupName = $stage->stageGroup ? strtolower($stage->stageGroup->name) : strtolower($stage->name);
+                        $mapping = $groupMappings[$groupName] ?? $defaultMapping;
                     @endphp
                     <div class="col-md-4 col-lg-3">
                         <a href="{{ route('dashboard.stage', $stage->id) }}" class="text-decoration-none h-100 d-block">

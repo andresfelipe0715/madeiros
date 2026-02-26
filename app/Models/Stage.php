@@ -13,7 +13,7 @@ class Stage extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['name', 'default_sequence', 'active', 'can_remit', 'is_delivery_stage'];
+    protected $fillable = ['name', 'default_sequence', 'stage_group_id', 'active', 'can_remit', 'is_delivery_stage'];
 
     protected function casts(): array
     {
@@ -27,6 +27,11 @@ class Stage extends Model
     public function orderStages(): HasMany
     {
         return $this->hasMany(OrderStage::class);
+    }
+
+    public function stageGroup(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(StageGroup::class);
     }
 
     public function roles(): BelongsToMany

@@ -41,7 +41,9 @@ it('can create an order with hardware and manual fields', function () {
         'invoice_number' => 'TEST-123',
         'lleva_herrajeria' => '1',
         'lleva_manual_armado' => '1',
-        'stages' => [$this->stage->id],
+        'stages' => [
+            ['stage_id' => $this->stage->id, 'sequence' => 1]
+        ],
         'materials' => [
             ['material_id' => $this->material->id, 'estimated_quantity' => 1],
         ],

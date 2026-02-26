@@ -140,12 +140,19 @@ CREATE TABLE clients (
     updated_at TIMESTAMP
 );
 
+CREATE TABLE stage_groups (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE stages (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE, -- INDEX: Unique
     default_sequence INTEGER NOT NULL DEFAULT 0,
+    stage_group_id INTEGER NULL, -- INDEX: FK
     can_remit BOOLEAN NOT NULL DEFAULT 1,
-    is_delivery_stage BOOLEAN NOT NULL DEFAULT 0
+    is_delivery_stage BOOLEAN NOT NULL DEFAULT 0,
+    FOREIGN KEY (stage_group_id) REFERENCES stage_groups(id)
 );
 
 CREATE TABLE orders (

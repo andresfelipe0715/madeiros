@@ -119,17 +119,20 @@ class OrderManagementController extends Controller
 
         $newStage = Stage::findOrFail($stageId);
 
-        // Validation rule: Block if any stage with a HIGHER default_sequence has already been completed.
-        // "No se puede insertar esta etapa porque ya se completaron etapas posteriores."
-        $hasLaterCompletedStage = $order->orderStages()
-            ->whereNotNull('completed_at')
+        // Validation rule: Block if any stage with a HIGHER default_sequence has already been started or completed.
+        // "No se puede insertar esta etapa porque ya se completaron o iniciaron etapas posteriores."
+        $hasLaterStartedOrCompletedStage = $order->orderStages()
+            ->where(function ($query) {
+                $query->whereNotNull('completed_at')
+                    ->orWhereNotNull('started_at');
+            })
             ->whereHas('stage', function ($query) use ($newStage) {
                 $query->where('default_sequence', '>', $newStage->default_sequence);
             })
             ->exists();
 
-        if ($hasLaterCompletedStage) {
-            return back()->with('error', 'No se puede insertar esta etapa porque ya se completaron etapas posteriores.');
+        if ($hasLaterStartedOrCompletedStage) {
+            return back()->with('error', 'No se puede insertar antes de una etapa en progreso o completada. Debe pausarla primero.');
         }
 
         // Determine the correct insertion position (sequence) for the frozen workflow.

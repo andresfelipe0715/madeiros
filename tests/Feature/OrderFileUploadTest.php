@@ -39,7 +39,9 @@ it('can upload a PDF file when creating an order', function () {
         'materials' => [
             ['material_id' => $this->material->id, 'estimated_quantity' => 2],
         ],
-        'stages' => [$this->stage->id],
+        'stages' => [
+            ['stage_id' => $this->stage->id, 'sequence' => 1],
+        ],
         'order_file' => $file,
     ]);
 
@@ -79,7 +81,9 @@ it('rejects non-PDF files', function () {
         'materials' => [
             ['material_id' => $this->material->id, 'estimated_quantity' => 2],
         ],
-        'stages' => [$this->stage->id],
+        'stages' => [
+            ['stage_id' => $this->stage->id, 'sequence' => 1],
+        ],
         'order_file' => $file,
     ]);
 
@@ -97,7 +101,9 @@ it('works without a file (optional)', function () {
         'materials' => [
             ['material_id' => $this->material->id, 'estimated_quantity' => 2],
         ],
-        'stages' => [$this->stage->id],
+        'stages' => [
+            ['stage_id' => $this->stage->id, 'sequence' => 1],
+        ],
     ]);
 
     $response->assertRedirect();

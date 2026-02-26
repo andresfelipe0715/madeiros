@@ -19,7 +19,8 @@ class OrderController extends Controller
 {
     public function __construct(
         protected InventoryService $inventory
-    ) {}
+    ) {
+    }
 
     /**
      * Show the form for creating a new order.
@@ -29,9 +30,15 @@ class OrderController extends Controller
         $clientId = $request->query('client_id');
         $selectedClient = $clientId ? Client::find($clientId) : null;
         $materials = Material::all();
-        $stages = Stage::orderBy('default_sequence')->get();
+        $stageGroups = \App\Models\StageGroup::with([
+            'stages' => function ($query) {
+                $query->orderBy('default_sequence');
+            }
+        ])->get()->sortBy(function ($group) {
+            return $group->stages->min('default_sequence');
+        });
 
-        return view('orders.create', compact('selectedClient', 'materials', 'stages'));
+        return view('orders.create', compact('selectedClient', 'materials', 'stageGroups'));
     }
 
     /**
@@ -54,10 +61,10 @@ class OrderController extends Controller
 
                 // Create OrderStages
                 if (isset($validated['stages'])) {
-                    foreach ($validated['stages'] as $index => $stageId) {
+                    foreach ($validated['stages'] as $stageData) {
                         $order->orderStages()->create([
-                            'stage_id' => $stageId,
-                            'sequence' => $index + 1,
+                            'stage_id' => $stageData['stage_id'],
+                            'sequence' => $stageData['sequence'],
                         ]);
                     }
                 }
@@ -77,7 +84,7 @@ class OrderController extends Controller
                 }
             });
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al crear la orden: '.$e->getMessage())->withInput();
+            return back()->with('error', 'Error al crear la orden: ' . $e->getMessage())->withInput();
         }
 
         return redirect()->route('orders.index')

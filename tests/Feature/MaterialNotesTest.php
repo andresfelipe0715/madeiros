@@ -47,7 +47,10 @@ it('can create an order with material notes', function () {
         'client_id' => $this->client->id,
         'invoice_number' => 'FAC-999',
         'notes' => 'General order notes',
-        'stages' => [$this->stage1->id, $this->stage2->id],
+        'stages' => [
+            ['stage_id' => $this->stage1->id, 'sequence' => 1],
+            ['stage_id' => $this->stage2->id, 'sequence' => 2],
+        ],
         'materials' => [
             [
                 'material_id' => $this->material->id,
@@ -73,7 +76,9 @@ it('rejects materials notes longer than 50 characters', function () {
     $response = post(route('orders.store'), [
         'client_id' => $this->client->id,
         'invoice_number' => 'FAC-ERR',
-        'stages' => [$this->stage1->id],
+        'stages' => [
+            ['stage_id' => $this->stage1->id, 'sequence' => 1],
+        ],
         'materials' => [
             [
                 'material_id' => $this->material->id,

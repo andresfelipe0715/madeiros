@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Get accessible stages based on role for the menu
-        $accessibleStages = $user->role->stages;
+        $accessibleStages = $user->role->stages()->with('stageGroup')->get();
 
         return view('dashboard', [
             'accessibleStages' => $accessibleStages,
