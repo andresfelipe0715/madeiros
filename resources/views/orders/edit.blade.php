@@ -47,7 +47,40 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('orders.update', $order) }}" method="POST" novalidate>
+                            <form action="{{ route('orders.update', $order) }}" method="POST" novalidate
+                                x-data="{
+                                    materials: {{ json_encode(old('materials', $order->orderMaterials->map(fn($om) => [
+                                        'id' => $om->id,
+                                        'material_id' => $om->material_id,
+                                        'material_name' => $om->material->name,
+                                        'estimated_quantity' => $om->estimated_quantity,
+                                        'actual_quantity' => $om->actual_quantity,
+                                        'notes' => $om->notes ?? '',
+                                        'cancelled' => $om->cancelled_at !== null,
+                                        'cancelled_at' => $om->cancelled_at ? $om->cancelled_at->format('Y-m-d H:i') : null,
+                                    ])->toArray())) }}.map(m => ({
+                                        ...m,
+                                        cancelled: m.cancelled == 1 || m.cancelled === true || m.cancelled === '1'
+                                    })),
+                                    stockLookup: {{ json_encode($materials->mapWithKeys(fn($m) => [$m->id => (float)$m->availableQuantity()])) }},
+                                    thisOrderReservations: {{ json_encode($order->orderMaterials->whereNull('cancelled_at')->groupBy('material_id')->map(fn($group) => $group->sum('estimated_quantity'))) }},
+                                    get hasErrors() {
+                                        let totals = {};
+                                        this.materials.forEach(m => {
+                                            if (!m.cancelled && m.material_id && m.estimated_quantity) {
+                                                totals[m.material_id] = (totals[m.material_id] || 0) + parseFloat(m.estimated_quantity);
+                                            }
+                                        });
+                                        for (let id in totals) {
+                                            let limit = (this.stockLookup[id] || 0) + (this.thisOrderReservations[id] || 0);
+                                            if (totals[id] > limit) return true;
+                                        }
+                                        return false;
+                                    },
+                                    getAvailableFor(mid) {
+                                        return (this.stockLookup[mid] || 0) + (this.thisOrderReservations[mid] || 0);
+                                    }
+                                }">
                                 @csrf
                                 @method('PUT')
 
@@ -81,34 +114,18 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-<div class="mb-3"
-    x-data="{
-        materials: {{ json_encode(old('materials', $order->orderMaterials->map(fn($om) => [
-            'id' => $om->id,
-            'material_id' => $om->material_id,
-            'material_name' => $om->material->name,
-            'estimated_quantity' => $om->estimated_quantity,
-            'actual_quantity' => $om->actual_quantity,
-            'notes' => $om->notes ?? '',
-            'cancelled' => $om->cancelled_at !== null,
-            'cancelled_at' => $om->cancelled_at ? $om->cancelled_at->format('Y-m-d H:i') : null,
-        ])->toArray())) }}.map(m => ({
-            ...m,
-            cancelled: m.cancelled == 1 || m.cancelled === true || m.cancelled === '1'
-        }))
-    }">
+                                <div class="mb-4 mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label text-muted small text-uppercase font-weight-bold mb-0">
+                                            Reserva de Materiales
+                                        </label>
+                                        <span class="badge bg-secondary rounded-pill"
+                                            x-text="materials.filter(m => !m.cancelled).length + ' Activos'"></span>
+                                    </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <label class="form-label text-muted small text-uppercase font-weight-bold mb-0">
-            Reserva de Materiales
-        </label>
-        <span class="badge bg-secondary rounded-pill"
-            x-text="materials.filter(m => !m.cancelled).length + ' Activos'"></span>
-    </div>
-
-    <!-- ACTIVE MATERIALS -->
-    <div class="bg-light p-3 rounded border mb-3">
-        <h6 class="small fw-bold text-primary mb-3">Materiales Activos</h6>
+                                    <!-- ACTIVE MATERIALS -->
+                                    <div class="bg-light p-3 rounded border mb-3">
+                                        <h6 class="small fw-bold text-primary mb-3">Materiales Activos</h6>
 
         <template x-for="(material, index) in materials" :key="index">
             <template x-if="!material.cancelled">
@@ -131,7 +148,7 @@
                         </div>
 
                         <div class="col-md-4 col-8">
-                            <div class="input-group input-group-sm">
+                            <div class="input-group input-group-sm" :class="material.material_id && material.estimated_quantity > getAvailableFor(material.material_id) ? 'border border-danger rounded' : ''">
                                 <span class="input-group-text bg-white border-end-0">Cant.</span>
                                 <input type="number"
                                     :name="`materials[${index}][estimated_quantity]`"
@@ -165,6 +182,23 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Stock Feedback Row -->
+                    <template x-if="material.material_id && !material.cancelled">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6 col-12"></div>
+                            <div class="col-md-4 col-8">
+                                <div class="px-1">
+                                    <small class="d-block" :class="material.estimated_quantity > getAvailableFor(material.material_id) ? 'text-danger fw-bold' : 'text-muted'" style="font-size: 0.7rem;">
+                                        Disp: <span x-text="(stockLookup[material.material_id] || 0).toFixed(2)"></span>
+                                    </small>
+                                    <template x-if="material.estimated_quantity > getAvailableFor(material.material_id)">
+                                        <small class="text-danger d-block lh-1 mt-1" style="font-size: 0.65rem;">No puedes exceder el stock disponible.</small>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
 
                     @if($order->delivered_at)
                     <div class="row g-2 mb-2">
@@ -286,7 +320,7 @@
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary" {{ $btnDisabled }}>
+                                    <button type="submit" class="btn btn-primary" {{ $btnDisabled }} :disabled="hasErrors">
                                         {{ __('Actualizar Información') }}
                                     </button>
                                 </div>
@@ -317,7 +351,7 @@
                                         </div>
 
                                         @if(!$os->started_at)
-                                            @if($os->stage_id !== $finalStageId)
+                                            @if($os->stage_id !== $finalStageId && $os->stage_id !== $firstStageId)
                                                 <form action="{{ route('orders.remove-stage', [$order, $os->stage]) }}"
                                                     method="POST">
                                                     @csrf

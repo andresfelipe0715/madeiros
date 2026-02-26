@@ -148,7 +148,7 @@ it('reverses consumption and clears all delivery fields upon remit', function ()
     $s1 = Stage::factory()->create(['default_sequence' => 1]);
     $s2 = Stage::factory()->create(['default_sequence' => 2, 'is_delivery_stage' => true]);
 
-    $os1 = $order->orderStages()->create(['stage_id' => $s1->id, 'sequence' => 1]);
+    $os1 = $order->orderStages()->create(['stage_id' => $s1->id, 'sequence' => 1, 'completed_at' => now()]);
     $os2 = $order->orderStages()->create(['stage_id' => $s2->id, 'sequence' => 2, 'completed_at' => now()]);
 
     $om = $order->orderMaterials()->create([

@@ -18,7 +18,8 @@ class OrderManagementController extends Controller
 {
     public function __construct(
         protected InventoryService $inventory
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the orders.
@@ -57,9 +58,10 @@ class OrderManagementController extends Controller
 
         $allStages = Stage::orderBy('default_sequence')->get();
         $materials = Material::all();
+        $firstStageId = Stage::orderBy('default_sequence', 'asc')->value('id');
         $finalStageId = Stage::orderBy('default_sequence', 'desc')->value('id');
 
-        return view('orders.edit', compact('order', 'allStages', 'finalStageId', 'materials'));
+        return view('orders.edit', compact('order', 'allStages', 'firstStageId', 'finalStageId', 'materials'));
     }
 
     /**
@@ -175,13 +177,16 @@ class OrderManagementController extends Controller
             return back()->with('error', 'No se puede eliminar una etapa que ya ha iniciado.');
         }
 
-        // Integrity check: Prevent removing the final stage (highest default_sequence)
-        $isFinalStage = Stage::where('id', $stage->id)
-            ->where('default_sequence', Stage::max('default_sequence'))
+        // Integrity check: Prevent removing the first or final stage
+        $isMandatoryStage = Stage::where('id', $stage->id)
+            ->where(function ($query) {
+                $query->where('default_sequence', Stage::min('default_sequence'))
+                    ->orWhere('default_sequence', Stage::max('default_sequence'));
+            })
             ->exists();
 
-        if ($isFinalStage) {
-            return back()->with('error', 'No se puede eliminar la etapa final de entrega.');
+        if ($isMandatoryStage) {
+            return back()->with('error', 'No se puede eliminar una etapa obligatoria (primera o última).');
         }
 
         DB::transaction(function () use ($order, $orderStage) {

@@ -36,7 +36,7 @@ it('allows remittance to a valid previous stage', function () {
         'invoice_number' => 'FC-1',
     ]);
 
-    $os1 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage1->id, 'sequence' => 1]);
+    $os1 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage1->id, 'sequence' => 1, 'completed_at' => now()]);
     $os2 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage2->id, 'sequence' => 2]);
     $os3 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage3->id, 'sequence' => 3]);
 
@@ -56,6 +56,7 @@ it('aborts with 400 if target stage does not belong to the order', function () {
         'invoice_number' => 'FC-2',
     ]);
 
+    $os1 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage1->id, 'sequence' => 1, 'completed_at' => now()]);
     $os2 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage2->id, 'sequence' => 2]);
 
     // Another stage that exists but NOT assigned to this order
@@ -76,7 +77,7 @@ it('aborts with 400 if target stage sequence is >= current stage sequence', func
         'invoice_number' => 'FC-3',
     ]);
 
-    $os1 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage1->id, 'sequence' => 1]);
+    $os1 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage1->id, 'sequence' => 1, 'completed_at' => now()]);
     $os2 = OrderStage::create(['order_id' => $order->id, 'stage_id' => $this->stage2->id, 'sequence' => 2]);
 
     actingAs($this->user)

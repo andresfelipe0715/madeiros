@@ -17,7 +17,17 @@
                     <div class="card shadow-sm border-0">
                         <div class="bg-primary bg-gradient py-1"></div>
                         <div class="card-body p-4 p-md-5">
-                            <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data" novalidate>
+                            <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data" novalidate
+                                x-data="{ 
+                                    materials: {{ json_encode(old('materials', [['material_id' => '', 'estimated_quantity' => '', 'notes' => '']])) }},
+                                    stockLookup: {{ json_encode($materials->mapWithKeys(fn($m) => [$m->id => (float)$m->availableQuantity()])) }},
+                                    get hasErrors() {
+                                        return this.materials.some(m => {
+                                            if (!m.material_id || !m.estimated_quantity) return false;
+                                            return parseFloat(m.estimated_quantity) > (this.stockLookup[m.material_id] || 0);
+                                        });
+                                    }
+                                }">
                                 @csrf
 
                                 <div class="mb-4">
@@ -47,7 +57,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-4" x-data="{ materials: {{ json_encode(old('materials', [['material_id' => '', 'estimated_quantity' => '', 'notes' => '']])) }} }">
+                                <div class="mb-4">
                                     <label class="form-label fw-bold">Reserva de Inventario</label>
                                     <p class="text-muted small mb-2">Seleccione los materiales y añada notas opcionales (ej: color, espesor, corte).</p>
                                     
@@ -64,7 +74,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-md-3 col-4">
-                                                        <div class="input-group input-group-sm shadow-sm">
+                                                        <div class="input-group input-group-sm shadow-sm" :class="material.material_id && material.estimated_quantity > (stockLookup[material.material_id] || 0) ? 'border border-danger rounded' : ''">
                                                             <input type="number" :name="`materials[${index}][estimated_quantity]`" x-model="material.estimated_quantity" class="form-control border-0" placeholder="Cant." min="0.01" step="0.01" required>
                                                         </div>
                                                     </div>
@@ -74,6 +84,23 @@
                                                         </button>
                                                     </div>
                                                 </div>
+
+                                                <!-- Stock Feedback Row -->
+                                                <template x-if="material.material_id">
+                                                    <div class="row g-2 mb-2">
+                                                        <div class="col-md-8 col-7"></div>
+                                                        <div class="col-md-3 col-4">
+                                                            <div class="px-1">
+                                                                <small class="d-block" :class="material.estimated_quantity > (stockLookup[material.material_id] || 0) ? 'text-danger fw-bold' : 'text-muted'" style="font-size: 0.7rem;">
+                                                                    Stock: <span x-text="stockLookup[material.material_id]"></span>
+                                                                </small>
+                                                                <template x-if="material.estimated_quantity > (stockLookup[material.material_id] || 0)">
+                                                                    <small class="text-danger d-block lh-1 mt-1" style="font-size: 0.65rem;">No puedes exceder el stock disponible.</small>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
                                                 <div class="row g-2">
                                                     <div class="col-12">
                                                         <div class="position-relative">
@@ -171,7 +198,7 @@
                                 </div>
 
                                 <div class="d-grid mt-5">
-                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm transition-all hover-elevate py-3">
+                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm transition-all hover-elevate py-3" :disabled="hasErrors">
                                         <i class="bi bi-check2-circle me-2"></i> Confirmar y Crear Orden
                                     </button>
                                 </div>
