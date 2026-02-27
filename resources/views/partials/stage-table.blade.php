@@ -215,15 +215,28 @@
                                                         <button type="submit" class="btn btn-sm btn-warning btn-action">Detener proceso</button>
                                                     </form>
                                                 @endif
-                                                <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success btn-action {{ !$canAct || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
-                                                        {{ !$canAct || $orderStage->is_pending ? 'disabled' : '' }}
-                                                        {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$canAct ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
-                                                        {{ $stage->is_delivery_stage ? 'Entrega del mueble realizada' : 'Finalizar' }}
+                                                    <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-success btn-action {{ !$canAct || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
+                                                            {{ !$canAct || $orderStage->is_pending ? 'disabled' : '' }}
+                                                            {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$canAct ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
+                                                            {{ $stage->is_delivery_stage ? 'Entrega del mueble realizada' : 'Finalizar' }}
+                                                        </button>
+                                                    </form>
+
+                                                @if($stage->is_delivery_stage)
+                                                    <button type="button" class="btn btn-sm btn-outline-info btn-action" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#evidenceModal{{ $orderStage->id }}">
+                                                        <i class="bi bi-camera-fill"></i> Capturar Evidencia
+                                                        @php
+                                                            $evidenceCount = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->count();
+                                                        @endphp
+                                                        @if($evidenceCount > 0)
+                                                            <span class="badge bg-info text-white rounded-pill ms-1">{{ $evidenceCount }}</span>
+                                                        @endif
                                                     </button>
-                                                </form>
+                                                @endif
                                             @endif
                                         @else
                                             <span class="text-muted small">No autorizado</span>
@@ -378,5 +391,77 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Modal for Evidence Photos --}}
+            @if($stage->is_delivery_stage && $orderStage->started_at && !$orderStage->completed_at)
+                <div class="modal fade" id="evidenceModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content border-0 shadow">
+                            <form action="{{ route('order-stages.upload-evidence', $orderStage->id) }}" method="POST" enctype="multipart/form-data" 
+                                x-data="{ files: null, count: 0, existing: {{ $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->count() }} }">
+                                @csrf
+                                <div class="modal-header bg-info text-white border-0">
+                                    <h5 class="modal-title"><i class="bi bi-camera-fill me-2"></i>Capturar Evidencia - #{{ $order->id }}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="alert alert-info py-2 small mb-3">
+                                        <i class="bi bi-info-circle-fill me-1"></i> Se permiten máximo 2 fotos de evidencia por pedido.
+                                        <br>Actual: <span class="fw-bold" x-text="existing"></span>/2
+                                    </div>
+
+                                    <div class="mb-3" x-show="existing < 2">
+                                        <label class="form-label font-weight-bold">Seleccionar fotos (Máx <span x-text="2 - existing"></span>)</label>
+                                        <input type="file" name="evidence_photos[]" class="form-control" accept="image/*" multiple 
+                                            @change="files = $event.target.files; count = files.length">
+                                        <div class="form-text mt-2" x-show="count > 0">
+                                            Seleccionado: <span class="fw-bold" x-text="count"></span> archivo(s)
+                                            <template x-if="count + existing > 2">
+                                                <div class="text-danger fw-bold mt-1">
+                                                    <i class="bi bi-exclamation-triangle-fill"></i> Supera el límite de 2 fotos.
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <div x-show="existing >= 2" class="text-center py-3">
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                                        <p class="mt-2 fw-bold">Ya se han subido las 2 fotos reglamentarias.</p>
+                                    </div>
+
+                                    @php
+                                        $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'));
+                                    @endphp
+                                    @if($evPhotos->count() > 0)
+                                        <div class="mt-4">
+                                            <label class="form-label font-weight-bold">Evidencia Actual</label>
+                                            <div class="row g-2">
+                                                @foreach($evPhotos as $photo)
+                                                    <div class="col-6">
+                                                        <div class="position-relative rounded overflow-hidden" style="height: 100px;">
+                                                            <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover">
+                                                            <a href="{{ $photo->fileUrl }}" target="_blank" class="position-absolute bottom-0 end-0 bg-dark bg-opacity-50 text-white p-1 px-2 small">
+                                                                <i class="bi bi-eye"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                                    <button type="submit" class="btn btn-info rounded-pill px-4 text-white" 
+                                        x-show="existing < 2"
+                                        :disabled="count == 0 || (count + existing > 2)">
+                                        Guardar fotos
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endif
         @endif
     @endforeach

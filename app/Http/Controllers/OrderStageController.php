@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class OrderStageController extends Controller
 {
+    use \App\Traits\CompressesImages;
+
     public function __construct(
         protected \App\Services\StageAuthorizationService $authService,
         protected \App\Services\InventoryService $inventory
@@ -493,5 +495,60 @@ class OrderStageController extends Controller
         }
 
         return back()->with('status', 'Estado pendiente removido.');
+    }
+
+    public function uploadEvidence(Request $request, OrderStage $orderStage)
+    {
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
+            return $error;
+        }
+
+        $user = Auth::user();
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
+        }
+
+        $request->validate([
+            'evidence_photos' => 'required|array|max:2',
+            'evidence_photos.*' => 'image|mimes:jpeg,png,jpg|max:5120',
+        ], [
+            'evidence_photos.max' => 'Máximo 2 fotos de evidencia por pedido.',
+            'evidence_photos.*.image' => 'El archivo debe ser una imagen.',
+            'evidence_photos.*.max' => 'La imagen no debe pesar más de 5MB.',
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $orderStage, $user) {
+                $orderStage->order->lockForUpdate();
+
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede subir evidencia de un pedido ya entregado.');
+                }
+
+                $evidenciaType = \App\Models\FileType::firstOrCreate(['name' => 'Evidencia']);
+
+                foreach ($request->file('evidence_photos') as $photo) {
+                    // Check existing evidence count
+                    $count = $orderStage->order->orderFiles()->where('file_type_id', $evidenciaType->id)->count();
+                    if ($count >= 2) {
+                        throw new \Exception('Ya se han subido las 2 fotos de evidencia permitidas.');
+                    }
+
+                    $path = $this->compressAndStore($photo, 'evidence');
+
+                    if ($path) {
+                        $orderStage->order->orderFiles()->create([
+                            'file_type_id' => $evidenciaType->id,
+                            'file_path' => $path,
+                            'uploaded_by' => $user->id,
+                        ]);
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
+
+        return back()->with('status', 'Evidencia subida correctamente.');
     }
 }

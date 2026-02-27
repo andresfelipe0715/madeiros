@@ -304,82 +304,169 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-4">
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
-                                            id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria', $order->lleva_herrajeria) ? 'checked' : '' }} {{ $isDisabled }}>
-                                        <label class="form-check-label text-muted small text-uppercase font-weight-bold"
-                                            for="lleva_herrajeria">Incluye Herrajería</label>
+                                <div class="mb-5">
+                                    <label class="form-label fw-bold d-block">Configuración Adicional</label>
+                                    <div class="bg-light p-4 rounded-3 border mb-4">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
+                                                id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria', $order->lleva_herrajeria) ? 'checked' : '' }} {{ $isDisabled }}>
+                                            <label class="form-check-label"
+                                                for="lleva_herrajeria">Incluye Herrajería</label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="lleva_manual_armado"
+                                                id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado', $order->lleva_manual_armado) ? 'checked' : '' }} {{ $isDisabled }}>
+                                            <label class="form-check-label"
+                                                for="lleva_manual_armado">Incluye Manual de Armado</label>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="lleva_manual_armado"
-                                            id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado', $order->lleva_manual_armado) ? 'checked' : '' }} {{ $isDisabled }}>
-                                        <label class="form-check-label text-muted small text-uppercase font-weight-bold"
-                                            for="lleva_manual_armado">Incluye Manual de Armado</label>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-4 border-top pt-4">
-                                    <label class="form-label text-muted small text-uppercase font-weight-bold d-block">Gestión de Archivos</label>
                                     
-                                    @if($order->orderFiles->count() > 0)
-                                        <div class="mb-3 p-3 bg-light rounded border">
-                                            <div class="d-flex align-items-center justify-content-between">
+                                    <label class="form-label fw-bold d-block">Gestión de Archivos y Evidencia</label>
+                                    <div class="bg-light p-4 rounded-3 border mb-4">
+                                        <!-- PDF Section -->
+                                        @php
+                                            $orderPdf = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'orden'));
+                                        @endphp
+
+                                        @if($orderPdf)
+                                            <div class="d-flex align-items-center justify-content-between mb-3 bg-white p-2 px-3 rounded border shadow-sm">
                                                 <div class="d-flex align-items-center">
                                                     <i class="bi bi-file-earmark-pdf-fill fs-4 text-danger me-3"></i>
                                                     <div>
-                                                        <div class="fw-bold small">{{ $order->orderFiles->first()->fileType->name ?? 'Orden' }}</div>
-                                                        <a href="{{ Storage::disk('public')->url($order->orderFiles->first()->file_path) }}" 
+                                                        <div class="fw-bold small">{{ $orderPdf->fileType->name ?? 'Orden' }}</div>
+                                                        <a href="{{ Storage::disk('public')->url($orderPdf->file_path) }}" 
                                                            target="_blank" class="text-primary small text-decoration-none hover-underline">
                                                             <i class="bi bi-eye me-1"></i> Ver archivo actual
                                                         </a>
                                                     </div>
                                                 </div>
-                                                <span class="badge bg-soft-success text-success rounded-pill small">Existente</span>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    <div x-data="{ 
-                                        fileName: '',
-                                        clearFile() {
-                                            this.fileName = '';
-                                            $refs.fileInput.value = '';
-                                        }
-                                    }">
-                                        <label for="order_file" class="form-label small text-muted text-uppercase mb-2">
-                                            {{ $order->orderFiles->count() > 0 ? 'Reemplazar Archivo' : 'Añadir Archivo' }} 
-                                            <span class="text-lowercase fw-normal">(PDF, Opcional)</span>
-                                        </label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="input-group input-group-sm flex-grow-1">
-                                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-upload"></i></span>
-                                                <input type="file" name="order_file" id="order_file"
-                                                    class="form-control border-start-0 @error('order_file') is-invalid @enderror"
-                                                    accept="application/pdf"
-                                                    x-ref="fileInput"
-                                                    @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
-                                            </div>
-                                            
-                                            <template x-if="fileName">
-                                                <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-3" @click="clearFile()" title="Quitar selección">
-                                                    <i class="bi bi-trash-fill me-1"></i> Quitar
-                                                </button>
-                                            </template>
-                                        </div>
-                                        <template x-if="fileName">
-                                            <div class="mt-2 small text-primary fw-medium">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Por reemplazar con: <span x-text="fileName"></span>
-                                            </div>
-                                        </template>
-                                        @if($order->orderFiles->count() > 0)
-                                            <div class="mt-1 x-small text-muted">
-                                                <i class="bi bi-exclamation-triangle me-1 text-warning"></i> Al subir uno nuevo, el anterior será eliminado permanentemente.
+                                                <span class="badge bg-soft-success text-success rounded-pill small border border-success border-opacity-25 pb-1">Existente</span>
                                             </div>
                                         @endif
-                                        @error('order_file')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
+
+                                        <div x-data="{ 
+                                            fileName: '',
+                                            clearFile() {
+                                                this.fileName = '';
+                                                $refs.fileInput.value = '';
+                                            }
+                                        }">
+                                            <label for="order_file" class="form-label fw-bold">
+                                                {{ $orderPdf ? 'Reemplazar Archivo' : 'Añadir Archivo' }} 
+                                                <span class="text-muted fw-normal small">(PDF, Opcional)</span>
+                                            </label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="input-group custom-input-group flex-grow-1">
+                                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-upload"></i></span>
+                                                    <input type="file" name="order_file" id="order_file"
+                                                        class="form-control border-start-0 @error('order_file') is-invalid @enderror"
+                                                        accept="application/pdf"
+                                                        x-ref="fileInput"
+                                                        @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                                </div>
+                                                
+                                                <template x-if="fileName">
+                                                    <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-3" @click="clearFile()" title="Quitar selección">
+                                                        <i class="bi bi-trash-fill me-1"></i> Quitar
+                                                    </button>
+                                                </template>
+                                            </div>
+                                            <template x-if="fileName">
+                                                <div class="mt-2 small text-primary fw-medium">
+                                                    <i class="bi bi-paperclip me-1"></i> Seleccionado: <span x-text="fileName"></span>
+                                                </div>
+                                            </template>
+                                            @if($orderPdf)
+                                                <div class="mt-1 x-small text-muted">
+                                                    <i class="bi bi-exclamation-triangle me-1 text-warning"></i> Al subir uno nuevo, el anterior será eliminado permanentemente.
+                                                </div>
+                                            @endif
+                                            @error('order_file')
+                                                <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <hr class="my-4 text-muted opacity-25">
+
+                                        <!-- Evidence Section -->
+                                        <div x-data="{ 
+                                            newPhotos: null, 
+                                            photosCount: 0,
+                                            existingPhotos: {{ $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->count() }},
+                                            deleting: []
+                                        }">
+                                            <label class="form-label fw-bold d-block">Fotos de Evidencia</label>
+                                            
+                                            @php
+                                                $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'));
+                                            @endphp
+
+                                            @if($evPhotos->count() > 0)
+                                                <div class="row g-2 mb-3">
+                                                    @foreach($evPhotos as $photo)
+                                                        <div class="col-6 col-md-4">
+                                                            <div class="position-relative border rounded overflow-hidden shadow-sm" 
+                                                                :class="deleting.includes({{ $photo->id }}) ? 'opacity-50 border-danger' : ''"
+                                                                style="height: 120px;">
+                                                                <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover">
+                                                                
+                                                                <div class="position-absolute top-0 end-0 p-1">
+                                                                    <div class="form-check p-0 m-0">
+                                                                        <input type="checkbox" name="delete_files[]" value="{{ $photo->id }}" 
+                                                                            class="form-check-input d-none" id="delPhoto{{ $photo->id }}"
+                                                                            @change="if($el.checked) { deleting.push({{ $photo->id }}); existingPhotos-- } else { deleting = deleting.filter(id => id !== {{ $photo->id }}); existingPhotos++ }">
+                                                                        <label class="btn btn-sm btn-danger p-0 px-2 rounded-circle shadow" for="delPhoto{{ $photo->id }}" 
+                                                                            :class="deleting.includes({{ $photo->id }}) ? 'btn-success' : 'btn-danger'">
+                                                                            <i class="bi" :class="deleting.includes({{ $photo->id }}) ? 'bi-arrow-counterclockwise' : 'bi-trash-fill'"></i>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-50 py-1 px-2 text-white x-small d-flex justify-content-between align-items-center">
+                                                                    <span>#{{ $loop->iteration }}</span>
+                                                                    <a href="{{ $photo->fileUrl }}" target="_blank" class="text-white bg-dark bg-opacity-50 p-1 px-2 rounded-1"><i class="bi bi-eye"></i></a>
+                                                                </div>
+                                                            </div>
+                                                            <template x-if="deleting.includes({{ $photo->id }})">
+                                                                <div class="text-danger extra-small mt-1 font-weight-bold">Marcado para eliminar</div>
+                                                            </template>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+
+                                            <div x-show="existingPhotos < 2" class="mt-2">
+                                                <label for="evidence_photos" class="form-label small fw-bold">
+                                                    Añadir Evidencia <span class="text-muted fw-normal">(Imágenes, Máx <span x-text="2 - existingPhotos"></span>)</span>
+                                                </label>
+                                                <div class="input-group custom-input-group flex-grow-1">
+                                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-image"></i></span>
+                                                    <input type="file" name="evidence_photos[]" id="evidence_photos"
+                                                        class="form-control border-start-0"
+                                                        accept="image/*"
+                                                        multiple
+                                                        @change="newPhotos = $event.target.files; photosCount = newPhotos.length">
+                                                </div>
+                                                
+                                                <template x-if="photosCount > 0">
+                                                    <div class="mt-2 small" :class="existingPhotos + photosCount > 2 ? 'text-danger fw-bold' : 'text-primary'">
+                                                        <i class="bi" :class="existingPhotos + photosCount > 2 ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'"></i>
+                                                        Seleccionado: <span x-text="photosCount"></span> archivo(s)
+                                                        <template x-if="existingPhotos + photosCount > 2">
+                                                            <span> (Excede el límite de 2 total)</span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                                
+                                                <div class="mt-1 extra-small text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i> Las imágenes se comprimirán automáticamente para ahorrar espacio.
+                                                </div>
+                                            </div>
+
+                                            <div x-show="existingPhotos >= 2 & deleting.length == 0" class="alert bg-success bg-opacity-10 text-success py-2 mt-2 extra-small mb-0 border border-success border-opacity-25 pb-1">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Límite de 2 fotos alcanzado.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

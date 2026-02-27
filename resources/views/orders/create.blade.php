@@ -53,7 +53,7 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="invoice_number" class="form-label fw-bold">NÃºmero de Factura /
+                                    <label for="invoice_number" class="form-label fw-bold">Número de Factura /
                                         Pedido</label>
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i
@@ -76,7 +76,8 @@
                                     <div class="bg-light p-3 rounded-3 border">
                                         <template x-if="materials.length === 0">
                                             <div class="text-center py-3 text-muted">
-                                                <i class="bi bi-info-circle me-1"></i> No se han aÃ±adido materiales aÃºn.
+                                                <i class="bi bi-info-circle me-1"></i> No se han aÃ±adido materiales
+                                                aÃºn.
                                             </div>
                                         </template>
 
@@ -183,7 +184,7 @@
                                         <textarea name="notes" id="notes"
                                             class="form-control border-start-0 @error('notes') is-invalid @enderror"
                                             rows="3"
-                                            placeholder="Detalles sobre cortes, acabados o servicios especÃ­ficos..."
+                                            placeholder="Detalles sobre cortes, acabados o servicios específicos..."
                                             maxlength="300">{{ old('notes') }}</textarea>
                                     </div>
                                     @error('notes')
@@ -192,13 +193,13 @@
                                 </div>
 
                                 <div class="mb-5">
-                                    <label class="form-label fw-bold d-block">ConfiguraciÃ³n Adicional</label>
+                                    <label class="form-label fw-bold d-block">Configuración Adicional</label>
                                     <div class="bg-light p-4 rounded-3 border mb-4">
                                         <div class="form-check form-switch mb-2">
                                             <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
                                                 id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria') ? 'checked' : '' }}>
                                             <label class="form-check-label" for="lleva_herrajeria">Incluye
-                                                HerrajerÃ­a</label>
+                                                Herrajería</label>
                                         </div>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" name="lleva_manual_armado"
@@ -208,7 +209,7 @@
                                         </div>
                                     </div>
 
-                                    <label class="form-label fw-bold d-block">Ruta de ProducciÃ³n</label>
+                                    <label class="form-label fw-bold d-block">Ruta de Producción</label>
                                     <p class="text-muted small mb-3">Seleccione las etapas que requiere este pedido. Por
                                         defecto se seleccionan todas.</p>
 
@@ -384,10 +385,11 @@
                                             x-text="fileName"></span>
                                     </div>
                                 </template>
-                                 <div class=" mt-1 x-small text-muted\>
- <i class=" bi bi-info-circle me-1\></i> Recomendación: Para archivos muy grandes, use un compresor de PDF (ej. iLovePDF) antes de subir.
- </div>
- @error('order_file')
+                                <div class=" mt-1 x-small text-muted\>
+ <i class=" bi bi-info-circle me-1\></i> Recomendación: Para archivos muy grandes, use un compresor de PDF (ej.
+                                    iLovePDF) antes de subir.
+                                </div>
+                                @error('order_file')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                         </div>

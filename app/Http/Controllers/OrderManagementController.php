@@ -9,17 +9,21 @@ use App\Models\Order;
 use App\Models\OrderStage;
 use App\Models\Stage;
 use App\Services\InventoryService;
+use App\Traits\CompressesImages;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class OrderManagementController extends Controller
 {
+    use CompressesImages;
+
     public function __construct(
         protected InventoryService $inventory
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of the orders.
@@ -93,22 +97,51 @@ class OrderManagementController extends Controller
 
                     $this->inventory->adjust($order, $validated['materials']);
 
-                    // Handle File Upload Replacement
+                    // 1. Handle main order PDF file replacement
                     if ($request->hasFile('order_file')) {
-                        // Delete old files if they exist
-                        foreach ($order->orderFiles as $oldFile) {
-                            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFile->file_path);
-                            $oldFile->delete();
+                        $ordenType = \App\Models\FileType::firstOrCreate(['name' => 'Orden']);
+
+                        // Delete existing PDF if any
+                        $existingFile = $order->orderFiles()->where('file_type_id', $ordenType->id)->first();
+                        if ($existingFile) {
+                            Storage::disk('public')->delete($existingFile->file_path);
+                            $existingFile->delete();
                         }
 
-                        // Store new file
                         $path = $request->file('order_file')->store('orders', 'public');
-                        $fileType = \App\Models\FileType::firstOrCreate(['name' => 'Orden']);
                         $order->orderFiles()->create([
-                            'file_type_id' => $fileType->id,
+                            'file_type_id' => $ordenType->id,
                             'file_path' => $path,
-                            'uploaded_by' => auth()->id(),
+                            'uploaded_by' => Auth::id(),
                         ]);
+                    }
+
+                    // 2. Handle Evidence Photos Deletion
+                    if ($request->has('delete_files')) {
+                        $filesToDelete = $order->orderFiles()->whereIn('id', $request->delete_files)->get();
+                        foreach ($filesToDelete as $file) {
+                            Storage::disk('public')->delete($file->file_path);
+                            $file->delete();
+                        }
+                    }
+
+                    // 3. Handle Evidence Photos Upload (Max 2 total)
+                    if ($request->hasFile('evidence_photos')) {
+                        $evidenciaType = \App\Models\FileType::firstOrCreate(['name' => 'Evidencia']);
+
+                        foreach ($request->file('evidence_photos') as $photo) {
+                            $currentCount = $order->orderFiles()->where('file_type_id', $evidenciaType->id)->count();
+                            if ($currentCount < 2) {
+                                $path = $this->compressAndStore($photo, 'evidence');
+                                if ($path) {
+                                    $order->orderFiles()->create([
+                                        'file_type_id' => $evidenciaType->id,
+                                        'file_path' => $path,
+                                        'uploaded_by' => Auth::id(),
+                                    ]);
+                                }
+                            }
+                        }
                     }
                 }
             });

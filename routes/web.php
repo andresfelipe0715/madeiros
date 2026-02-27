@@ -27,6 +27,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/order-stages/{orderStage}/deliver-manual', [\App\Http\Controllers\OrderStageController::class, 'deliverManual'])->name('order-stages.deliver-manual');
     Route::post('/order-stages/{orderStage}/mark-as-pending', [\App\Http\Controllers\OrderStageController::class, 'markAsPending'])->name('order-stages.mark-as-pending');
     Route::post('/order-stages/{orderStage}/remove-pending', [\App\Http\Controllers\OrderStageController::class, 'removePending'])->name('order-stages.remove-pending');
+    Route::post('/order-stages/{orderStage}/upload-evidence', [\App\Http\Controllers\OrderStageController::class, 'uploadEvidence'])->name('order-stages.upload-evidence');
 
     // Order Creation
     Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
@@ -55,4 +56,4 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/performance/details/{user}', [\App\Http\Controllers\PerformanceController::class, 'details'])->name('performance.details');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

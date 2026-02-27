@@ -136,19 +136,19 @@ it('allows an admin to override the queue', function () {
     expect($orderStageB->refresh()->started_at)->not->toBeNull();
 });
 
-it('blocks finishing an order if it is not next in queue', function () {
-    // Create Order A
+it('allows finishing an order that has been started even if it is not next in queue', function () {
+    // Create Order A (ID 1, say)
     $orderA = Order::create([
         'client_id' => $this->client->id,
-        'invoice_number' => 'INV-A',
+        'invoice_number' => 'INV-QA',
         'created_by' => $this->adminUser->id,
     ]);
     OrderStage::create(['order_id' => $orderA->id, 'stage_id' => $this->corte->id, 'sequence' => 1]);
 
-    // Create Order B
+    // Create Order B (ID 2, say)
     $orderB = Order::create([
         'client_id' => $this->client->id,
-        'invoice_number' => 'INV-B',
+        'invoice_number' => 'INV-QB',
         'created_by' => $this->adminUser->id,
     ]);
     $orderStageB = OrderStage::create([
@@ -162,13 +162,11 @@ it('blocks finishing an order if it is not next in queue', function () {
     // Acting as Corte User
     Auth::login($this->corteUser);
 
-    // Try to finish Order B
+    // Try to finish Order B (Should succeed because it was already started)
     $response = $this->from(route('dashboard'))->post(route('order-stages.finish', $orderStageB->id));
 
-    $response->assertStatus(302);
-    $response->assertRedirect(route('dashboard'));
-    $response->assertSessionHasErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
-    expect($orderStageB->refresh()->completed_at)->toBeNull();
+    $response->assertSessionHas('status', 'Etapa finalizada.');
+    expect($orderStageB->refresh()->completed_at)->not->toBeNull();
 });
 
 it('blocks a regular user from remitting an order if it is not next in queue', function () {
