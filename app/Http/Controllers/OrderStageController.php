@@ -12,8 +12,7 @@ class OrderStageController extends Controller
     public function __construct(
         protected \App\Services\StageAuthorizationService $authService,
         protected \App\Services\InventoryService $inventory
-    ) {
-    }
+    ) {}
 
     /**
      * Enforce strict workflow integrity before any action.
@@ -35,22 +34,32 @@ class OrderStageController extends Controller
 
     public function start(OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
 
         // 1. Basic Authorization (Role Access + Internal Sequence + Queue/Admin Override)
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             // Check if it's just a queue issue to provide better feedback
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        // 2. Pending Validation: A pending stage cannot be started
+        // 2. State Validation: Cannot start what is already started or completed
+        if ($orderStage->started_at) {
+            return back()->withErrors(['auth' => 'Esta etapa ya ha sido iniciada.']);
+        }
+
+        if ($orderStage->completed_at) {
+            return back()->withErrors(['auth' => 'Esta etapa ya ha sido completada.']);
+        }
+
+        // 3. Pending Validation: A pending stage cannot be started
         if ($orderStage->is_pending) {
             return back()->withErrors(['auth' => 'Este pedido está marcado como pendiente y no puede procesarse.']);
         }
@@ -67,17 +76,19 @@ class OrderStageController extends Controller
 
     public function pause(OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
-            return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
+        if (! Auth::user()->role->hasPermission('orders', 'edit')) {
+            return back()->withErrors(['auth' => 'No tiene permisos para pausar el proceso.']);
         }
 
         // Pause logic (could be more complex, but for now we just clear started_at or similar)
         // Given the instructions, we'll just implement a simple state change.
         $orderStage->update([
-            'started_at' => null, // Simple "pause" resets the start time in this simple model
+            'started_at' => null,
+            'started_by' => null,
         ]);
 
         return back()->with('status', 'Etapa pausada.');
@@ -85,20 +96,30 @@ class OrderStageController extends Controller
 
     public function finish(OrderStage $orderStage): \Illuminate\Http\RedirectResponse
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        // 2. Pending Validation: A pending stage cannot be finished
+        // 2. State Validation: Cannot finish what hasn't been started or is already completed
+        if (! $orderStage->started_at) {
+            return back()->withErrors(['auth' => 'No se puede finalizar una etapa que no ha sido iniciada.']);
+        }
+
+        if ($orderStage->completed_at) {
+            return back()->withErrors(['auth' => 'Esta etapa ya ha sido completada.']);
+        }
+
+        // 3. Pending Validation: A pending stage cannot be finished
         if ($orderStage->is_pending) {
             return back()->withErrors(['auth' => 'Este pedido está marcado como pendiente y no puede procesarse.']);
         }
@@ -119,7 +140,7 @@ class OrderStageController extends Controller
                 $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
 
                 // 4. Update the Order only if current sequence is the max and no stages remain incomplete
-                if ($orderStage->sequence == $maxSequence && !$hasIncompleteStages) {
+                if ($orderStage->sequence == $maxSequence && ! $hasIncompleteStages) {
                     $order->update([
                         'delivered_at' => now(),
                         'delivered_by' => Auth::id(),
@@ -138,13 +159,14 @@ class OrderStageController extends Controller
 
     public function remit(Request $request, OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
@@ -152,7 +174,7 @@ class OrderStageController extends Controller
         }
 
         // 1.5. DB-Driven Validation: Check if remit is allowed from this stage
-        if (!$orderStage->stage->can_remit) {
+        if (! $orderStage->stage->can_remit) {
             return back()->withErrors(['auth' => 'No se permite remitir pedidos desde esta etapa.']);
         }
 
@@ -186,7 +208,7 @@ class OrderStageController extends Controller
                     ->where('stage_id', $targetStageId)
                     ->first();
 
-                if (!$targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
+                if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
                     abort(400, 'Invalid remittance target.');
                 }
 
@@ -236,10 +258,11 @@ class OrderStageController extends Controller
 
     public function updateNotes(Request $request, OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -256,11 +279,12 @@ class OrderStageController extends Controller
 
     public function deliverHardware(OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -278,11 +302,12 @@ class OrderStageController extends Controller
 
     public function deliverManual(OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -300,13 +325,14 @@ class OrderStageController extends Controller
 
     public function markAsPending(Request $request, OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can mark as pending
-        if (!$user->role->hasPermission('orders', 'edit')) {
+        if (! $user->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para marcar como pendiente.']);
         }
 
@@ -322,12 +348,14 @@ class OrderStageController extends Controller
             'pending_reason' => $request->pending_reason,
             'pending_marked_by' => Auth::id(),
             'pending_marked_at' => now(),
+            'started_at' => null,
+            'started_by' => null,
         ]);
 
         \App\Models\OrderLog::create([
             'order_id' => $orderStage->order_id,
             'user_id' => Auth::id(),
-            'action' => 'Etapa marcada como pendiente: ' . substr($request->pending_reason, 0, 370),
+            'action' => 'Etapa marcada como pendiente: '.substr($request->pending_reason, 0, 370),
         ]);
 
         return back()->with('status', 'Etapa marcada como pendiente.');
@@ -335,13 +363,14 @@ class OrderStageController extends Controller
 
     public function removePending(OrderStage $orderStage)
     {
-        if ($error = $this->checkWorkflowIntegrity($orderStage))
+        if ($error = $this->checkWorkflowIntegrity($orderStage)) {
             return $error;
+        }
 
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can remove pending status
-        if (!$user->role->hasPermission('orders', 'edit')) {
+        if (! $user->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para quitar el estado pendiente.']);
         }
 

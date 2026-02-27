@@ -208,11 +208,13 @@
                                                     </form>
                                                 @endif
                                             @elseif(!$orderStage->completed_at)
-                                                <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-warning btn-action">Detener proceso</button>
-                                                </form>
+                                                @if($isAdmin)
+                                                    <form action="{{ route('order-stages.pause', $orderStage->id) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-warning btn-action">Detener proceso</button>
+                                                    </form>
+                                                @endif
                                                 <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
                                                     class="d-inline">
                                                     @csrf
@@ -238,7 +240,7 @@
                                         @endif
 
                                         {{-- Pending Logic Controls (Admin/can_edit only) --}}
-                                        @if($isAdmin && !$orderStage->completed_at && !$orderStage->started_at)
+                                        @if($isAdmin && !$orderStage->completed_at)
                                             @if($orderStage->is_pending)
                                                 <form action="{{ route('order-stages.remove-pending', $orderStage->id) }}" method="POST" class="d-inline">
                                                     @csrf
@@ -299,7 +301,7 @@
         @php $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id); @endphp
         @if($orderStage)
             {{-- Modal para marcar como pendiente --}}
-            @if($isAdmin && !$orderStage->completed_at && !$orderStage->started_at && !$orderStage->is_pending)
+            @if($isAdmin && !$orderStage->completed_at && !$orderStage->is_pending)
                 <div class="modal fade" id="pendingModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
