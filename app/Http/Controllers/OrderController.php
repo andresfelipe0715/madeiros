@@ -7,7 +7,6 @@ use App\Models\Client;
 use App\Models\FileType;
 use App\Models\Material;
 use App\Models\Order;
-use App\Models\Stage;
 use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,21 +18,20 @@ class OrderController extends Controller
 {
     public function __construct(
         protected InventoryService $inventory
-    ) {
-    }
+    ) {}
 
     /**
      * Show the form for creating a new order.
      */
     public function create(Request $request): View
     {
-        $clientId = $request->query('client_id');
+        $clientId = $request->query('client_id') ?? old('client_id');
         $selectedClient = $clientId ? Client::find($clientId) : null;
         $materials = Material::all();
         $stageGroups = \App\Models\StageGroup::with([
             'stages' => function ($query) {
                 $query->orderBy('default_sequence');
-            }
+            },
         ])->get()->sortBy(function ($group) {
             return $group->stages->min('default_sequence');
         });
@@ -84,7 +82,7 @@ class OrderController extends Controller
                 }
             });
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al crear la orden: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Error al crear la orden: '.$e->getMessage())->withInput();
         }
 
         return redirect()->route('orders.index')

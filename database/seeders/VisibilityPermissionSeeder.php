@@ -20,10 +20,6 @@ class VisibilityPermissionSeeder extends Seeder
                     'can_view_files' => true,
                     'can_view_order_file' => true,
                     'can_view_machine_file' => true,
-                    'can_view_notes' => true,
-                    'can_view_remit_history' => true,
-                    'can_view_pending_reason' => true,
-                    'can_view_performance' => false,
                 ]
             );
         }

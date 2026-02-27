@@ -42,7 +42,7 @@
 
                                             @if($selectedClient)
                                                 <option value="{{ $selectedClient->id }}" selected>
-                                                    {{ $selectedClient->name }}
+                                                    {{ $selectedClient->name }}{{ $selectedClient->document ? ' - ' . $selectedClient->document : '' }}
                                                 </option>
                                             @endif
                                         </select>
@@ -215,15 +215,16 @@
                                     <!-- Alpine.js Stages Component -->
                                     <div class="workflow-container bg-light p-4 rounded-3 border" x-data="{
                                              groups: {{ json_encode($stageGroups->map(function ($group) {
+    $oldStageIds = collect(old('stages'))->pluck('stage_id')->all();
     return [
         'id' => $group->id,
         'name' => $group->name,
-        'stages' => $group->stages->map(function ($stage) {
+        'stages' => $group->stages->map(function ($stage) use ($oldStageIds) {
             return [
                 'id' => $stage->id,
                 'name' => $stage->name,
                 'is_delivery' => $stage->is_delivery_stage,
-                'selected' => (is_array(old('stages')) && in_array($stage->id, old('stages'))) || !old('stages')
+                'selected' => (is_array(old('stages')) && in_array($stage->id, $oldStageIds)) || !old('stages')
             ];
         })->values()->toArray()
     ];

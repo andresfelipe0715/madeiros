@@ -64,7 +64,7 @@ class DefaultDataSeeder extends Seeder
 
         // 3. Create a dedicated Role and User for each specific Stage
         foreach ($stages as $stageName => $stageModel) {
-            $roleName = 'Empleado de ' . strtolower($stageName);
+            $roleName = 'Empleado de '.strtolower($stageName);
             $role = Role::firstOrCreate(['name' => $roleName]);
 
             // Sync only this specific stage to this role
@@ -73,9 +73,9 @@ class DefaultDataSeeder extends Seeder
             // Create a test user for this role
             $slug = strtolower(str_replace(' ', '_', $stageName));
             User::firstOrCreate(
-                ['document' => $slug . '_123'],
+                ['document' => $slug.'_123'],
                 [
-                    'name' => $roleName . ' Test',
+                    'name' => $roleName.' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,
@@ -144,6 +144,12 @@ class DefaultDataSeeder extends Seeder
                 ['role_id' => $adminRole->id, 'resource_type' => 'users'],
                 ['can_view' => true, 'can_create' => true, 'can_edit' => true]
             );
+
+            // Grant Full Visibility
+            \App\Models\RoleVisibilityPermission::updateOrCreate(
+                ['role_id' => $adminRole->id],
+                ['can_view_files' => true, 'can_view_order_file' => true, 'can_view_machine_file' => true]
+            );
         }
 
         $otherRoles = Role::where('name', '!=', 'Admin')->get();
@@ -170,6 +176,12 @@ class DefaultDataSeeder extends Seeder
             RolePermission::updateOrCreate(
                 ['role_id' => $role->id, 'resource_type' => 'performance'],
                 ['can_view' => false, 'can_create' => false, 'can_edit' => false]
+            );
+
+            // Default Visibility: All true
+            \App\Models\RoleVisibilityPermission::updateOrCreate(
+                ['role_id' => $role->id],
+                ['can_view_files' => true, 'can_view_order_file' => true, 'can_view_machine_file' => true]
             );
         }
 
