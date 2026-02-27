@@ -60,7 +60,7 @@
             {{-- Benchmarking Section (Manager Insights) --}}
             @if(count($benchmarking) > 0)
                 <h5 class="mb-3 font-weight-bold text-muted text-uppercase small">Benchmarking por Etapa</h5>
-                <div class="row mb-4">php
+                <div class="row mb-4">
                     @foreach($benchmarking as $bench)
                         <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
                             <div class="card border-0 shadow-sm h-100 overflow-hidden">

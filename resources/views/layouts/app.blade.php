@@ -54,6 +54,22 @@
         }
     </script>
     @include('partials.image-lightbox')
+    <form id="globalDeleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        window.confirmDeletion = function (url) {
+            if (confirm('¿Está seguro de eliminar esta foto? Esta acción no se puede deshacer.')) {
+                const form = document.getElementById('globalDeleteForm');
+                if (form) {
+                    form.action = url;
+                    form.submit();
+                }
+            }
+        };
+    </script>
 </body>
 
 </html>

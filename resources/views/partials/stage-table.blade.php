@@ -16,10 +16,10 @@
             <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
                 <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-light search-pill" 
                     style="width: 250px; transition: border-color 0.2s ease-in-out;">
-                    <span class="input-group-text bg-light border-0 pe-0 ps-3">
+                    <span class="input-group-text bg-transparent border-0 ps-3">
                         <i class="bi bi-search text-muted"></i>
                     </span>
-                    <input type="text" name="search" class="form-control bg-light border-0 ps-0 shadow-none" 
+                    <input type="text" name="search" class="form-control bg-transparent border-0 py-2 shadow-none" 
                         placeholder="Buscar por cliente o factura..." 
                         value="{{ request('search') }}"
                         onkeyup="debounceSubmit(this.form)"
@@ -483,20 +483,3 @@
             @endif
         @endif
     @endforeach
-
-<form id="globalDeleteForm" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
-
-<script>
-    if (typeof confirmDeletion === 'undefined') {
-        window.confirmDeletion = function(url) {
-            if (confirm('¿Está seguro de eliminar esta foto? Esta acción no se puede deshacer.')) {
-                const form = document.getElementById('globalDeleteForm');
-                form.action = url;
-                form.submit();
-            }
-        };
-    }
-</script>

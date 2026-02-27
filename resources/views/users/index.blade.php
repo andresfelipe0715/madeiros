@@ -16,12 +16,12 @@
         <div class="container-fluid px-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <form action="{{ route('users.index') }}" method="GET" class="d-flex align-items-center">
-                    <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-white search-pill"
+                    <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill"
                         style="width: 350px; transition: border-color 0.2s ease-in-out;">
-                        <span class="input-group-text bg-white border-0">
+                        <span class="input-group-text bg-transparent border-0 ps-3">
                             <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" name="search" class="form-control border-0 py-2 shadow-none"
+                        <input type="text" name="search" class="form-control bg-transparent border-0 py-2 shadow-none"
                             placeholder="Buscar por nombre o documento..." value="{{ request('search') }}"
                             onkeyup="debounceSubmit(this.form)"
                             onfocus="this.parentElement.style.borderColor = '#0d6efd'"

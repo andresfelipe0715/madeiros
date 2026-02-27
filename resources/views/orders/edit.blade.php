@@ -594,20 +594,3 @@
         }
     </style>
 </x-app-layout>
-
-<form id="globalDeleteForm" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
-
-<script>
-    if (typeof confirmDeletion === 'undefined') {
-        window.confirmDeletion = function(url) {
-            if (confirm('¿Está seguro de eliminar esta foto? Esta acción no se puede deshacer.')) {
-                const form = document.getElementById('globalDeleteForm');
-                form.action = url;
-                form.submit();
-            }
-        };
-    }
-</script>
