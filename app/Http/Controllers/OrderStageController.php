@@ -50,26 +50,36 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        // 2. State Validation: Cannot start what is already started or completed
-        if ($orderStage->started_at) {
-            return back()->withErrors(['auth' => 'Esta etapa ya ha sido iniciada.']);
-        }
+        try {
+            DB::transaction(function () use ($orderStage) {
+                $orderStage->lockForUpdate();
 
-        if ($orderStage->completed_at) {
-            return back()->withErrors(['auth' => 'Esta etapa ya ha sido completada.']);
-        }
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede modificar un pedido que ya ha sido entregado.');
+                }
 
-        // 3. Pending Validation: A pending stage cannot be started
-        if ($orderStage->is_pending) {
-            return back()->withErrors(['auth' => 'Este pedido está marcado como pendiente y no puede procesarse.']);
-        }
+                // 2. State Validation: Cannot start what is already started or completed
+                if ($orderStage->started_at) {
+                    throw new \Exception('Esta etapa ya ha sido iniciada.');
+                }
 
-        DB::transaction(function () use ($orderStage) {
-            $orderStage->update([
-                'started_at' => now(),
-                'started_by' => Auth::id(),
-            ]);
-        });
+                if ($orderStage->completed_at) {
+                    throw new \Exception('Esta etapa ya ha sido completada.');
+                }
+
+                // 3. Pending Validation: A pending stage cannot be started
+                if ($orderStage->is_pending) {
+                    throw new \Exception('Este pedido está marcado como pendiente y no puede procesarse.');
+                }
+
+                $orderStage->update([
+                    'started_at' => now(),
+                    'started_by' => Auth::id(),
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'Etapa iniciada.');
     }
@@ -84,12 +94,35 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No tiene permisos para pausar el proceso.']);
         }
 
-        // Pause logic (could be more complex, but for now we just clear started_at or similar)
-        // Given the instructions, we'll just implement a simple state change.
-        $orderStage->update([
-            'started_at' => null,
-            'started_by' => null,
-        ]);
+        try {
+            DB::transaction(function () use ($orderStage) {
+                $orderStage->lockForUpdate();
+
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede modificar un pedido que ya ha sido entregado.');
+                }
+
+                // State Validation: Cannot pause if not started, already completed, or already pending
+                if (! $orderStage->started_at) {
+                    throw new \Exception('No se puede pausar una etapa que no ha sido iniciada.');
+                }
+
+                if ($orderStage->completed_at) {
+                    throw new \Exception('No se puede pausar una etapa que ya ha sido completada.');
+                }
+
+                if ($orderStage->is_pending) {
+                    throw new \Exception('No se puede pausar una etapa que ya está marcada como pendiente.');
+                }
+
+                $orderStage->update([
+                    'started_at' => null,
+                    'started_by' => null,
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'Etapa pausada.');
     }
@@ -110,22 +143,28 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
-        // 2. State Validation: Cannot finish what hasn't been started or is already completed
-        if (! $orderStage->started_at) {
-            return back()->withErrors(['auth' => 'No se puede finalizar una etapa que no ha sido iniciada.']);
-        }
-
-        if ($orderStage->completed_at) {
-            return back()->withErrors(['auth' => 'Esta etapa ya ha sido completada.']);
-        }
-
-        // 3. Pending Validation: A pending stage cannot be finished
-        if ($orderStage->is_pending) {
-            return back()->withErrors(['auth' => 'Este pedido está marcado como pendiente y no puede procesarse.']);
-        }
-
         try {
             DB::transaction(function () use ($orderStage) {
+                $orderStage->lockForUpdate();
+
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede modificar un pedido que ya ha sido entregado.');
+                }
+
+                // 2. State Validation: Cannot finish what hasn't been started or is already completed
+                if (! $orderStage->started_at) {
+                    throw new \Exception('No se puede finalizar una etapa que no ha sido iniciada.');
+                }
+
+                if ($orderStage->completed_at) {
+                    throw new \Exception('Esta etapa ya ha sido completada.');
+                }
+
+                // 3. Pending Validation: A pending stage cannot be finished
+                if ($orderStage->is_pending) {
+                    throw new \Exception('Este pedido está marcado como pendiente y no puede procesarse.');
+                }
+
                 // 1. Mark current stage as completed
                 $orderStage->update([
                     'completed_at' => now(),
@@ -151,7 +190,7 @@ class OrderStageController extends Controller
                 }
             });
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withErrors(['auth' => $e->getMessage()]);
         }
 
         return back()->with('status', 'Etapa finalizada.');
@@ -171,6 +210,11 @@ class OrderStageController extends Controller
             }
 
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
+        }
+
+        // State Validation: Cannot remit an already completed stage
+        if ($orderStage->completed_at) {
+            return back()->withErrors(['auth' => 'No se puede remitir una etapa que ya ha sido completada.']);
         }
 
         // 1.5. DB-Driven Validation: Check if remit is allowed from this stage
@@ -200,6 +244,13 @@ class OrderStageController extends Controller
 
         try {
             return DB::transaction(function () use ($request, $orderStage) {
+                // Concurrency Locking
+                $orderStage->order->lockForUpdate();
+
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede remitir un pedido que ya ha sido entregado a menos que se revierta la entrega globalmente.');
+                }
+
                 $order = $orderStage->order;
                 $targetStageId = $request->target_stage_id;
 
@@ -209,7 +260,7 @@ class OrderStageController extends Controller
                     ->first();
 
                 if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
-                    abort(400, 'Invalid remittance target.');
+                    throw new \Exception('Destino de remisión inválido.');
                 }
 
                 $targetSequence = $targetStage->sequence;
@@ -249,10 +300,8 @@ class OrderStageController extends Controller
 
                 return back()->with('status', 'Pedido remitido.');
             });
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            throw $e;
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withErrors(['auth' => $e->getMessage()]);
         }
     }
 
@@ -264,6 +313,10 @@ class OrderStageController extends Controller
 
         if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
+        }
+
+        if ($orderStage->order->delivered_at) {
+            return back()->withErrors(['auth' => 'No se puede modificar un pedido que ya ha sido entregado.']);
         }
 
         $request->validate([
@@ -288,14 +341,26 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
-        if ($orderStage->is_pending) {
-            return back()->withErrors(['auth' => 'No se puede entregar herrajería mientras el pedido esté pendiente.']);
-        }
+        try {
+            DB::transaction(function () use ($orderStage, $user) {
+                $orderStage->order->lockForUpdate();
 
-        $orderStage->order->update([
-            'herrajeria_delivered_at' => now(),
-            'herrajeria_delivered_by' => $user->id,
-        ]);
+                if ($orderStage->is_pending) {
+                    throw new \Exception('No se puede entregar herrajería mientras el pedido esté pendiente.');
+                }
+
+                if ($orderStage->order->herrajeria_delivered_at) {
+                    throw new \Exception('La herrajería ya ha sido entregada.');
+                }
+
+                $orderStage->order->update([
+                    'herrajeria_delivered_at' => now(),
+                    'herrajeria_delivered_by' => $user->id,
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'Herrajería entregada.');
     }
@@ -311,14 +376,26 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
-        if ($orderStage->is_pending) {
-            return back()->withErrors(['auth' => 'No se puede entregar el manual mientras el pedido esté pendiente.']);
-        }
+        try {
+            DB::transaction(function () use ($orderStage, $user) {
+                $orderStage->order->lockForUpdate();
 
-        $orderStage->order->update([
-            'manual_armado_delivered_at' => now(),
-            'manual_armado_delivered_by' => $user->id,
-        ]);
+                if ($orderStage->is_pending) {
+                    throw new \Exception('No se puede entregar el manual mientras el pedido esté pendiente.');
+                }
+
+                if ($orderStage->order->manual_armado_delivered_at) {
+                    throw new \Exception('El manual ya ha sido entregado.');
+                }
+
+                $orderStage->order->update([
+                    'manual_armado_delivered_at' => now(),
+                    'manual_armado_delivered_by' => $user->id,
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'Manual de armado entregado.');
     }
@@ -336,27 +413,37 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No tiene permisos para marcar como pendiente.']);
         }
 
-        $request->validate([
-            'pending_reason' => 'required|string|max:250',
-        ], [
-            'pending_reason.required' => 'La razón del pendiente es obligatoria.',
-            'pending_reason.max' => 'La razón no puede exceder los 250 caracteres.',
-        ]);
+        try {
+            DB::transaction(function () use ($request, $orderStage) {
+                $orderStage->lockForUpdate();
 
-        $orderStage->update([
-            'is_pending' => true,
-            'pending_reason' => $request->pending_reason,
-            'pending_marked_by' => Auth::id(),
-            'pending_marked_at' => now(),
-            'started_at' => null,
-            'started_by' => null,
-        ]);
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede marcar como pendiente un pedido que ya ha sido entregado.');
+                }
 
-        \App\Models\OrderLog::create([
-            'order_id' => $orderStage->order_id,
-            'user_id' => Auth::id(),
-            'action' => 'Etapa marcada como pendiente: '.substr($request->pending_reason, 0, 370),
-        ]);
+                // State Validation: Cannot mark a completed stage as pending
+                if ($orderStage->completed_at) {
+                    throw new \Exception('No se puede marcar como pendiente una etapa que ya ha sido completada.');
+                }
+
+                $orderStage->update([
+                    'is_pending' => true,
+                    'pending_reason' => $request->pending_reason,
+                    'pending_marked_by' => Auth::id(),
+                    'pending_marked_at' => now(),
+                    'started_at' => null,
+                    'started_by' => null,
+                ]);
+
+                \App\Models\OrderLog::create([
+                    'order_id' => $orderStage->order_id,
+                    'user_id' => Auth::id(),
+                    'action' => 'Etapa marcada como pendiente: '.substr($request->pending_reason, 0, 370),
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'Etapa marcada como pendiente.');
     }
@@ -374,15 +461,36 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No tiene permisos para quitar el estado pendiente.']);
         }
 
-        $orderStage->update([
-            'is_pending' => false,
-        ]);
+        try {
+            DB::transaction(function () use ($orderStage) {
+                $orderStage->lockForUpdate();
 
-        \App\Models\OrderLog::create([
-            'order_id' => $orderStage->order_id,
-            'user_id' => Auth::id(),
-            'action' => 'Pendiente removido',
-        ]);
+                if ($orderStage->order->delivered_at) {
+                    throw new \Exception('No se puede modificar un pedido que ya ha sido entregado.');
+                }
+
+                // State Validation: Cannot remove pending if it's not pending or already completed
+                if (! $orderStage->is_pending) {
+                    throw new \Exception('Esta etapa no está marcada como pendiente.');
+                }
+
+                if ($orderStage->completed_at) {
+                    throw new \Exception('No se puede modificar el estado de una etapa que ya ha sido completada.');
+                }
+
+                $orderStage->update([
+                    'is_pending' => false,
+                ]);
+
+                \App\Models\OrderLog::create([
+                    'order_id' => $orderStage->order_id,
+                    'user_id' => Auth::id(),
+                    'action' => 'Pendiente removido',
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'Estado pendiente removido.');
     }
