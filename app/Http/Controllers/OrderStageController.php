@@ -551,4 +551,29 @@ class OrderStageController extends Controller
 
         return back()->with('status', 'Evidencia subida correctamente.');
     }
+
+    public function deleteFile(\App\Models\OrderFile $orderFile)
+    {
+        $user = Auth::user();
+
+        // Authorization: Admin or the user who uploaded it
+        if (! $user->role->hasPermission('orders', 'edit') && $orderFile->uploaded_by !== $user->id) {
+            return back()->withErrors(['auth' => 'No autorizado para eliminar este archivo.']);
+        }
+
+        if ($orderFile->order->delivered_at) {
+            return back()->withErrors(['auth' => 'No se puede eliminar archivos de un pedido ya entregado.']);
+        }
+
+        try {
+            DB::transaction(function () use ($orderFile) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($orderFile->file_path);
+                $orderFile->delete();
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['auth' => 'Error al eliminar el archivo: '.$e->getMessage()]);
+        }
+
+        return back()->with('status', 'Archivo eliminado correctamente.');
+    }
 }

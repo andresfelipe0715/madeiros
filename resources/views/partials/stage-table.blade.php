@@ -436,13 +436,28 @@
                                         <div class="mt-4">
                                             <label class="form-label font-weight-bold">Evidencia Actual</label>
                                             <div class="row g-2">
-                                                @foreach($evPhotos as $photo)
+                                                @php
+                                                    $imageUrls = $evPhotos->map(fn($p) => $p->fileUrl)->values()->toArray();
+                                                @endphp
+                                                @foreach($evPhotos as $index => $photo)
                                                     <div class="col-6">
-                                                        <div class="position-relative rounded overflow-hidden" style="height: 100px;">
-                                                            <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover">
-                                                            <a href="{{ $photo->fileUrl }}" target="_blank" class="position-absolute bottom-0 end-0 bg-dark bg-opacity-50 text-white p-1 px-2 small">
-                                                                <i class="bi bi-eye"></i>
-                                                            </a>
+                                                        <div class="position-relative rounded overflow-hidden shadow-sm shadow-hover" style="height: 120px;">
+                                                            <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover" alt="Foto de evidencia">
+                                                            
+                                                            <div class="position-absolute top-0 end-0 p-1">
+                                                                <button type="button" 
+                                                                    class="btn btn-sm btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" 
+                                                                    style="width: 32px; height: 32px;" 
+                                                                    title="Eliminar foto"
+                                                                    onclick="confirmDeletion('{{ route('order-files.destroy', $photo->id) }}')">
+                                                                    <i class="bi bi-trash3-fill" style="font-size: 1rem;"></i>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-50 py-1 px-2 text-white x-small d-flex justify-content-between align-items-center">
+                                                                <span>#{{ $loop->iteration }}</span>
+                                                                <span class="text-white"><i class="bi bi-image"></i></span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 @endforeach
@@ -465,3 +480,20 @@
             @endif
         @endif
     @endforeach
+
+<form id="globalDeleteForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+    if (typeof confirmDeletion === 'undefined') {
+        window.confirmDeletion = function(url) {
+            if (confirm('¿Está seguro de eliminar esta foto? Esta acción no se puede deshacer.')) {
+                const form = document.getElementById('globalDeleteForm');
+                form.action = url;
+                form.submit();
+            }
+        };
+    }
+</script>

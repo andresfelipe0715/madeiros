@@ -329,19 +329,19 @@
                                         @endphp
 
                                         @if($orderPdf)
-                                            <div class="d-flex align-items-center justify-content-between mb-3 bg-white p-2 px-3 rounded border shadow-sm">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-file-earmark-pdf-fill fs-4 text-danger me-3"></i>
-                                                    <div>
-                                                        <div class="fw-bold small">{{ $orderPdf->fileType->name ?? 'Orden' }}</div>
-                                                        <a href="{{ Storage::disk('public')->url($orderPdf->file_path) }}" 
-                                                           target="_blank" class="text-primary small text-decoration-none hover-underline">
-                                                            <i class="bi bi-eye me-1"></i> Ver archivo actual
-                                                        </a>
+                                                <div class="d-flex align-items-center justify-content-between mb-3 bg-white p-2 px-3 rounded border shadow-sm">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-file-earmark-pdf-fill fs-4 text-danger me-3"></i>
+                                                        <div>
+                                                            <div class="fw-bold small">{{ $orderPdf->fileType->name ?? 'Orden' }}</div>
+                                                            <a href="{{ $orderPdf->fileUrl }}" 
+                                                               target="_blank" class="text-primary small text-decoration-none hover-underline">
+                                                                <i class="bi bi-eye me-1"></i> Ver archivo actual
+                                                            </a>
+                                                        </div>
                                                     </div>
+                                                    <span class="badge bg-soft-success text-success rounded-pill small border border-success border-opacity-25 pb-1">Existente</span>
                                                 </div>
-                                                <span class="badge bg-soft-success text-success rounded-pill small border border-success border-opacity-25 pb-1">Existente</span>
-                                            </div>
                                         @endif
 
                                         <div x-data="{ 
@@ -402,50 +402,62 @@
                                             @endphp
 
                                             @if($evPhotos->count() > 0)
+                                                @php
+                                                    $imageUrls = $evPhotos->map(fn($p) => $p->fileUrl)->values()->toArray();
+                                                @endphp
                                                 <div class="row g-2 mb-3">
-                                                    @foreach($evPhotos as $photo)
+                                                    @foreach($evPhotos as $index => $photo)
                                                         <div class="col-6 col-md-4">
-                                                            <div class="position-relative border rounded overflow-hidden shadow-sm" 
-                                                                :class="deleting.includes({{ $photo->id }}) ? 'opacity-50 border-danger' : ''"
+                                                            <div class="position-relative border rounded overflow-hidden shadow-sm shadow-hover" 
                                                                 style="height: 120px;">
-                                                                <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover">
+                                                                <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover" alt="Foto de evidencia">
                                                                 
                                                                 <div class="position-absolute top-0 end-0 p-1">
-                                                                    <div class="form-check p-0 m-0">
-                                                                        <input type="checkbox" name="delete_files[]" value="{{ $photo->id }}" 
-                                                                            class="form-check-input d-none" id="delPhoto{{ $photo->id }}"
-                                                                            @change="if($el.checked) { deleting.push({{ $photo->id }}); existingPhotos-- } else { deleting = deleting.filter(id => id !== {{ $photo->id }}); existingPhotos++ }">
-                                                                        <label class="btn btn-sm btn-danger p-0 px-2 rounded-circle shadow" for="delPhoto{{ $photo->id }}" 
-                                                                            :class="deleting.includes({{ $photo->id }}) ? 'btn-success' : 'btn-danger'">
-                                                                            <i class="bi" :class="deleting.includes({{ $photo->id }}) ? 'bi-arrow-counterclockwise' : 'bi-trash-fill'"></i>
-                                                                        </label>
-                                                                    </div>
+                                                                    <button type="button" 
+                                                                        class="btn btn-sm btn-danger rounded-circle p-0 shadow d-flex align-items-center justify-content-center" 
+                                                                        style="width: 36px; height: 36px;" 
+                                                                        title="Eliminar foto"
+                                                                        onclick="confirmDeletion('{{ route('order-files.destroy', $photo->id) }}')">
+                                                                        <i class="bi bi-trash3-fill" style="font-size: 1.2rem;"></i>
+                                                                    </button>
                                                                 </div>
 
                                                                 <div class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-50 py-1 px-2 text-white x-small d-flex justify-content-between align-items-center">
                                                                     <span>#{{ $loop->iteration }}</span>
-                                                                    <a href="{{ $photo->fileUrl }}" target="_blank" class="text-white bg-dark bg-opacity-50 p-1 px-2 rounded-1"><i class="bi bi-eye"></i></a>
+                                                                    <span class="text-white"><i class="bi bi-image"></i></span>
                                                                 </div>
                                                             </div>
-                                                            <template x-if="deleting.includes({{ $photo->id }})">
-                                                                <div class="text-danger extra-small mt-1 font-weight-bold">Marcado para eliminar</div>
-                                                            </template>
                                                         </div>
                                                     @endforeach
                                                 </div>
                                             @endif
 
-                                            <div x-show="existingPhotos < 2" class="mt-2">
+                                            <div x-show="existingPhotos < 2" class="mt-2" 
+                                                x-data="{ 
+                                                    clearInput() { 
+                                                        $refs.evidenceInput.value = ''; 
+                                                        $data.newPhotos = null; 
+                                                        $data.photosCount = 0; 
+                                                    } 
+                                                }">
                                                 <label for="evidence_photos" class="form-label small fw-bold">
                                                     Añadir Evidencia <span class="text-muted fw-normal">(Imágenes, Máx <span x-text="2 - existingPhotos"></span>)</span>
                                                 </label>
-                                                <div class="input-group custom-input-group flex-grow-1">
-                                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-image"></i></span>
-                                                    <input type="file" name="evidence_photos[]" id="evidence_photos"
-                                                        class="form-control border-start-0"
-                                                        accept="image/*"
-                                                        multiple
-                                                        @change="newPhotos = $event.target.files; photosCount = newPhotos.length">
+                                                <div class="d-flex gap-2">
+                                                    <div class="input-group custom-input-group flex-grow-1">
+                                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-image"></i></span>
+                                                        <input type="file" name="evidence_photos[]" id="evidence_photos"
+                                                            class="form-control border-start-0"
+                                                            accept="image/*"
+                                                            multiple
+                                                            x-ref="evidenceInput"
+                                                            @change="newPhotos = $event.target.files; photosCount = newPhotos.length">
+                                                    </div>
+                                                    <template x-if="photosCount > 0">
+                                                        <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-3" @click="clearInput()" title="Quitar selección">
+                                                            <i class="bi bi-trash-fill me-1"></i> Quitar
+                                                        </button>
+                                                    </template>
                                                 </div>
                                                 
                                                 <template x-if="photosCount > 0">
@@ -470,7 +482,13 @@
                                     </div>
                                 </div>
 
-                                <div class="d-grid">
+                                <div class="d-grid gap-2">
+                                    <template x-if="hasErrors">
+                                        <div class="alert alert-danger py-2 extra-small mb-0 text-center border-0 shadow-sm">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                            No se puede actualizar: Hay materiales que exceden el stock disponible.
+                                        </div>
+                                    </template>
                                     <button type="submit" class="btn btn-primary" {{ $btnDisabled }} :disabled="hasErrors">
                                         {{ __('Actualizar Información') }}
                                     </button>
@@ -576,3 +594,20 @@
         }
     </style>
 </x-app-layout>
+
+<form id="globalDeleteForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+    if (typeof confirmDeletion === 'undefined') {
+        window.confirmDeletion = function(url) {
+            if (confirm('¿Está seguro de eliminar esta foto? Esta acción no se puede deshacer.')) {
+                const form = document.getElementById('globalDeleteForm');
+                form.action = url;
+                form.submit();
+            }
+        };
+    }
+</script>

@@ -28,6 +28,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/order-stages/{orderStage}/mark-as-pending', [\App\Http\Controllers\OrderStageController::class, 'markAsPending'])->name('order-stages.mark-as-pending');
     Route::post('/order-stages/{orderStage}/remove-pending', [\App\Http\Controllers\OrderStageController::class, 'removePending'])->name('order-stages.remove-pending');
     Route::post('/order-stages/{orderStage}/upload-evidence', [\App\Http\Controllers\OrderStageController::class, 'uploadEvidence'])->name('order-stages.upload-evidence');
+    Route::delete('/order-files/{orderFile}', [\App\Http\Controllers\OrderStageController::class, 'deleteFile'])->name('order-files.destroy');
 
     // Order Creation
     Route::get('/orders/create', [\App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
