@@ -216,9 +216,9 @@
                                                 <form action="{{ route('order-stages.finish', $orderStage->id) }}" method="POST"
                                                     class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
-                                                        {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
-                                                        {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
+                                                    <button type="submit" class="btn btn-sm btn-success btn-action {{ !$canAct || $orderStage->is_pending ? 'disabled opacity-50' : '' }}"
+                                                        {{ !$canAct || $orderStage->is_pending ? 'disabled' : '' }}
+                                                        {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$canAct ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
                                                         {{ $stage->is_delivery_stage ? 'Entrega del mueble realizada' : 'Finalizar' }}
                                                     </button>
                                                 </form>
@@ -228,11 +228,11 @@
                                         @endif
 
                                         @if($stage->can_remit && $canAct)
-                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled opacity-50' : '' }}" 
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-action {{ !$canAct || $orderStage->is_pending ? 'disabled opacity-50' : '' }}" 
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#remitirModal{{ $orderStage->id }}"
-                                                {{ (!$isNext && !$isAdmin) || $orderStage->is_pending ? 'disabled' : '' }}
-                                                {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$isNext && !$isAdmin ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
+                                                {{ !$canAct || $orderStage->is_pending ? 'disabled' : '' }}
+                                                {{ $orderStage->is_pending ? 'title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : (!$canAct ? 'title="Este pedido no es el siguiente en la fila."' : '') }}>
                                                 Remitir
                                             </button>
                                         @endif

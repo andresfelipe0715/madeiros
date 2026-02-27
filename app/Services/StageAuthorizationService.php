@@ -47,6 +47,12 @@ class StageAuthorizationService
         }
 
         // 5. Queue Logic: Order must be the next pending order in this stage
+        // EXCEPTION: If the stage is already started, the user can continue and finish it
+        // even if a lower-ID order arrives later at this stage.
+        if ($targetOrderStage->started_at !== null) {
+            return true;
+        }
+
         return $this->isNextInQueue($order, $stageId);
     }
 
