@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center w-100">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -53,7 +53,7 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="invoice_number" class="form-label fw-bold">Número de Factura /
+                                    <label for="invoice_number" class="form-label fw-bold">NÃºmero de Factura /
                                         Pedido</label>
                                     <div class="input-group custom-input-group">
                                         <span class="input-group-text bg-white border-end-0 text-muted"><i
@@ -70,13 +70,13 @@
 
                                 <div class="mb-4">
                                     <label class="form-label fw-bold">Reserva de Inventario</label>
-                                    <p class="text-muted small mb-2">Seleccione los materiales y añada notas opcionales
+                                    <p class="text-muted small mb-2">Seleccione los materiales y aÃ±ada notas opcionales
                                         (ej: color, espesor, corte).</p>
 
                                     <div class="bg-light p-3 rounded-3 border">
                                         <template x-if="materials.length === 0">
                                             <div class="text-center py-3 text-muted">
-                                                <i class="bi bi-info-circle me-1"></i> No se han añadido materiales aún.
+                                                <i class="bi bi-info-circle me-1"></i> No se han aÃ±adido materiales aÃºn.
                                             </div>
                                         </template>
 
@@ -183,7 +183,7 @@
                                         <textarea name="notes" id="notes"
                                             class="form-control border-start-0 @error('notes') is-invalid @enderror"
                                             rows="3"
-                                            placeholder="Detalles sobre cortes, acabados o servicios específicos..."
+                                            placeholder="Detalles sobre cortes, acabados o servicios especÃ­ficos..."
                                             maxlength="300">{{ old('notes') }}</textarea>
                                     </div>
                                     @error('notes')
@@ -192,13 +192,13 @@
                                 </div>
 
                                 <div class="mb-5">
-                                    <label class="form-label fw-bold d-block">Configuración Adicional</label>
+                                    <label class="form-label fw-bold d-block">ConfiguraciÃ³n Adicional</label>
                                     <div class="bg-light p-4 rounded-3 border mb-4">
                                         <div class="form-check form-switch mb-2">
                                             <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
                                                 id="lleva_herrajeria" value="1" {{ old('lleva_herrajeria') ? 'checked' : '' }}>
                                             <label class="form-check-label" for="lleva_herrajeria">Incluye
-                                                Herrajería</label>
+                                                HerrajerÃ­a</label>
                                         </div>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" name="lleva_manual_armado"
@@ -208,7 +208,7 @@
                                         </div>
                                     </div>
 
-                                    <label class="form-label fw-bold d-block">Ruta de Producción</label>
+                                    <label class="form-label fw-bold d-block">Ruta de ProducciÃ³n</label>
                                     <p class="text-muted small mb-3">Seleccione las etapas que requiere este pedido. Por
                                         defecto se seleccionan todas.</p>
 
@@ -350,34 +350,61 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-4">
+                                <div class="mb-4" x-data="{ 
+                                    fileName: '',
+                                    clearFile() {
+                                        this.fileName = '';
+                                        $refs.fileInput.value = '';
+                                    }
+                                }">
                                     <label for="order_file" class="form-label fw-bold">Archivo de la Orden <span
                                             class="text-muted fw-normal small">(PDF, Opcional)</span></label>
-                                    <div class="input-group custom-input-group">
-                                        <span class="input-group-text bg-white border-end-0 text-muted"><i
-                                                class="bi bi-file-earmark-pdf-fill"></i></span>
-                                        <input type="file" name="order_file" id="order_file"
-                                            class="form-control border-start-0 @error('order_file') is-invalid @enderror"
-                                            accept="application/pdf">
-                                    </div>
-                                    @error('order_file')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="input-group custom-input-group flex-grow-1">
+                                            <span class="input-group-text bg-white border-end-0 text-muted"><i
+                                                    class="bi bi-file-earmark-pdf-fill"></i></span>
+                                            <input type="file" name="order_file" id="order_file"
+                                                class="form-control border-start-0 @error('order_file') is-invalid @enderror"
+                                                accept="application/pdf" x-ref="fileInput"
+                                                @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                        </div>
 
-                                <div class="d-grid mt-5">
-                                    <button type="submit"
-                                        class="btn btn-primary btn-lg rounded-pill shadow-sm transition-all hover-elevate py-3"
-                                        :disabled="hasErrors">
-                                        <i class="bi bi-check2-circle me-2"></i> Confirmar y Crear Orden
-                                    </button>
+                                        <template x-if="fileName">
+                                            <button type="button"
+                                                class="btn btn-outline-danger shadow-sm rounded-pill px-3"
+                                                @click="clearFile()" title="Quitar archivo">
+                                                <i class="bi bi-trash-fill me-1"></i> Quitar
+                                            </button>
+                                        </template>
+                                    </div>
                                 </div>
-                            </form>
+                                <template x-if="fileName">
+                                    <div class="mt-2 small text-primary fw-medium">
+                                        <i class="bi bi-paperclip me-1"></i> Seleccionado: <span
+                                            x-text="fileName"></span>
+                                    </div>
+                                </template>
+                                 <div class=" mt-1 x-small text-muted\>
+ <i class=" bi bi-info-circle me-1\></i> Recomendación: Para archivos muy grandes, use un compresor de PDF (ej. iLovePDF) antes de subir.
+ </div>
+ @error('order_file')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                         </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit"
+                                class="btn btn-primary btn-lg rounded-pill shadow-sm transition-all hover-elevate py-3"
+                                :disabled="hasErrors">
+                                <i class="bi bi-check2-circle me-2"></i> Confirmar y Crear Orden
+                            </button>
+                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <style>

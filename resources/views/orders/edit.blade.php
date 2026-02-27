@@ -47,7 +47,7 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('orders.update', $order) }}" method="POST" novalidate
+                            <form action="{{ route('orders.update', $order) }}" method="POST" enctype="multipart/form-data" novalidate
                                 x-data="{
                                     materials: {{ json_encode(old('materials', $order->orderMaterials->map(fn($om) => [
                                         'id' => $om->id,
@@ -316,6 +316,70 @@
                                             id="lleva_manual_armado" value="1" {{ old('lleva_manual_armado', $order->lleva_manual_armado) ? 'checked' : '' }} {{ $isDisabled }}>
                                         <label class="form-check-label text-muted small text-uppercase font-weight-bold"
                                             for="lleva_manual_armado">Incluye Manual de Armado</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4 border-top pt-4">
+                                    <label class="form-label text-muted small text-uppercase font-weight-bold d-block">Gestión de Archivos</label>
+                                    
+                                    @if($order->orderFiles->count() > 0)
+                                        <div class="mb-3 p-3 bg-light rounded border">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-file-earmark-pdf-fill fs-4 text-danger me-3"></i>
+                                                    <div>
+                                                        <div class="fw-bold small">{{ $order->orderFiles->first()->fileType->name ?? 'Orden' }}</div>
+                                                        <a href="{{ Storage::disk('public')->url($order->orderFiles->first()->file_path) }}" 
+                                                           target="_blank" class="text-primary small text-decoration-none hover-underline">
+                                                            <i class="bi bi-eye me-1"></i> Ver archivo actual
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-soft-success text-success rounded-pill small">Existente</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div x-data="{ 
+                                        fileName: '',
+                                        clearFile() {
+                                            this.fileName = '';
+                                            $refs.fileInput.value = '';
+                                        }
+                                    }">
+                                        <label for="order_file" class="form-label small text-muted text-uppercase mb-2">
+                                            {{ $order->orderFiles->count() > 0 ? 'Reemplazar Archivo' : 'Añadir Archivo' }} 
+                                            <span class="text-lowercase fw-normal">(PDF, Opcional)</span>
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="input-group input-group-sm flex-grow-1">
+                                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-upload"></i></span>
+                                                <input type="file" name="order_file" id="order_file"
+                                                    class="form-control border-start-0 @error('order_file') is-invalid @enderror"
+                                                    accept="application/pdf"
+                                                    x-ref="fileInput"
+                                                    @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                            </div>
+                                            
+                                            <template x-if="fileName">
+                                                <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-3" @click="clearFile()" title="Quitar selección">
+                                                    <i class="bi bi-trash-fill me-1"></i> Quitar
+                                                </button>
+                                            </template>
+                                        </div>
+                                        <template x-if="fileName">
+                                            <div class="mt-2 small text-primary fw-medium">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Por reemplazar con: <span x-text="fileName"></span>
+                                            </div>
+                                        </template>
+                                        @if($order->orderFiles->count() > 0)
+                                            <div class="mt-1 x-small text-muted">
+                                                <i class="bi bi-exclamation-triangle me-1 text-warning"></i> Al subir uno nuevo, el anterior será eliminado permanentemente.
+                                            </div>
+                                        @endif
+                                        @error('order_file')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 

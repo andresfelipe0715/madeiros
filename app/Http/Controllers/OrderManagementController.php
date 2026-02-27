@@ -92,6 +92,24 @@ class OrderManagementController extends Controller
                     ]);
 
                     $this->inventory->adjust($order, $validated['materials']);
+
+                    // Handle File Upload Replacement
+                    if ($request->hasFile('order_file')) {
+                        // Delete old files if they exist
+                        foreach ($order->orderFiles as $oldFile) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFile->file_path);
+                            $oldFile->delete();
+                        }
+
+                        // Store new file
+                        $path = $request->file('order_file')->store('orders', 'public');
+                        $fileType = \App\Models\FileType::firstOrCreate(['name' => 'Orden']);
+                        $order->orderFiles()->create([
+                            'file_type_id' => $fileType->id,
+                            'file_path' => $path,
+                            'uploaded_by' => auth()->id(),
+                        ]);
+                    }
                 }
             });
         } catch (\Exception $e) {

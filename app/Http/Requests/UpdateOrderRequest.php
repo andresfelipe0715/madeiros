@@ -33,7 +33,7 @@ class UpdateOrderRequest extends FormRequest
         }
 
         return [
-            'invoice_number' => 'required|string|max:50|unique:orders,invoice_number,'.$orderId,
+            'invoice_number' => 'required|string|max:50|unique:orders,invoice_number,' . $orderId,
             'notes' => 'nullable|string|max:300',
             'lleva_herrajeria' => 'boolean',
             'lleva_manual_armado' => 'boolean',
@@ -44,6 +44,7 @@ class UpdateOrderRequest extends FormRequest
             'materials.*.actual_quantity' => 'nullable|numeric|min:0',
             'materials.*.notes' => 'nullable|string|max:50',
             'materials.*.cancelled' => 'nullable|boolean',
+            'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB
         ];
     }
 }
