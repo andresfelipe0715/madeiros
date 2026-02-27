@@ -82,7 +82,7 @@
                                 @php
                                     $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
                                     $materialLabels = $activeMaterials->map(function($om) {
-                                        return $om->material->name . ($om->notes ? " - {$om->notes}" : "");
+                                        return $om->material->name . " (" . (floor($om->estimated_quantity) == $om->estimated_quantity ? number_format($om->estimated_quantity, 0) : number_format($om->estimated_quantity, 1)) . ")" . ($om->notes ? " - {$om->notes}" : "");
                                     });
                                     $materialText = $materialLabels->implode(', ');
                                 @endphp
@@ -180,7 +180,7 @@
                                     @endif
                                     <small class="text-muted d-block"><span class="fw-bold">Gral:</span>
                                         {{ Str::limit($order->notes, 30) ?: '-' }}</small>
-                                    <small class="text-info d-block fw-bold"><span
+                                    <small class="text-primary d-block fw-bold"><span
                                             class="text-dark">{{ $stageName }}:</span>
                                         {{ Str::limit($orderStage->notes, 30) ?: '-' }}</small>
                                     <div class="text-primary x-small mt-1"><i class="bi bi-pencil-square"></i> Ver/Editar
@@ -377,7 +377,10 @@
                             <ul class="list-group list-group-flush">
                                 @foreach($activeMaterials as $om)
                                     <li class="list-group-item px-0 border-0">
-                                        <div class="fw-bold">{{ $om->material->name }}</div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold">{{ $om->material->name }}</span>
+                                            <span class="badge bg-light text-dark border">{{ $om->estimated_quantity }}</span>
+                                        </div>
                                         @if($om->notes)
                                             <div class="small text-muted">{{ $om->notes }}</div>
                                         @endif

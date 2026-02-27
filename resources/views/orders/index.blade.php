@@ -48,6 +48,7 @@
                                     <th class="px-4 py-3 text-nowrap">Creado por</th>
                                     <th class="px-4 py-3">Factura</th>
                                     <th class="px-4 py-3">Material</th>
+                                    <th class="px-4 py-3">Observaciones</th>
                                     <th class="px-4 py-3">Herrajería</th>
                                     <th class="px-4 py-3">Manual</th>
                                     <th class="px-4 py-3">Etapa Actual</th>
@@ -78,21 +79,49 @@
                                                 $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
                                                 $cancelledMaterials = $order->orderMaterials->filter(fn($om) => !is_null($om->cancelled_at));
                                                 $materialLabels = $activeMaterials->map(function ($om) {
-                                                    return $om->material->name . ($om->notes ? " - {$om->notes}" : "");
+                                                    return $om->material->name . " (" . (floor($om->estimated_quantity) == $om->estimated_quantity ? number_format($om->estimated_quantity, 0) : number_format($om->estimated_quantity, 1)) . ")" . ($om->notes ? " - {$om->notes}" : "");
                                                 });
                                                 $materialText = $materialLabels->implode(', ');
                                             @endphp
 
-                                            <div class="d-flex align-items-center">
+                                            <div class="d-flex align-items-center" style="cursor: pointer;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#materialDetailModal{{ $order->id }}">
                                                 <span class="text-truncate" style="max-width: 150px;">
                                                     {{ $materialText ?: '-' }}
                                                 </span>
-                                                <button type="button" class="btn btn-link btn-sm p-0 ms-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#materialDetailModal{{ $order->id }}"
-                                                    title="Ver detalle completo">
-                                                    <i class="bi bi-info-circle text-primary"></i>
-                                                </button>
+                                                <i class="bi bi-info-circle text-primary ms-2"></i>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @php
+                                                $currentOrderStage = $order->orderStages->whereNull('completed_at')->sortBy('sequence')->first();
+                                                $remitLogs = $order->logs()->where('action', 'like', 'remit|%')->latest()->get();
+                                                $latestRemit = $remitLogs->first();
+                                                $remitData = $latestRemit?->remit_data;
+                                            @endphp
+                                            <div style="cursor: pointer;" data-bs-toggle="modal"
+                                                data-bs-target="#notesModal{{ $order->id }}">
+                                                @if($currentOrderStage && $currentOrderStage->is_pending)
+                                                    <small class="text-danger d-block fw-bold"><i
+                                                            class="bi bi-exclamation-triangle-fill"></i> Pendiente:
+                                                        {{ Str::limit($currentOrderStage->pending_reason, 20) }}</small>
+                                                @endif
+                                                @if($remitData)
+                                                    <small class="text-danger d-block fw-bold"><i
+                                                            class="bi bi-arrow-left-circle-fill"></i>Retorno:
+                                                        {{ Str::limit($remitData['reason'], 20) }}</small>
+                                                @endif
+                                                <small class="text-muted d-block"><span class="fw-bold">Gral:</span>
+                                                    {{ Str::limit($order->notes, 20) ?: '-' }}</small>
+                                                @if($currentOrderStage)
+                                                    <small class="text-primary d-block fw-bold"><span
+                                                            class="text-dark">{{ $currentOrderStage->stage->name }}:</span>
+                                                        {{ Str::limit($currentOrderStage->notes, 20) ?: '-' }}</small>
+                                                @endif
+                                                <div class="text-primary x-small mt-1"><i class="bi bi-pencil-square"></i>
+                                                    Ver historial
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="px-4 py-3">
@@ -264,6 +293,116 @@
                 </div>
             </div>
         </div>
+
+    {{-- Modal de Notas y Traceabilidad (History) --}}
+    @php
+        $remitLogs = $order->logs()->where('action', 'like', 'remit|%')->latest()->get();
+        $allOrderStages = $order->orderStages->sortBy('sequence');
+    @endphp
+    <div class="modal fade" id="notesModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title">Traceabilidad y Notas - Orden #{{ $order->id }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <div class="timeline-container">
+                        <!-- 1. General Notes -->
+                        <div class="timeline-item pb-4 position-relative">
+                            <div class="timeline-indicator bg-secondary position-absolute rounded-circle" style="left: -20px; width: 12px; height: 12px; top: 5px;"></div>
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body p-3">
+                                    <h6 class="text-uppercase text-xs font-weight-bold text-muted mb-2">Observaciones Generales</h6>
+                                    <p class="mb-0 text-dark small text-break">{{ $order->notes ?: 'Sin observaciones generales.' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Full Stages and Remit History -->
+                        {{-- We merge stages and remit logs for a chronological view --}}
+                        @php
+                            $timelineItems = collect();
+                            
+                            foreach($allOrderStages as $os) {
+                                if($os->notes || $os->is_pending) {
+                                    $timelineItems->push([
+                                        'date' => $os->updated_at,
+                                        'type' => 'stage',
+                                        'data' => $os
+                                    ]);
+                                }
+                            }
+
+                            foreach($remitLogs as $log) {
+                                $timelineItems->push([
+                                    'date' => $log->created_at,
+                                    'type' => 'remit',
+                                    'data' => $log
+                                ]);
+                            }
+
+                            $timelineItems = $timelineItems->sortBy('date');
+                        @endphp
+
+                        @foreach($timelineItems as $item)
+                            @if($item['type'] === 'stage')
+                                @php $os = $item['data']; @endphp
+                                @if($os->notes)
+                                    <div class="timeline-item pb-4 position-relative">
+                                        <div class="timeline-indicator bg-primary position-absolute rounded-circle" style="left: -20px; width: 12px; height: 12px; top: 5px;"></div>
+                                        <div class="card border-0 shadow-sm border-left-primary" style="border-left: 3px solid #0d6efd !important;">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-uppercase text-xs font-weight-bold text-primary mb-2">Etapa: {{ $os->stage->name }}</h6>
+                                                <p class="mb-0 text-dark small text-break">{{ $os->notes }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if($os->is_pending)
+                                    <div class="timeline-item pb-4 position-relative">
+                                        <div class="timeline-indicator bg-warning position-absolute rounded-circle" style="left: -20px; width: 12px; height: 12px; top: 5px;"></div>
+                                        <div class="card border-0 shadow-sm border-left-warning" style="border-left: 3px solid #ffc107 !important;">
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <h6 class="text-xs font-weight-bold text-warning mb-0 text-uppercase">Pendiente en {{ $os->stage->name }}</h6>
+                                                    <small class="x-small text-muted">{{ $os->pending_marked_at?->format('d/m/Y H:i') ?? '' }}</small>
+                                                </div>
+                                                <p class="mb-0 text-dark small text-break"><span class="fw-bold">Razón:</span> {{ $os->pending_reason }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @else
+                                @php 
+                                    $log = $item['data'];
+                                    $data = $log->remit_data;
+                                    // Note: we can't easily get the 'from' stage name here without more queries, but we can try
+                                    $fromStage = \App\Models\Stage::find($data['from'] ?? null);
+                                @endphp
+                                <div class="timeline-item pb-4 position-relative">
+                                    <div class="timeline-indicator bg-danger position-absolute rounded-circle" style="left: -20px; width: 12px; height: 12px; top: 5px;"></div>
+                                    <div class="card border-0 shadow-sm border-left-danger" style="border-left: 3px solid #dc3545 !important;">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h6 class="text-xs font-weight-bold text-danger mb-0 text-uppercase">Retorno de Producción</h6>
+                                                <small class="x-small text-muted">{{ $log->created_at->format('d/m/Y H:i') }}</small>
+                                            </div>
+                                            <p class="mb-1 text-dark small"><span class="fw-bold">Desde:</span> {{ $fromStage?->name ?? 'Etapa anterior' }}</p>
+                                            <p class="mb-0 text-dark small text-break"><span class="fw-bold">Motivo:</span> {{ $data['reason'] ?? '' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     @endforeach
 
     <style>
@@ -279,6 +418,32 @@
             padding-left: 0rem;
             /* adjust icon spacing */
             padding-right: 0rem;
+        }
+
+        .timeline-container {
+            border-left: 2px dashed #dee2e6;
+            margin-left: 25px;
+            padding-left: 10px;
+        }
+
+        .border-left-danger {
+            border-left-width: 4px !important;
+        }
+
+        .border-left-warning {
+            border-left-width: 4px !important;
+        }
+
+        .border-left-primary {
+            border-left-width: 4px !important;
+        }
+
+        .text-xs {
+            font-size: 0.7rem;
+        }
+
+        .x-small {
+            font-size: 0.75rem;
         }
     </style>
 </x-app-layout>
