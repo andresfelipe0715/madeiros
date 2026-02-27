@@ -105,9 +105,9 @@
     @foreach($orders as $order)
         @php 
             $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id);
-            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'archivo_orden'));
+            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'orden'));
             $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'proyecto'));
-            $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina'));
+            $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina') || str_contains(strtolower($f->fileType->name), 'maquina'));
         @endphp
         <div class="modal fade" id="filesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
