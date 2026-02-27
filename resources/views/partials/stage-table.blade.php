@@ -295,9 +295,10 @@
             {{ $orders->links() }}
         </div>
     </div>
+</div>
 
-    {{-- Modals Loop --}}
-    @foreach($orders as $order)
+{{-- Modals Loop outside the overflow-hidden card --}}
+@foreach($orders as $order)
         @php $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id); @endphp
         @if($orderStage)
             {{-- Modal para marcar como pendiente --}}
@@ -376,6 +377,6 @@
                         </div>
                     </div>
                 </div>
-            @endif
+            </div>
+        @endif
     @endforeach
-</div>
