@@ -70,7 +70,7 @@
 
                                 <div class="mb-4">
                                     <label class="form-label fw-bold">Reserva de Inventario</label>
-                                    <p class="text-muted small mb-2">Seleccione los materiales y aÃ±ada notas opcionales
+                                    <p class="text-muted small mb-2">Seleccione los materiales y añada notas opcionales
                                         (ej: color, espesor, corte).</p>
 
                                     <div class="bg-light p-3 rounded-3 border">
