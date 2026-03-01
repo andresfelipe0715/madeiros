@@ -20,6 +20,7 @@
                             <form action="{{ route('orders.store') }}" method="POST" enctype="multipart/form-data"
                                 novalidate x-data="{ 
                                     materials: {{ json_encode(old('materials', [['material_id' => '', 'estimated_quantity' => '', 'notes' => '']])) }},
+                                    materialLookup: {{ json_encode($materials->mapWithKeys(fn($m) => [$m->id => $m->name])) }},
                                     stockLookup: {{ json_encode($materials->mapWithKeys(fn($m) => [$m->id => (float) $m->availableQuantity()])) }},
                                     get hasErrors() {
                                         if (this.materials.length === 0) return true;
@@ -78,6 +79,8 @@
                                             <div class="text-center py-3 text-muted">
                                                 <i class="bi bi-info-circle me-1"></i> No se han aÃ±adido materiales
                                                 aÃºn.
+                                                <i class="bi bi-info-circle me-1"></i> No se han añadido materiales
+                                                aún.
                                             </div>
                                         </template>
 
@@ -86,14 +89,15 @@
                                                 <div class="row g-2 mb-2 align-items-center">
                                                     <div class="col-md-8 col-7">
                                                         <select :name="`materials[${index}][material_id]`"
+                                                            x-init="initMaterialSelect($el, material.material_id, materialLookup[material.material_id] || null, stockLookup[material.material_id] || 0)"
                                                             x-model="material.material_id"
                                                             class="form-select border-0 shadow-sm" required>
                                                             <option value="">Seleccione material...</option>
-                                                            @foreach($materials as $m)
-                                                                <option value="{{ $m->id }}">{{ $m->name }} (Disp:
-                                                                    {{ $m->availableQuantity() }})
-                                                                </option>
-                                                            @endforeach
+                                                            <template x-if="material.material_id">
+                                                                <option :value="material.material_id"
+                                                                    x-text="materialLookup[material.material_id]"
+                                                                    selected></option>
+                                                            </template>
                                                         </select>
                                                     </div>
                                                     <div class="col-md-3 col-4">
@@ -175,47 +179,70 @@
                                 </div>
 
                                 <div class="mb-4" x-data="{ 
-                                    selectedServices: {{ json_encode(collect(old('special_services', []))->keyBy('service_id')->map(fn($s) => ['notes' => $s['notes'] ?? ''])) }}
+                                    selectedSpecialServices: {{ json_encode(old('special_services', [])) }},
+                                    serviceLookup: {{ json_encode($specialServices->mapWithKeys(fn($s) => [$s->id => $s->name])) }}
                                 }">
-                                    <label class="form-label fw-bold">Servicios Especiales <span class="text-muted fw-normal small">(Opcional)</span></label>
-                                    <p class="text-muted small mb-2">Seleccione los servicios adicionales requeridos y añada notas si es necesario.</p>
+                                    <label class="form-label fw-bold">Servicios Especiales <span
+                                            class="text-muted fw-normal small">(Opcional)</span></label>
+                                    <p class="text-muted small mb-2">Seleccione los servicios adicionales y añada notas
+                                        si es necesario.</p>
 
                                     <div class="bg-light p-3 rounded-3 border">
-                                        <div class="row g-3">
-                                            @foreach($specialServices as $service)
-                                                <div class="col-md-6">
-                                                    <div class="form-check form-switch mb-1">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                            id="service_{{ $service->id }}" 
-                                                            :checked="selectedServices['{{ $service->id }}'] !== undefined"
-                                                            @change="if($el.checked) { selectedServices['{{ $service->id }}'] = {notes: ''} } else { delete selectedServices['{{ $service->id }}'] }">
-                                                        <label class="form-check-label fw-medium" for="service_{{ $service->id }}">
-                                                            {{ $service->name }}
-                                                        </label>
+                                        <template x-if="selectedSpecialServices.length === 0">
+                                            <div class="text-center py-3 text-muted">
+                                                <i class="bi bi-info-circle me-1"></i> No se han añadido servicios aún.
+                                            </div>
+                                        </template>
+
+                                        <template x-for="(service, index) in selectedSpecialServices" :key="index">
+                                            <div class="mb-3 pb-3 border-bottom last-child-no-border">
+                                                <div class="row g-2 mb-2 align-items-center">
+                                                    <div class="col-md-11 col-10">
+                                                        <select :name="`special_services[${index}][service_id]`"
+                                                            x-init="initServiceSelect($el, service.service_id, serviceLookup[service.service_id] || null)"
+                                                            x-model="service.service_id"
+                                                            class="form-select border-0 shadow-sm" required>
+                                                            <option value="">Seleccione servicio...</option>
+                                                            <template x-if="service.service_id">
+                                                                <option :value="service.service_id"
+                                                                    x-text="serviceLookup[service.service_id]" selected>
+                                                                </option>
+                                                            </template>
+                                                        </select>
                                                     </div>
-                                                    
-                                                    <div x-show="selectedServices['{{ $service->id }}'] !== undefined" x-transition class="ms-4 mt-2">
-                                                        <input type="hidden" 
-                                                            :name="'special_services['+{{ $loop->index }}+'][service_id]'" 
-                                                            :disabled="selectedServices['{{ $service->id }}'] === undefined"
-                                                            value="{{ $service->id }}">
+                                                    <div class="col-md-1 col-2 text-end">
+                                                        <button type="button"
+                                                            @click="selectedSpecialServices.splice(index, 1)"
+                                                            class="btn btn-link text-danger p-0"
+                                                            title="Eliminar servicio">
+                                                            <i class="bi bi-trash3 fs-5"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-2">
+                                                    <div class="col-12">
                                                         <div class="position-relative">
-                                                            <input type="text" 
-                                                                :name="'special_services['+{{ $loop->index }}+'][notes]'" 
-                                                                :disabled="selectedServices['{{ $service->id }}'] === undefined"
-                                                                x-model="selectedServices['{{ $service->id }}'].notes"
-                                                                class="form-control form-control-sm border-0 shadow-sm" 
-                                                                placeholder="Notas para {{ $service->name }}..."
+                                                            <input type="text"
+                                                                :name="`special_services[${index}][notes]`"
+                                                                x-model="service.notes"
+                                                                class="form-control form-control-sm border-0 shadow-sm"
+                                                                placeholder="Notas: ej. Canto grueso, perforación extra..."
                                                                 maxlength="50">
                                                             <div class="position-absolute end-0 top-50 translate-middle-y me-2 text-muted x-small"
-                                                                :class="selectedServices['{{ $service->id }}']?.notes?.length >= 50 ? 'text-danger fw-bold' : ''"
-                                                                x-text="(selectedServices['{{ $service->id }}']?.notes?.length || 0) + '/50'">
+                                                                :class="(service.notes || '').length >= 50 ? 'text-danger fw-bold' : ''"
+                                                                x-text="(service.notes || '').length + '/50'">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endforeach
-                                        </div>
+                                            </div>
+                                        </template>
+
+                                        <button type="button"
+                                            @click="selectedSpecialServices.push({ service_id: '', notes: '' })"
+                                            class="btn btn-sm btn-outline-primary mt-2 rounded-pill">
+                                            <i class="bi bi-plus-lg me-1"></i> Agregar Servicio
+                                        </button>
                                     </div>
                                     @error('special_services')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -684,61 +711,143 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var settings = {
+        // Use window.onload or similar to ensure helpers are global before Alpine
+        window.initMaterialSelect = function (el, initialId = null, initialName = null, initialStock = 0) {
+            if (el.tomselect) return;
+            const ts = new TomSelect(el, {
                 valueField: 'id',
                 labelField: 'name',
-                searchField: ['name', 'document'],
-                create: false,
-                placeholder: 'Escriba nombre o documento del cliente',
-                allowEmptyOption: false,
-                loadThrottle: 300, // Debounce 300ms
+                searchField: ['name'],
+                placeholder: 'Seleccione material...',
+                loadThrottle: 300,
+                plugins: ['virtual_scroll'],
+                shouldLoad: function (query) { return query.length >= 2; },
+                firstUrl: function (query) {
+                    return '{{ route("materials.search") }}?q=' + encodeURIComponent(query);
+                },
                 load: function (query, callback) {
-                    if (query.length < 2) return callback();
+                    const url = this.getUrl(query);
+                    if (!url) return callback();
 
-                    var url = '{{ route("clients.search") }}?q=' + encodeURIComponent(query);
+                    const scroll = this.dropdown_content.scrollTop;
+
                     fetch(url)
                         .then(response => response.json())
                         .then(json => {
-                            callback(json);
-                        }).catch(() => {
-                            callback();
-                        });
+                            this.setNextUrl(query, json.next_page_url);
+                            callback(json.data);
+
+                            setTimeout(() => {
+                                this.dropdown_content.scrollTop = scroll;
+                            }, 0);
+                        }).catch(() => callback());
                 },
                 render: {
-                    option: function (item, escape) {
-                        var name = item.name;
-                        var document = item.document;
-
-                        if (!name && !document) {
-                            return null;
+                    option: (item, escape) => `<div class="py-2 px-3 border-bottom">
+                        <span class="d-block">${escape(item.name)}</span>
+                        <small class="text-muted">Disponible: ${item.available_quantity}</small>
+                    </div>`,
+                    item: (item, escape) => `<div class="py-0">${escape(item.name)}</div>`
+                },
+                onChange: function (value) {
+                    const option = this.options[value];
+                    if (option) {
+                        try {
+                            const alpineEl = el.closest('[x-data]');
+                            if (alpineEl && alpineEl.__x) {
+                                alpineEl.__x.$data.stockLookup[value] = option.available_quantity;
+                            }
+                        } catch (e) {
+                            console.error('Failed to update stockLookup', e);
                         }
-
-                        var label = escape(name);
-                        if (document) {
-                            label += '-' + escape(document);
-                        }
-                        return '<div class="py-2 px-3 border-bottom">' +
-                            '<span class="d-block">' + label + '</span>' +
-                            '</div>';
-                    },
-                    item: function (item, escape) {
-                        var name = item.name;
-                        var document = item.document;
-
-                        if (!name && !document) {
-                            return null;
-                        }
-
-                        var label = escape(name);
-                        if (document) {
-                            label += '-' + escape(document);
-                        }
-                        return '<div class="py-0">' + label + '</div>';
                     }
                 }
-            };
-            new TomSelect('#client_id', settings);
+            });
+            if (initialId && initialName) {
+                ts.addOption({ id: initialId, name: initialName, available_quantity: initialStock });
+                ts.setValue(initialId);
+            }
+        };
+
+        window.initServiceSelect = function (el, initialId = null, initialName = null) {
+            if (el.tomselect) return;
+            const ts = new TomSelect(el, {
+                valueField: 'id',
+                labelField: 'name',
+                searchField: ['name'],
+                placeholder: 'Seleccione servicio...',
+                loadThrottle: 300,
+                plugins: ['virtual_scroll'],
+                shouldLoad: function (query) { return query.length >= 2; },
+                firstUrl: function (query) {
+                    return '{{ route("special-services.search") }}?q=' + encodeURIComponent(query);
+                },
+                load: function (query, callback) {
+                    const url = this.getUrl(query);
+                    if (!url) return callback();
+
+                    const scroll = this.dropdown_content.scrollTop;
+
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            this.setNextUrl(query, json.next_page_url);
+                            callback(json.data);
+
+                            setTimeout(() => {
+                                this.dropdown_content.scrollTop = scroll;
+                            }, 0);
+                        }).catch(() => callback());
+                },
+                render: {
+                    option: (item, escape) => `<div class="py-2 px-3 border-bottom"><span class="d-block">${escape(item.name)}</span></div>`,
+                    item: (item, escape) => `<div class="py-0">${escape(item.name)}</div>`
+                }
+            });
+            if (initialId && initialName) {
+                ts.addOption({ id: initialId, name: initialName });
+                ts.setValue(initialId);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Client Search with Pagination
+            const clientSelect = document.getElementById('client_id');
+            if (clientSelect) {
+                new TomSelect(clientSelect, {
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name', 'document'],
+                    placeholder: 'Escriba nombre o documento del cliente',
+                    loadThrottle: 300,
+                    plugins: ['virtual_scroll'],
+                    shouldLoad: function (query) { return query.length >= 2; },
+                    firstUrl: function (query) {
+                        return '{{ route("clients.search") }}?q=' + encodeURIComponent(query);
+                    },
+                    load: function (query, callback) {
+                        const url = this.getUrl(query);
+                        if (!url) return callback();
+
+                        const scroll = this.dropdown_content.scrollTop;
+
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(json => {
+                                this.setNextUrl(query, json.next_page_url);
+                                callback(json.data);
+
+                                setTimeout(() => {
+                                    this.dropdown_content.scrollTop = scroll;
+                                }, 0);
+                            }).catch(() => callback());
+                    },
+                    render: {
+                        option: (item, escape) => `<div class="py-2 px-3 border-bottom"><span class="d-block">${escape(item.name)}${item.document ? ' - ' + escape(item.document) : ''}</span></div>`,
+                        item: (item, escape) => `<div class="py-0">${escape(item.name)}${item.document ? ' - ' + escape(item.document) : ''}</div>`
+                    }
+                });
+            }
         });
     </script>
 </x-app-layout>

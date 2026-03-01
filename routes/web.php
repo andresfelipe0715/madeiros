@@ -13,7 +13,6 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/stages/{stage}', [\App\Http\Controllers\DashboardController::class, 'showStage'])->name('dashboard.stage');
 
-
     Route::post('/order-stages/{orderStage}/start', [\App\Http\Controllers\OrderStageController::class, 'start'])->name('order-stages.start');
     Route::post('/order-stages/{orderStage}/pause', [\App\Http\Controllers\OrderStageController::class, 'pause'])->name('order-stages.pause');
     Route::post('/order-stages/{orderStage}/finish', [\App\Http\Controllers\OrderStageController::class, 'finish'])->name('order-stages.finish');
@@ -45,6 +44,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
     Route::get('/clients/search', [\App\Http\Controllers\ClientSearchController::class, 'search'])->name('clients.search');
 
+    // Generic Search
+    Route::get('/materials/search', [\App\Http\Controllers\SearchController::class, 'materials'])->name('materials.search');
+    Route::get('/special-services/search', [\App\Http\Controllers\SearchController::class, 'specialServices'])->name('special-services.search');
+
     // Users Management
     Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
 
@@ -53,4 +56,4 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/performance/details/{user}', [\App\Http\Controllers\PerformanceController::class, 'details'])->name('performance.details');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

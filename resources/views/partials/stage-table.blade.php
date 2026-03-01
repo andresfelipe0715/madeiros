@@ -141,6 +141,7 @@
                                 @if($activeServices->count() > 0)
                                     @if(Str::length($serviceText) > 40)
                                         <span style="cursor: pointer;" 
+                                              class="small"
                                               data-bs-toggle="modal" 
                                               data-bs-target="#specialServicesModal{{ $orderStage->id }}">
                                             {{ Str::limit($serviceText, 40) }}

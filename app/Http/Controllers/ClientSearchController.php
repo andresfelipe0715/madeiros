@@ -15,19 +15,19 @@ class ClientSearchController extends Controller
     {
         $query = $request->get('q');
 
-        if (strlen($query) < 2) {
-            return response()->json([]);
-        }
-
         $clients = Client::query()
-            ->where(function ($queryBuilder) use ($query) {
-                $queryBuilder->where('name', 'LIKE', "%{$query}%")
-                    ->orWhere('document', 'LIKE', "%{$query}%");
+            ->when($query, function ($queryBuilder) use ($query) {
+                $queryBuilder->where(function ($q) use ($query) {
+                    $q->where('name', 'LIKE', "%{$query}%")
+                        ->orWhere('document', 'LIKE', "%{$query}%");
+                });
             })
             ->orderBy('name')
-            ->limit(20)
-            ->get(['id', 'name', 'document']);
+            ->paginate(25, ['id', 'name', 'document']);
 
-        return response()->json($clients);
+        return response()->json([
+            'data' => $clients->items(),
+            'next_page_url' => $clients->appends(['q' => $query])->nextPageUrl(),
+        ]);
     }
 }
