@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class SpecialService extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'active',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+        ];
+    }
+
+    public function orderSpecialServices(): HasMany
+    {
+        return $this->hasMany(OrderSpecialService::class, 'service_id');
+    }
+}

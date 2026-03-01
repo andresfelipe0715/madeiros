@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\FileType;
 use App\Models\Material;
 use App\Models\Order;
+use App\Models\SpecialService;
 use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,7 +37,9 @@ class OrderController extends Controller
             return $group->stages->min('default_sequence');
         });
 
-        return view('orders.create', compact('selectedClient', 'materials', 'stageGroups'));
+        $specialServices = SpecialService::where('active', true)->get();
+
+        return view('orders.create', compact('selectedClient', 'materials', 'stageGroups', 'specialServices'));
     }
 
     /**
@@ -69,6 +72,16 @@ class OrderController extends Controller
 
                 // Reserve Materials
                 $this->inventory->reserve($order, $validated['materials']);
+
+                // Save Special Services
+                if (isset($validated['special_services'])) {
+                    foreach ($validated['special_services'] as $serviceData) {
+                        $order->orderSpecialServices()->create([
+                            'service_id' => $serviceData['service_id'],
+                            'notes' => $serviceData['notes'] ?? null,
+                        ]);
+                    }
+                }
 
                 // Handle File Upload
                 if ($request->hasFile('order_file')) {

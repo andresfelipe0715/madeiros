@@ -292,6 +292,96 @@
 
 </div>
 
+                                <div class="mb-4" x-data="{ 
+                                    selectedServices: {{ json_encode(collect(old('special_services', $order->orderSpecialServices->map(fn($oss) => [
+                                        'id' => $oss->id,
+                                        'service_id' => $oss->service_id,
+                                        'notes' => $oss->notes ?? '',
+                                        'cancelled' => $oss->cancelled_at !== null,
+                                        'cancelled_at' => $oss->cancelled_at ? $oss->cancelled_at->format('Y-m-d H:i') : null,
+                                    ])))->keyBy('service_id')->map(fn($s) => [
+                                        'id' => $s['id'] ?? null,
+                                        'notes' => $s['notes'] ?? '',
+                                        'cancelled' => $s['cancelled'] ?? false
+                                    ])) }}
+                                }">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label text-muted small text-uppercase font-weight-bold mb-0">Servicios Especiales</label>
+                                        <span class="badge bg-secondary rounded-pill" x-text="Object.values(selectedServices).filter(s => !s.cancelled).length + ' Activos'"></span>
+                                    </div>
+
+                                    <div class="bg-light p-3 rounded border mb-3">
+                                        <div class="row g-3">
+                                            @foreach($specialServices as $service)
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch mb-1">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                            id="service_{{ $service->id }}" 
+                                                            :checked="selectedServices['{{ $service->id }}'] !== undefined && !selectedServices['{{ $service->id }}'].cancelled"
+                                                            {{ $isDisabled }}
+                                                            @change="
+                                                                if($el.checked) { 
+                                                                    if(selectedServices['{{ $service->id }}']) {
+                                                                        selectedServices['{{ $service->id }}'].cancelled = false;
+                                                                    } else {
+                                                                        selectedServices['{{ $service->id }}'] = {id: null, notes: '', cancelled: false};
+                                                                    }
+                                                                } else { 
+                                                                    if(selectedServices['{{ $service->id }}'] && selectedServices['{{ $service->id }}'].id) {
+                                                                        selectedServices['{{ $service->id }}'].cancelled = true;
+                                                                    } else {
+                                                                        delete selectedServices['{{ $service->id }}'];
+                                                                    }
+                                                                }
+                                                            ">
+                                                        <label class="form-check-label fw-medium" :class="selectedServices['{{ $service->id }}']?.cancelled ? 'text-muted text-decoration-line-through' : ''" for="service_{{ $service->id }}">
+                                                            {{ $service->name }}
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <div x-show="selectedServices['{{ $service->id }}'] !== undefined" x-transition class="ms-4 mt-2">
+                                                        <input type="hidden" 
+                                                            :name="'special_services['+{{ $loop->index }}+'][id]'" 
+                                                            x-model="selectedServices['{{ $service->id }}'].id"
+                                                            :disabled="selectedServices['{{ $service->id }}'] === undefined">
+                                                        <input type="hidden" 
+                                                            :name="'special_services['+{{ $loop->index }}+'][service_id]'" 
+                                                            value="{{ $service->id }}"
+                                                            :disabled="selectedServices['{{ $service->id }}'] === undefined">
+                                                        <input type="hidden" 
+                                                            :name="'special_services['+{{ $loop->index }}+'][cancelled]'" 
+                                                            :value="selectedServices['{{ $service->id }}'].cancelled ? 1 : 0"
+                                                            :disabled="selectedServices['{{ $service->id }}'] === undefined">
+                                                        
+                                                        <div class="position-relative" x-show="!selectedServices['{{ $service->id }}'].cancelled">
+                                                            <input type="text" 
+                                                                :name="'special_services['+{{ $loop->index }}+'][notes]'" 
+                                                                x-model="selectedServices['{{ $service->id }}'].notes"
+                                                                :disabled="selectedServices['{{ $service->id }}'] === undefined"
+                                                                class="form-control form-control-sm border-0 shadow-sm" 
+                                                                placeholder="Notas para {{ $service->name }}..."
+                                                                maxlength="50"
+                                                                {{ $isDisabled }}>
+                                                            <div class="position-absolute end-0 top-50 translate-middle-y me-2 text-muted x-small"
+                                                                style="font-size: .65rem;"
+                                                                x-text="(selectedServices['{{ $service->id }}']?.notes?.length || 0) + '/50'">
+                                                            </div>
+                                                        </div>
+                                                        <template x-if="selectedServices['{{ $service->id }}'].cancelled">
+                                                            <div class="extra-small text-danger">
+                                                                <i class="bi bi-calendar-x me-1"></i> Cancelado (Al guardar)
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @error('special_services')
+                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="mb-3">
                                     <label for="notes"
                                         class="form-label text-muted small text-uppercase font-weight-bold">Notas

@@ -174,6 +174,54 @@
                                     @enderror
                                 </div>
 
+                                <div class="mb-4" x-data="{ 
+                                    selectedServices: {{ json_encode(collect(old('special_services', []))->keyBy('service_id')->map(fn($s) => ['notes' => $s['notes'] ?? ''])) }}
+                                }">
+                                    <label class="form-label fw-bold">Servicios Especiales <span class="text-muted fw-normal small">(Opcional)</span></label>
+                                    <p class="text-muted small mb-2">Seleccione los servicios adicionales requeridos y añada notas si es necesario.</p>
+
+                                    <div class="bg-light p-3 rounded-3 border">
+                                        <div class="row g-3">
+                                            @foreach($specialServices as $service)
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch mb-1">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                            id="service_{{ $service->id }}" 
+                                                            :checked="selectedServices['{{ $service->id }}'] !== undefined"
+                                                            @change="if($el.checked) { selectedServices['{{ $service->id }}'] = {notes: ''} } else { delete selectedServices['{{ $service->id }}'] }">
+                                                        <label class="form-check-label fw-medium" for="service_{{ $service->id }}">
+                                                            {{ $service->name }}
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <div x-show="selectedServices['{{ $service->id }}'] !== undefined" x-transition class="ms-4 mt-2">
+                                                        <input type="hidden" 
+                                                            :name="'special_services['+{{ $loop->index }}+'][service_id]'" 
+                                                            :disabled="selectedServices['{{ $service->id }}'] === undefined"
+                                                            value="{{ $service->id }}">
+                                                        <div class="position-relative">
+                                                            <input type="text" 
+                                                                :name="'special_services['+{{ $loop->index }}+'][notes]'" 
+                                                                :disabled="selectedServices['{{ $service->id }}'] === undefined"
+                                                                x-model="selectedServices['{{ $service->id }}'].notes"
+                                                                class="form-control form-control-sm border-0 shadow-sm" 
+                                                                placeholder="Notas para {{ $service->name }}..."
+                                                                maxlength="50">
+                                                            <div class="position-absolute end-0 top-50 translate-middle-y me-2 text-muted x-small"
+                                                                :class="selectedServices['{{ $service->id }}']?.notes?.length >= 50 ? 'text-danger fw-bold' : ''"
+                                                                x-text="(selectedServices['{{ $service->id }}']?.notes?.length || 0) + '/50'">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @error('special_services')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="mb-4">
                                     <label for="notes" class="form-label fw-bold">Notas Especiales <span
                                             class="text-muted fw-normal small">(Opcional)</span></label>

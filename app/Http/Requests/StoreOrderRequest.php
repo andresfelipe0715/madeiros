@@ -30,6 +30,9 @@ class StoreOrderRequest extends FormRequest
             'materials.*.material_id' => 'required|exists:materials,id',
             'materials.*.estimated_quantity' => 'required|numeric|min:0.01',
             'materials.*.notes' => 'nullable|string|max:50',
+            'special_services' => 'nullable|array',
+            'special_services.*.service_id' => 'required|exists:special_services,id',
+            'special_services.*.notes' => 'nullable|string|max:50',
         ];
     }
 
@@ -42,6 +45,7 @@ class StoreOrderRequest extends FormRequest
             'stages.min' => 'Debe seleccionar al menos una etapa.',
             'stages.*.exists' => 'Una de las etapas seleccionadas no es válida.',
             'materials.*.notes.max' => 'La nota del material no debe exceder los 50 caracteres.',
+            'special_services.*.notes.max' => 'La nota del servicio especial no debe exceder los 50 caracteres.',
             'order_file.file' => 'El archivo de la orden debe ser un archivo válido.',
             'order_file.mimes' => 'El archivo de la orden debe ser un PDF.',
             'order_file.max' => 'El archivo de la orden no debe pesar más de 10MB.',
@@ -49,11 +53,12 @@ class StoreOrderRequest extends FormRequest
             'notes.max' => 'Las notas no deben exceder los 300 caracteres.',
         ];
     }
+
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             $stages = $this->input('stages', []);
-            if (!is_array($stages) || empty($stages)) {
+            if (! is_array($stages) || empty($stages)) {
                 return;
             }
 

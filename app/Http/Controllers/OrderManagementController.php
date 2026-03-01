@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\OrderStage;
+use App\Models\SpecialService;
 use App\Models\Stage;
 use App\Services\InventoryService;
 use App\Traits\CompressesImages;
@@ -58,14 +59,15 @@ class OrderManagementController extends Controller
     {
         Gate::authorize('edit-orders');
 
-        $order->load(['client', 'orderStages.stage', 'orderMaterials.material']);
+        $order->load(['client', 'orderStages.stage', 'orderMaterials.material', 'orderSpecialServices.specialService']);
 
         $allStages = Stage::orderBy('default_sequence')->get();
         $materials = Material::all();
+        $specialServices = SpecialService::where('active', true)->get();
         $firstStageId = Stage::orderBy('default_sequence', 'asc')->value('id');
         $finalStageId = Stage::orderBy('default_sequence', 'desc')->value('id');
 
-        return view('orders.edit', compact('order', 'allStages', 'firstStageId', 'finalStageId', 'materials'));
+        return view('orders.edit', compact('order', 'allStages', 'firstStageId', 'finalStageId', 'materials', 'specialServices'));
     }
 
     /**
@@ -96,6 +98,29 @@ class OrderManagementController extends Controller
                     ]);
 
                     $this->inventory->adjust($order, $validated['materials']);
+
+                    // Sync Special Services
+                    if (isset($validated['special_services'])) {
+                        foreach ($validated['special_services'] as $data) {
+                            if (isset($data['id'])) {
+                                $oss = $order->orderSpecialServices()->findOrFail($data['id']);
+                                if (isset($data['cancelled']) && $data['cancelled']) {
+                                    $oss->update(['cancelled_at' => now()]);
+                                } else {
+                                    $oss->update([
+                                        'service_id' => $data['service_id'],
+                                        'notes' => $data['notes'] ?? null,
+                                        'cancelled_at' => null, // Reactivate if it was cancelled
+                                    ]);
+                                }
+                            } else {
+                                $order->orderSpecialServices()->create([
+                                    'service_id' => $data['service_id'],
+                                    'notes' => $data['notes'] ?? null,
+                                ]);
+                            }
+                        }
+                    }
 
                     // 1. Handle main order PDF file replacement
                     if ($request->hasFile('order_file')) {

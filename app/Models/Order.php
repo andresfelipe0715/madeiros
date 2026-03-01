@@ -94,6 +94,18 @@ class Order extends Model
             ->withTimestamps();
     }
 
+    public function orderSpecialServices(): HasMany
+    {
+        return $this->hasMany(OrderSpecialService::class);
+    }
+
+    public function specialServices(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(SpecialService::class, 'order_special_services', 'order_id', 'service_id')
+            ->withPivot(['id', 'notes', 'cancelled_at'])
+            ->withTimestamps();
+    }
+
     public function trackingLinks(): HasMany
     {
         return $this->hasMany(OrderTrackingLink::class);

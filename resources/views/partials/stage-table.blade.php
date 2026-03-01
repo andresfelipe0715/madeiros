@@ -45,6 +45,7 @@
                         <th>Material</th>
                         <th>Herrajería</th>
                         <th>Manual</th>
+                        <th>Sr. Especiales</th>
                         <th>Archivos</th>
                         <th>Fecha Envío</th>
                         <th>Estado</th>
@@ -123,6 +124,30 @@
                                         </div>
                                     @else
                                         <span class="badge bg-soft-warning text-warning">Pendiente</span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @php
+                                    $activeServices = $order->orderSpecialServices->filter(fn($oss) => is_null($oss->cancelled_at));
+                                    $serviceLabels = $activeServices->map(function($oss) {
+                                        return $oss->specialService->name . ($oss->notes ? " ({$oss->notes})" : "");
+                                    });
+                                    $serviceText = $serviceLabels->implode(', ');
+                                @endphp
+
+                                @if($activeServices->count() > 0)
+                                    @if(Str::length($serviceText) > 40)
+                                        <span style="cursor: pointer;" 
+                                              data-bs-toggle="modal" 
+                                              data-bs-target="#specialServicesModal{{ $orderStage->id }}">
+                                            {{ Str::limit($serviceText, 40) }}
+                                            <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                        </span>
+                                    @else
+                                        <small>{{ $serviceText }}</small>
                                     @endif
                                 @else
                                     <span class="text-muted">-</span>
@@ -376,6 +401,36 @@
                                         </div>
                                         @if($om->notes)
                                             <div class="small text-muted">{{ $om->notes }}</div>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Modal de Servicios Especiales --}}
+            <div class="modal fade" id="specialServicesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title">Servicios Especiales - Pedido #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <ul class="list-group list-group-flush">
+                                @php
+                                    $activeServices = $order->orderSpecialServices->filter(fn($oss) => is_null($oss->cancelled_at));
+                                @endphp
+                                @foreach($activeServices as $oss)
+                                    <li class="list-group-item px-0 border-0">
+                                        <div class="fw-bold text-primary">{{ $oss->specialService->name }}</div>
+                                        @if($oss->notes)
+                                            <div class="small text-muted ps-2 border-start ms-1">{{ $oss->notes }}</div>
                                         @endif
                                     </li>
                                 @endforeach

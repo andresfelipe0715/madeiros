@@ -49,6 +49,11 @@ class UpdateOrderRequest extends FormRequest
             'materials.*.actual_quantity' => 'nullable|numeric|min:0',
             'materials.*.notes' => 'nullable|string|max:50',
             'materials.*.cancelled' => 'nullable|boolean',
+            'special_services' => 'nullable|array',
+            'special_services.*.id' => 'nullable|exists:order_special_services,id',
+            'special_services.*.service_id' => 'required|exists:special_services,id',
+            'special_services.*.notes' => 'nullable|string|max:50',
+            'special_services.*.cancelled' => 'nullable|boolean',
         ];
     }
 }
