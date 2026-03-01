@@ -188,7 +188,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-2">
+                                <div class="d-flex justify-content-start align-items-center w-100 flex-wrap gap-2">
                                     {{-- Group A: Producción (Left) --}}
                                     <div class="d-flex flex-wrap gap-2">
                                         @if($canAct)
@@ -268,7 +268,6 @@
                                             @endif
                                         @endif
                                     </div>
-                                    </div>
 
                                     {{-- Group B: Entregas (Right) --}}
                                     <div class="d-flex flex-wrap gap-2">
@@ -276,19 +275,13 @@
                                             @if($order->lleva_herrajeria && !$order->herrajeria_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-hardware', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de herrajería?')">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action"
-                                                        {{ $orderStage->is_pending ? 'disabled title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : '' }}>
-                                                        Entregar herrajería
-                                                    </button>
+                                                    <button type="submit" class="btn btn-sm btn-secondary btn-action" {{ $orderStage->is_pending ? 'disabled title="Bloqueado"' : '' }}>Entregar herrajería</button>
                                                 </form>
                                             @endif
                                             @if($order->lleva_manual_armado && !$order->manual_armado_delivered_at)
                                                 <form action="{{ route('order-stages.deliver-manual', $orderStage->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmar entrega de manual de armado?')">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action"
-                                                        {{ $orderStage->is_pending ? 'disabled title="Bloqueado: El pedido está pendiente. Solicite al administrador que lo desbloquee."' : '' }}>
-                                                        Entregar manual de armado
-                                                    </button>
+                                                    <button type="submit" class="btn btn-sm btn-secondary btn-action" {{ $orderStage->is_pending ? 'disabled title="Bloqueado"' : '' }}>Entregar manual de armado</button>
                                                 </form>
                                             @endif
                                         @endif
@@ -433,7 +426,7 @@
                                     </div>
 
                                     @php
-                                        $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'));
+                                        $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->values();
                                     @endphp
                                     @if($evPhotos->count() > 0)
                                         <div class="mt-4">
@@ -445,7 +438,11 @@
                                                 @foreach($evPhotos as $index => $photo)
                                                     <div class="col-6">
                                                         <div class="position-relative rounded overflow-hidden shadow-sm shadow-hover" style="height: 120px;">
-                                                            <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover" alt="Foto de evidencia">
+                                                            <img src="{{ $photo->fileUrl }}" 
+                                                                class="w-100 h-100 object-fit-cover cursor-zoom-in" 
+                                                                alt="Foto de evidencia"
+                                                                data-images="{{ json_encode($imageUrls) }}"
+                                                                onclick="openLightbox(JSON.parse(this.dataset.images), {{ $index }})">
                                                             
                                                             <div class="position-absolute top-0 end-0 p-1">
                                                                 <button type="button" 

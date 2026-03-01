@@ -398,7 +398,7 @@
                                             <label class="form-label fw-bold d-block">Fotos de Evidencia</label>
                                             
                                             @php
-                                                $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'));
+                                                $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->values();
                                             @endphp
 
                                             @if($evPhotos->count() > 0)
@@ -410,7 +410,11 @@
                                                         <div class="col-6 col-md-4">
                                                             <div class="position-relative border rounded overflow-hidden shadow-sm shadow-hover" 
                                                                 style="height: 120px;">
-                                                                <img src="{{ $photo->fileUrl }}" class="w-100 h-100 object-fit-cover" alt="Foto de evidencia">
+                                                                <img src="{{ $photo->fileUrl }}" 
+                                                                    class="w-100 h-100 object-fit-cover cursor-zoom-in" 
+                                                                    alt="Foto de evidencia"
+                                                                    data-images="{{ json_encode($imageUrls) }}"
+                                                                    onclick="openLightbox(JSON.parse(this.dataset.images), {{ $index }})">
                                                                 
                                                                 <div class="position-absolute top-0 end-0 p-1">
                                                                     <button type="button" 

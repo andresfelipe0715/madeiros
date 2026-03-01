@@ -35,6 +35,12 @@
 
 <script>
     function openLightbox(images, startIndex = 0) {
+        console.log('openLightbox called', { images, startIndex });
+        if (!images || images.length === 0) {
+            console.error('No images provided to openLightbox');
+            return;
+        }
+
         if (typeof images === 'string') {
             images = [images];
         }
@@ -42,9 +48,14 @@
         const index = parseInt(startIndex) || 0;
         const carouselInner = document.getElementById('carouselInner');
         const carouselEl = document.getElementById('lightboxCarousel');
-        if (!carouselInner || !carouselEl) return;
+        const modalEl = document.getElementById('imageLightboxModal');
 
-        // CRITICAL FIX: Destroy instance so it doesn't remember old DOM elements
+        if (!carouselInner || !carouselEl || !modalEl) {
+            console.error('Lightbox modal elements not found in DOM');
+            return;
+        }
+
+        // Cleanup previous state
         const existingCarousel = bootstrap.Carousel.getInstance(carouselEl);
         if (existingCarousel) {
             existingCarousel.dispose();
@@ -58,12 +69,11 @@
 
             itemDiv.innerHTML = `
                 <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 75vh; background: #000;">
-                    <img src="${url}" 
-                         class="img-fluid rounded shadow" 
-                         style="max-height: 100%; max-width: 100%; object-fit: contain; transform: translateZ(0);" 
+                    <img src="${url}"
+                         class="img-fluid rounded shadow-lg"
+                         style="max-height: 100%; max-width: 100%; object-fit: contain;"
                          alt="Imagen ${i + 1}"
-                         onload="this.style.opacity=1"
-                         onerror="this.src='/img/madeiros.png'">
+                         onerror="this.src='/img/madeiros.png'; console.warn('Failed to load image:', '${url}')">
                 </div>`;
             carouselInner.appendChild(itemDiv);
         });
@@ -82,11 +92,10 @@
             if (counter) counter.innerText = (index + 1) + ' / ' + images.length;
         }
 
-        const modalEl = document.getElementById('imageLightboxModal');
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
 
-        // ALWAYS initialize new carousel instance
-        const carousel = new bootstrap.Carousel(carouselEl, {
+        // Initialize carousel
+        new bootstrap.Carousel(carouselEl, {
             interval: false,
             wrap: true
         });
@@ -97,13 +106,6 @@
         };
         carouselEl.removeEventListener('slide.bs.carousel', updateCounter);
         carouselEl.addEventListener('slide.bs.carousel', updateCounter);
-
-        // Force the slide switch once the modal is fully shown
-        const showHandler = function () {
-            carousel.to(index);
-            modalEl.removeEventListener('shown.bs.modal', showHandler);
-        };
-        modalEl.addEventListener('shown.bs.modal', showHandler);
 
         modal.show();
     }
