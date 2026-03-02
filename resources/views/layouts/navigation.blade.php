@@ -34,6 +34,19 @@
                         </x-nav-link>
                     @endcan
 
+                    @can('view-materials')
+                        <x-nav-link :href="route('materials.index')" :active="request()->routeIs('materials.*')">
+                            {{ __('Materiales') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('view-special-services')
+                        <x-nav-link :href="route('special-services.index')"
+                            :active="request()->routeIs('special-services.*')">
+                            {{ __('Servicios Esp.') }}
+                        </x-nav-link>
+                    @endcan
+
                     @can('view-performance')
                         <x-nav-link :href="route('performance.index')" :active="request()->routeIs('performance.*')">
                             {{ __('Rendimiento') }}
@@ -114,6 +127,19 @@
             @can('view-users')
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('Usuarios') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('view-materials')
+                <x-responsive-nav-link :href="route('materials.index')" :active="request()->routeIs('materials.*')">
+                    {{ __('Materiales') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('view-special-services')
+                <x-responsive-nav-link :href="route('special-services.index')"
+                    :active="request()->routeIs('special-services.*')">
+                    {{ __('Servicios Esp.') }}
                 </x-responsive-nav-link>
             @endcan
 

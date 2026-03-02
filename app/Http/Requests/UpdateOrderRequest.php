@@ -29,6 +29,10 @@ class UpdateOrderRequest extends FormRequest
                 'materials' => 'required|array|min:1',
                 'materials.*.id' => 'required|exists:order_materials,id',
                 'materials.*.actual_quantity' => 'required|numeric|min:0',
+                'evidence_photos' => 'nullable|array|max:2',
+                'evidence_photos.*' => 'image|mimes:jpeg,png,jpg|max:5120',
+                'delete_files' => 'nullable|array',
+                'delete_files.*' => 'exists:order_files,id',
             ];
         }
 

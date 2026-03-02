@@ -2,7 +2,6 @@
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\RolePermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 
@@ -71,9 +70,13 @@ it('persists permissions correctly through seeder', function () {
     expect($adminRole->hasPermission('orders', 'edit'))->toBeTrue();
     expect($adminRole->hasPermission('clients', 'create'))->toBeTrue();
     expect($adminRole->hasPermission('performance', 'view'))->toBeTrue();
+    expect($adminRole->hasPermission('materials', 'view'))->toBeTrue();
+    expect($adminRole->hasPermission('special_services', 'create'))->toBeTrue();
 
     $corteRole = Role::where('name', 'Empleado de corte')->first();
     expect($corteRole->hasPermission('orders', 'view'))->toBeFalse();
     expect($corteRole->hasPermission('clients', 'view'))->toBeFalse();
     expect($corteRole->hasPermission('performance', 'view'))->toBeFalse();
+    expect($corteRole->hasPermission('materials', 'view'))->toBeFalse();
+    expect($corteRole->hasPermission('special_services', 'view'))->toBeFalse();
 });

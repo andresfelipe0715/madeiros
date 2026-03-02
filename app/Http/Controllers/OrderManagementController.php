@@ -141,30 +141,31 @@ class OrderManagementController extends Controller
                         ]);
                     }
 
-                    // 2. Handle Evidence Photos Deletion
-                    if ($request->has('delete_files')) {
-                        $filesToDelete = $order->orderFiles()->whereIn('id', $request->delete_files)->get();
-                        foreach ($filesToDelete as $file) {
-                            Storage::disk('public')->delete($file->file_path);
-                            $file->delete();
-                        }
+                }
+
+                // 2. Handle Evidence Photos Deletion
+                if ($request->has('delete_files')) {
+                    $filesToDelete = $order->orderFiles()->whereIn('id', $request->delete_files)->get();
+                    foreach ($filesToDelete as $file) {
+                        Storage::disk('public')->delete($file->file_path);
+                        $file->delete();
                     }
+                }
 
-                    // 3. Handle Evidence Photos Upload (Max 2 total)
-                    if ($request->hasFile('evidence_photos')) {
-                        $evidenciaType = \App\Models\FileType::firstOrCreate(['name' => 'Evidencia']);
+                // 3. Handle Evidence Photos Upload (Max 2 total)
+                if ($request->hasFile('evidence_photos')) {
+                    $evidenciaType = \App\Models\FileType::firstOrCreate(['name' => 'Evidencia']);
 
-                        foreach ($request->file('evidence_photos') as $photo) {
-                            $currentCount = $order->orderFiles()->where('file_type_id', $evidenciaType->id)->count();
-                            if ($currentCount < 2) {
-                                $path = $this->compressAndStore($photo, 'evidence');
-                                if ($path) {
-                                    $order->orderFiles()->create([
-                                        'file_type_id' => $evidenciaType->id,
-                                        'file_path' => $path,
-                                        'uploaded_by' => Auth::id(),
-                                    ]);
-                                }
+                    foreach ($request->file('evidence_photos') as $photo) {
+                        $currentCount = $order->orderFiles()->where('file_type_id', $evidenciaType->id)->count();
+                        if ($currentCount < 2) {
+                            $path = $this->compressAndStore($photo, 'evidence');
+                            if ($path) {
+                                $order->orderFiles()->create([
+                                    'file_type_id' => $evidenciaType->id,
+                                    'file_path' => $path,
+                                    'uploaded_by' => Auth::id(),
+                                ]);
                             }
                         }
                     }

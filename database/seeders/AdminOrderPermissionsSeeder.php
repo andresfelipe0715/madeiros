@@ -17,6 +17,16 @@ class AdminOrderPermissionsSeeder extends Seeder
                 ['role_id' => $adminRole->id, 'resource_type' => 'orders'],
                 ['can_view' => true, 'can_edit' => true, 'can_create' => true]
             );
+
+            \App\Models\RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'materials'],
+                ['can_view' => true, 'can_edit' => true, 'can_create' => true]
+            );
+
+            \App\Models\RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'special_services'],
+                ['can_view' => true, 'can_edit' => true, 'can_create' => true]
+            );
         }
     }
 }

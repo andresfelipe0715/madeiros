@@ -145,6 +145,18 @@ class DefaultDataSeeder extends Seeder
                 ['can_view' => true, 'can_create' => true, 'can_edit' => true]
             );
 
+            // Grant Materials permission
+            RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'materials'],
+                ['can_view' => true, 'can_create' => true, 'can_edit' => true]
+            );
+
+            // Grant Special Services permission
+            RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'special_services'],
+                ['can_view' => true, 'can_create' => true, 'can_edit' => true]
+            );
+
             // Grant Full Visibility
             \App\Models\RoleVisibilityPermission::updateOrCreate(
                 ['role_id' => $adminRole->id],
@@ -175,6 +187,18 @@ class DefaultDataSeeder extends Seeder
             // Deny performance permissions for others by default
             RolePermission::updateOrCreate(
                 ['role_id' => $role->id, 'resource_type' => 'performance'],
+                ['can_view' => false, 'can_create' => false, 'can_edit' => false]
+            );
+
+            // Deny materials permissions for others by default
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'materials'],
+                ['can_view' => false, 'can_create' => false, 'can_edit' => false]
+            );
+
+            // Deny special services permissions for others by default
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'special_services'],
                 ['can_view' => false, 'can_create' => false, 'can_edit' => false]
             );
 

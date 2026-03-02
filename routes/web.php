@@ -51,6 +51,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Users Management
     Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
 
+    // Materials Management
+    Route::resource('materials', \App\Http\Controllers\MaterialController::class)->except(['show']);
+
+    // Special Services Management
+    Route::resource('special-services', \App\Http\Controllers\SpecialServiceController::class)->except(['show']);
+
     // Performance Module
     Route::get('/performance', [\App\Http\Controllers\PerformanceController::class, 'index'])->name('performance.index');
     Route::get('/performance/details/{user}', [\App\Http\Controllers\PerformanceController::class, 'details'])->name('performance.details');

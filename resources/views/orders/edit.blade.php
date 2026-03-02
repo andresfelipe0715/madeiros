@@ -492,7 +492,7 @@
                                                             class="bi bi-upload"></i></span>
                                                     <input type="file" name="order_file" id="order_file"
                                                         class="form-control border-start-0 @error('order_file') is-invalid @enderror"
-                                                        accept="application/pdf" x-ref="fileInput"
+                                                        accept="application/pdf" x-ref="fileInput" {{ $isDisabled }}
                                                         @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
                                                 </div>
 

@@ -522,9 +522,7 @@ class OrderStageController extends Controller
             DB::transaction(function () use ($request, $orderStage, $user) {
                 $orderStage->order->lockForUpdate();
 
-                if ($orderStage->order->delivered_at) {
-                    throw new \Exception('No se puede subir evidencia de un pedido ya entregado.');
-                }
+                // Allow uploading evidence even after delivery to fulfill user request of "uploading it later"
 
                 $evidenciaType = \App\Models\FileType::firstOrCreate(['name' => 'Evidencia']);
 
@@ -562,9 +560,7 @@ class OrderStageController extends Controller
             return back()->withErrors(['auth' => 'No autorizado para eliminar este archivo.']);
         }
 
-        if ($orderFile->order->delivered_at) {
-            return back()->withErrors(['auth' => 'No se puede eliminar archivos de un pedido ya entregado.']);
-        }
+        // Allow managing files even after delivery to fulfill user request of "uploading it later"
 
         try {
             DB::transaction(function () use ($orderFile) {
