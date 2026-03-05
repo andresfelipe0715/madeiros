@@ -113,6 +113,9 @@ class DefaultDataSeeder extends Seeder
             );
         }
 
+        // 6. Create Special Services
+        $this->call(SpecialServiceSeeder::class);
+
         // 5. Populate role_order_permissions
         // 5. Populate role_order_permissions and role_client_permissions
         // 5. Populate role_order_permissions and role_client_permissions for Admin

@@ -16,6 +16,7 @@ class OrderMaterial extends Model
         'actual_quantity',
         'notes',
         'cancelled_at',
+        'consumed_at',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class OrderMaterial extends Model
             'estimated_quantity' => 'decimal:2',
             'actual_quantity' => 'decimal:2',
             'cancelled_at' => 'datetime',
+            'consumed_at' => 'datetime',
         ];
     }
 
@@ -40,5 +42,10 @@ class OrderMaterial extends Model
     public function scopeActive($query)
     {
         return $query->whereNull('cancelled_at');
+    }
+
+    public function scopeConsumed($query)
+    {
+        return $query->whereNotNull('consumed_at');
     }
 }

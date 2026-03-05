@@ -14,8 +14,7 @@ class OrderStageController extends Controller
     public function __construct(
         protected \App\Services\StageAuthorizationService $authService,
         protected \App\Services\InventoryService $inventory
-    ) {
-    }
+    ) {}
 
     /**
      * Enforce strict workflow integrity before any action.
@@ -44,9 +43,9 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // 1. Basic Authorization (Role Access + Internal Sequence + Queue/Admin Override)
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             // Check if it's just a queue issue to provide better feedback
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
@@ -93,7 +92,7 @@ class OrderStageController extends Controller
             return $error;
         }
 
-        if (!Auth::user()->role->hasPermission('orders', 'edit')) {
+        if (! Auth::user()->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para pausar el proceso.']);
         }
 
@@ -106,7 +105,7 @@ class OrderStageController extends Controller
                 }
 
                 // State Validation: Cannot pause if not started, already completed, or already pending
-                if (!$orderStage->started_at) {
+                if (! $orderStage->started_at) {
                     throw new \Exception('No se puede pausar una etapa que no ha sido iniciada.');
                 }
 
@@ -138,8 +137,8 @@ class OrderStageController extends Controller
 
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
@@ -155,7 +154,7 @@ class OrderStageController extends Controller
                 }
 
                 // 2. State Validation: Cannot finish what hasn't been started or is already completed
-                if (!$orderStage->started_at) {
+                if (! $orderStage->started_at) {
                     throw new \Exception('No se puede finalizar una etapa que no ha sido iniciada.');
                 }
 
@@ -174,22 +173,24 @@ class OrderStageController extends Controller
                     'completed_by' => Auth::id(),
                 ]);
 
-                // 2. Load fresh order data to ensure we have the latest state and correct model type
+                // 2. Load fresh order data
                 $order = \App\Models\Order::find($orderStage->order_id);
+
+                // Check for "Corte" stage to trigger consumption
+                if ($orderStage->stage->name === 'Corte') {
+                    $this->inventory->consume($order);
+                }
 
                 // 3. Determine if this is the last stage and all are completed using Eloquent
                 $maxSequence = $order->orderStages()->max('sequence');
                 $hasIncompleteStages = $order->orderStages()->whereNull('completed_at')->exists();
 
                 // 4. Update the Order only if current sequence is the max and no stages remain incomplete
-                if ($orderStage->sequence == $maxSequence && !$hasIncompleteStages) {
+                if ($orderStage->sequence == $maxSequence && ! $hasIncompleteStages) {
                     $order->update([
                         'delivered_at' => now(),
                         'delivered_by' => Auth::id(),
                     ]);
-
-                    // Consume materials
-                    $this->inventory->consume($order);
                 }
             });
         } catch (\Exception $e) {
@@ -207,8 +208,8 @@ class OrderStageController extends Controller
 
         $user = Auth::user();
 
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
-            if (!$this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+            if (! $this->authService->isNextInQueue($orderStage->order, $orderStage->stage_id)) {
                 return back()->withErrors(['auth' => 'Este pedido no es el siguiente en la fila.']);
             }
 
@@ -221,7 +222,7 @@ class OrderStageController extends Controller
         }
 
         // 1.5. DB-Driven Validation: Check if remit is allowed from this stage
-        if (!$orderStage->stage->can_remit) {
+        if (! $orderStage->stage->can_remit) {
             return back()->withErrors(['auth' => 'No se permite remitir pedidos desde esta etapa.']);
         }
 
@@ -251,7 +252,7 @@ class OrderStageController extends Controller
                 $orderStage->order->lockForUpdate();
 
                 if ($orderStage->order->delivered_at) {
-                    throw new \Exception('No se puede remitir un pedido que ya ha sido entregado a menos que se revierta la entrega globalmente.');
+                    throw new \Exception('No se puede remitir un pedido que ya ha sido entregado.');
                 }
 
                 $order = $orderStage->order;
@@ -262,7 +263,7 @@ class OrderStageController extends Controller
                     ->where('stage_id', $targetStageId)
                     ->first();
 
-                if (!$targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
+                if (! $targetStage || $targetStage->sequence === null || $targetStage->sequence >= $orderStage->sequence) {
                     throw new \Exception('Destino de remisión inválido.');
                 }
 
@@ -276,8 +277,14 @@ class OrderStageController extends Controller
                     'action' => "remit|from:{$orderStage->stage_id}|to:{$targetStageId}|reason:{$reason}",
                 ]);
 
-                // 1.5 Handle Delivery Reversal if applicable
-                if ($order->delivered_at) {
+                // 1.5 Handle Consumption Reversal if applicable
+                $corteStage = $order->orderStages()->whereHas('stage', function ($q) {
+                    $q->where('name', 'Corte');
+                })->first();
+
+                $isCorteReset = $corteStage && $targetSequence <= $corteStage->sequence;
+
+                if ($isCorteReset && $order->orderMaterials()->whereNotNull('consumed_at')->exists()) {
                     $this->inventory->reverseConsumption($order);
                 }
 
@@ -314,7 +321,7 @@ class OrderStageController extends Controller
             return $error;
         }
 
-        if (!$this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage(Auth::user(), $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta etapa.']);
         }
 
@@ -340,7 +347,7 @@ class OrderStageController extends Controller
         }
 
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -375,7 +382,7 @@ class OrderStageController extends Controller
         }
 
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -412,7 +419,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can mark as pending
-        if (!$user->role->hasPermission('orders', 'edit')) {
+        if (! $user->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para marcar como pendiente.']);
         }
 
@@ -441,7 +448,7 @@ class OrderStageController extends Controller
                 \App\Models\OrderLog::create([
                     'order_id' => $orderStage->order_id,
                     'user_id' => Auth::id(),
-                    'action' => 'Etapa marcada como pendiente: ' . substr($request->pending_reason, 0, 370),
+                    'action' => 'Etapa marcada como pendiente: '.substr($request->pending_reason, 0, 370),
                 ]);
             });
         } catch (\Exception $e) {
@@ -460,7 +467,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Only users with can_edit permission (Admin/Authorized) can remove pending status
-        if (!$user->role->hasPermission('orders', 'edit')) {
+        if (! $user->role->hasPermission('orders', 'edit')) {
             return back()->withErrors(['auth' => 'No tiene permisos para quitar el estado pendiente.']);
         }
 
@@ -473,7 +480,7 @@ class OrderStageController extends Controller
                 }
 
                 // State Validation: Cannot remove pending if it's not pending or already completed
-                if (!$orderStage->is_pending) {
+                if (! $orderStage->is_pending) {
                     throw new \Exception('Esta etapa no está marcada como pendiente.');
                 }
 
@@ -505,7 +512,7 @@ class OrderStageController extends Controller
         }
 
         $user = Auth::user();
-        if (!$this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
+        if (! $this->authService->canActOnStage($user, $orderStage->order, $orderStage->stage_id)) {
             return back()->withErrors(['auth' => 'No autorizado para esta acción.']);
         }
 
@@ -556,7 +563,7 @@ class OrderStageController extends Controller
         $user = Auth::user();
 
         // Authorization: Admin or the user who uploaded it
-        if (!$user->role->hasPermission('orders', 'edit') && $orderFile->uploaded_by !== $user->id) {
+        if (! $user->role->hasPermission('orders', 'edit') && $orderFile->uploaded_by !== $user->id) {
             return back()->withErrors(['auth' => 'No autorizado para eliminar este archivo.']);
         }
 
@@ -568,7 +575,7 @@ class OrderStageController extends Controller
                 $orderFile->delete();
             });
         } catch (\Exception $e) {
-            return back()->withErrors(['auth' => 'Error al eliminar el archivo: ' . $e->getMessage()]);
+            return back()->withErrors(['auth' => 'Error al eliminar el archivo: '.$e->getMessage()]);
         }
 
         return back()->with('status', 'Archivo eliminado correctamente.');

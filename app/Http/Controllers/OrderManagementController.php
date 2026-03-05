@@ -80,24 +80,14 @@ class OrderManagementController extends Controller
 
         try {
             DB::transaction(function () use ($order, $validated, $request) {
-                if ($order->delivered_at) {
-                    // POST-DELIVERY: Only actual_quantity corrections allowed
-                    foreach ($validated['materials'] as $data) {
-                        $om = $order->orderMaterials()->findOrFail($data['id']);
-                        if (array_key_exists('actual_quantity', $data) && (float) $data['actual_quantity'] != (float) $om->actual_quantity) {
-                            $this->inventory->correctActual($om, (float) $data['actual_quantity']);
-                        }
-                    }
-                } else {
-                    // BEFORE DELIVERY: Standard update
+                // Update Order-level fields only if not delivered
+                if (! $order->delivered_at) {
                     $order->update([
                         'invoice_number' => $validated['invoice_number'],
                         'notes' => $validated['notes'] ?? null,
                         'lleva_herrajeria' => $request->has('lleva_herrajeria'),
                         'lleva_manual_armado' => $request->has('lleva_manual_armado'),
                     ]);
-
-                    $this->inventory->adjust($order, $validated['materials']);
 
                     // Sync Special Services
                     if (isset($validated['special_services'])) {
@@ -122,7 +112,7 @@ class OrderManagementController extends Controller
                         }
                     }
 
-                    // 1. Handle main order PDF file replacement
+                    // Handle main order PDF file replacement
                     if ($request->hasFile('order_file')) {
                         $ordenType = \App\Models\FileType::firstOrCreate(['name' => 'Orden']);
 
@@ -140,8 +130,10 @@ class OrderManagementController extends Controller
                             'uploaded_by' => Auth::id(),
                         ]);
                     }
-
                 }
+
+                // Materials adjustment: Handle both pre- and post-consumption via InventoryService
+                $this->inventory->adjust($order, $validated['materials']);
 
                 // 2. Handle Evidence Photos Deletion
                 if ($request->has('delete_files')) {

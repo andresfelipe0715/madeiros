@@ -18,6 +18,8 @@ class SpecialServiceSeeder extends Seeder
             'Corte Especial',
             'Ranurado',
             'Armado de Mueble',
+            'Instalación',
+            'Transporte',
         ];
 
         foreach ($services as $service) {

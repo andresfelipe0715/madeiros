@@ -1,0 +1,22 @@
+﻿
+   FAIL  Tests\Feature\MaterialConsumptionTest
+  Γ£ô it auto-filΓÇª 0.20s  
+  Γ£ô it allows cΓÇª 0.03s  
+  Γ£ô it preventsΓÇª 0.02s  
+  Γ£ô it preventsΓÇª 0.03s  
+  Γ£ô it reversesΓÇª 0.03s  
+  Γ£ô it preventsΓÇª 0.02s  
+  Γ£ô it preventsΓÇª 0.02s  
+  Γ£ô it instantlΓÇª 0.02s  
+  Γ£ô it instantlΓÇª 0.02s  
+  Γ£ô it cancelliΓÇª 0.02s  
+  Γ¿» it preventsΓÇª 0.03s  
+  Γ£ô it only revΓÇª 0.03s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\FeaΓÇª   
+  Failed asserting that exception of type "Exception" is thrown.
+
+
+  Tests:    1 failed, 11 passed (44 assertions)
+  Duration: 0.60s
+
