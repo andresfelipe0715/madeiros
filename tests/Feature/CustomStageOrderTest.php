@@ -6,7 +6,6 @@ use App\Models\Client;
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\Stage;
-use App\Models\StageGroup;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,24 +41,17 @@ class CustomStageOrderTest extends TestCase
 
     public function test_order_creation_with_custom_substage_ordering(): void
     {
-        $enchapeGroup = StageGroup::where('name', 'Enchape')->first();
-        $enchapeStage1 = Stage::where('name', 'Enchape')->first();
-
-        // Let's create a second enchape stage to test reordering
-        $enchapeStage2 = Stage::create([
-            'name' => 'Enchape Curvo',
-            'default_sequence' => 25,
-            'stage_group_id' => $enchapeGroup->id,
-        ]);
+        $enchapeStage1 = Stage::where('name', 'Enchape 1')->first();
+        $enchapeStage2 = Stage::where('name', 'Enchape 2')->first();
 
         $corteStage = Stage::where('name', 'Corte')->first();
 
-        // Normally sequence is Corte(10) -> Enchape(20) -> Enchape Curvo(25)
-        // We will send payload as Corte -> Enchape Curvo -> Enchape (swapping enchapes)
+        // Normally sequence is Corte(10) -> Enchape 1(20) -> Enchape 2(30)
+        // We will send payload as Corte -> Enchape 2 -> Enchape 1 (swapping enchapes)
 
         $payload = [
             'client_id' => $this->client->id,
-            'invoice_number' => 'INV-TEST-CUSTOM-'.rand(100, 999),
+            'invoice_number' => 'INV-TEST-CUSTOM-' . rand(100, 999),
             'lleva_herrajeria' => false,
             'lleva_manual_armado' => false,
             'materials' => [
@@ -70,7 +62,7 @@ class CustomStageOrderTest extends TestCase
             ],
             'stages' => [
                 ['stage_id' => $corteStage->id, 'sequence' => 1],
-                ['stage_id' => $enchapeStage2->id, 'sequence' => 2], // Custom order!
+                ['stage_id' => $enchapeStage2->id, 'sequence' => 2], // Custom order: Enchape 2 before Enchape 1!
                 ['stage_id' => $enchapeStage1->id, 'sequence' => 3], // Custom order!
             ],
         ];
@@ -96,11 +88,11 @@ class CustomStageOrderTest extends TestCase
     public function test_rejects_non_contiguous_sequences(): void
     {
         $corteStage = Stage::where('name', 'Corte')->first();
-        $enchapeStage = Stage::where('name', 'Enchape')->first();
+        $enchapeStage = Stage::where('name', 'Enchape 1')->first();
 
         $payload = [
             'client_id' => $this->client->id,
-            'invoice_number' => 'INV-TEST-GAP-'.rand(100, 999),
+            'invoice_number' => 'INV-TEST-GAP-' . rand(100, 999),
             'materials' => [
                 ['material_id' => $this->material->id, 'estimated_quantity' => 10],
             ],
