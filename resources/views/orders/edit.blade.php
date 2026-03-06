@@ -56,6 +56,7 @@
     'material_name' => $om->material->name,
     'estimated_quantity' => $om->estimated_quantity,
     'actual_quantity' => $om->actual_quantity,
+    'consumed_at' => $om->consumed_at ? true : false,
     'notes' => $om->notes ?? '',
     'cancelled' => $om->cancelled_at !== null,
     'cancelled_at' => $om->cancelled_at ? $om->cancelled_at->format('Y-m-d H:i') : null,
@@ -139,7 +140,9 @@
                                                             value="0">
 
                                                         <div class="col-md-5">
-                                                            <select :name="`materials[${index}][material_id]`"
+                                                            <input type="hidden" :name="`materials[${index}][material_id]`"
+                                                                x-model="material.material_id">
+                                                            <select
                                                                 x-init="initMaterialSelect($el, material.material_id, material.initial_name || materialLookup[material.material_id] || null, stockLookup[material.material_id] || 0)"
                                                                 x-model="material.material_id"
                                                                 class="form-select border-0 shadow-sm" required
@@ -154,12 +157,13 @@
                                                         </div>
 
                                                         <div class="col-md-4 col-8">
+                                                            <input type="hidden" :name="`materials[${index}][estimated_quantity]`"
+                                                                x-model="material.estimated_quantity">
                                                             <div class="input-group input-group-sm"
                                                                 :class="material.material_id && material.estimated_quantity > getAvailableFor(material.material_id) ? 'border border-danger rounded' : ''">
                                                                 <span
                                                                     class="input-group-text bg-white border-end-0">Cant.</span>
                                                                 <input type="number"
-                                                                    :name="`materials[${index}][estimated_quantity]`"
                                                                     x-model="material.estimated_quantity"
                                                                     class="form-control border-start-0"
                                                                     placeholder="Est." min="0.01" step="0.01" {{ $isDisabled }}>
@@ -211,23 +215,20 @@
                                                         </div>
                                                     </template>
 
-                                                    @if($order->delivered_at)
-                                                        <div class="row g-2 mb-2">
-                                                            <div class="col-12">
-                                                                <div class="input-group input-group-sm">
-                                                                    <span
-                                                                        class="input-group-text bg-primary text-white border-primary">Consumo
-                                                                        Real</span>
-                                                                    <input type="number"
-                                                                        :name="`materials[${index}][actual_quantity]`"
-                                                                        x-model="material.actual_quantity"
-                                                                        class="form-control border-primary"
-                                                                        placeholder="Consumo Real" min="0" step="0.01"
-                                                                        required>
-                                                                </div>
+                                                    <div x-show="material.consumed_at" class="row g-2 mb-2">
+                                                        <div class="col-12">
+                                                            <div class="input-group input-group-sm">
+                                                                <span
+                                                                    class="input-group-text bg-primary text-white border-primary">Consumo Real</span>
+                                                                <input type="number"
+                                                                    :name="`materials[${index}][actual_quantity]`"
+                                                                    x-model="material.actual_quantity"
+                                                                    class="form-control border-primary"
+                                                                    placeholder="Consumo Real" min="0" step="0.01"
+                                                                    required>
                                                             </div>
                                                         </div>
-                                                    @endif
+                                                    </div>
 
                                                     <div class="row g-2">
                                                         <div class="col-12">
