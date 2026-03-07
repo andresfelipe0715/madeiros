@@ -62,6 +62,18 @@ class DefaultDataSeeder extends Seeder
             ]
         );
 
+        // 2.1 Create Bodega Role
+        $bodegaRole = Role::firstOrCreate(['name' => 'Bodega']);
+        User::firstOrCreate(
+            ['document' => 'bodega_123'],
+            [
+                'name' => 'Bodega Test',
+                'role_id' => $bodegaRole->id,
+                'password' => Hash::make('password'),
+                'active' => true,
+            ]
+        );
+
         // 3. Create a dedicated Role and User for each specific Stage
         foreach ($stages as $stageName => $stageModel) {
             $roleName = 'Empleado de '.strtolower($stageName);
@@ -109,7 +121,10 @@ class DefaultDataSeeder extends Seeder
         foreach ($materialsData as $material) {
             \App\Models\Material::updateOrCreate(
                 ['name' => $material['name']],
-                ['stock_quantity' => $material['stock_quantity']]
+                [
+                    'stock_quantity' => $material['stock_quantity'],
+                    'bodega_quantity' => 0,
+                ]
             );
         }
 
@@ -165,6 +180,12 @@ class DefaultDataSeeder extends Seeder
                 ['role_id' => $adminRole->id],
                 ['can_view_files' => true, 'can_view_order_file' => true, 'can_view_machine_file' => true]
             );
+
+            // Grant Bodega permission
+            RolePermission::updateOrCreate(
+                ['role_id' => $adminRole->id, 'resource_type' => 'bodega'],
+                ['can_view' => true, 'can_create' => true, 'can_edit' => true]
+            );
         }
 
         $otherRoles = Role::where('name', '!=', 'Admin')->get();
@@ -209,6 +230,29 @@ class DefaultDataSeeder extends Seeder
             \App\Models\RoleVisibilityPermission::updateOrCreate(
                 ['role_id' => $role->id],
                 ['can_view_files' => true, 'can_view_order_file' => true, 'can_view_machine_file' => true]
+            );
+
+            // Default Bodega permission: off for others
+            RolePermission::updateOrCreate(
+                ['role_id' => $role->id, 'resource_type' => 'bodega'],
+                ['can_view' => false, 'can_create' => false, 'can_edit' => false]
+            );
+        }
+
+        // Specifically set Bodega role permissions
+        $bodegaRole = Role::where('name', 'Bodega')->first();
+        if ($bodegaRole) {
+            RolePermission::updateOrCreate(
+                ['role_id' => $bodegaRole->id, 'resource_type' => 'bodega'],
+                ['can_view' => true, 'can_create' => true, 'can_edit' => true]
+            );
+            RolePermission::updateOrCreate(
+                ['role_id' => $bodegaRole->id, 'resource_type' => 'materials'],
+                ['can_view' => true, 'can_create' => false, 'can_edit' => false]
+            );
+            RolePermission::updateOrCreate(
+                ['role_id' => $bodegaRole->id, 'resource_type' => 'orders'],
+                ['can_view' => true, 'can_edit' => false, 'can_create' => false]
             );
         }
 

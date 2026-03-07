@@ -51,8 +51,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Users Management
     Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
 
-    // Materials Management
+    // Materials Management (POS Stock Only)
     Route::resource('materials', \App\Http\Controllers\MaterialController::class)->except(['show']);
+
+    // Bodega Management (Bodega Stock Only)
+    Route::get('bodega', [\App\Http\Controllers\BodegaController::class, 'index'])->name('bodega.index');
+    Route::get('bodega/{material}/edit', [\App\Http\Controllers\BodegaController::class, 'edit'])->name('bodega.edit');
+    Route::put('bodega/{material}', [\App\Http\Controllers\BodegaController::class, 'update'])->name('bodega.update');
+    Route::post('bodega/{material}/transfer', [\App\Http\Controllers\BodegaController::class, 'transfer'])->name('bodega.transfer');
 
     // Special Services Management
     Route::resource('special-services', \App\Http\Controllers\SpecialServiceController::class)->except(['show']);

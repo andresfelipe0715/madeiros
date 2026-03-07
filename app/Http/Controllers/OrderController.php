@@ -26,6 +26,8 @@ class OrderController extends Controller
      */
     public function create(Request $request): View
     {
+        \Illuminate\Support\Facades\Gate::authorize('create-orders');
+
         $clientId = $request->query('client_id') ?? old('client_id');
         $selectedClient = $clientId ? Client::find($clientId) : null;
         $materials = Material::all();

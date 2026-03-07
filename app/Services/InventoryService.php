@@ -22,7 +22,7 @@ class InventoryService
                 $material = Material::lockForUpdate()->findOrFail($materialId);
 
                 if ($material->availableQuantity() < $quantity) {
-                    throw new Exception("Stock insuficiente para: {$material->name}");
+                    throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                 }
 
                 $order->orderMaterials()->create([
@@ -89,12 +89,12 @@ class InventoryService
 
                         if ($isConsumed) {
                             if ($material->stock_quantity < $newEstimated) {
-                                throw new Exception("Stock insuficiente para restaurar: {$material->name}");
+                                throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                             }
                             $material->decrement('stock_quantity', $newEstimated);
                         } else {
                             if ($material->availableQuantity() < $newEstimated) {
-                                throw new Exception("Stock insuficiente para restaurar: {$material->name}");
+                                throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                             }
                             $material->increment('reserved_quantity', $newEstimated);
                         }
@@ -137,7 +137,7 @@ class InventoryService
                             $material->decrement('reserved_quantity', $om->estimated_quantity);
                             $newMaterial = Material::lockForUpdate()->findOrFail($materialId);
                             if ($newMaterial->availableQuantity() < $newEstimated) {
-                                throw new Exception("Stock insuficiente para cambiar a: {$newMaterial->name}");
+                                throw new Exception("No hay suficiente material en el punto de venta: {$newMaterial->name}");
                             }
                             $newMaterial->increment('reserved_quantity', $newEstimated);
                             $om->update([
@@ -154,7 +154,7 @@ class InventoryService
                             // Standard adjustment (Pre-consumption)
                             $diff = $newEstimated - $om->estimated_quantity;
                             if ($diff > 0 && $material->availableQuantity() < $diff) {
-                                throw new Exception("Stock insuficiente para ajustar: {$material->name}");
+                                throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                             }
                             $om->update([
                                 'estimated_quantity' => $newEstimated,
@@ -183,12 +183,12 @@ class InventoryService
 
                     if ($isConsumed) {
                         if ($material->stock_quantity < $newEstimated) {
-                            throw new Exception("Stock insuficiente para nuevo material: {$material->name}");
+                            throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                         }
                         $material->decrement('stock_quantity', $newEstimated);
                     } else {
                         if ($material->availableQuantity() < $newEstimated) {
-                            throw new Exception("Stock insuficiente para nuevo material: {$material->name}");
+                            throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                         }
                         $material->increment('reserved_quantity', $newEstimated);
                     }
@@ -231,7 +231,7 @@ class InventoryService
 
                 // Step 2 & 3 - Release reservation & Deduct stock
                 if ($material->stock_quantity < $finalActual) {
-                    throw new Exception("Stock insuficiente para: {$material->name}. No se puede procesar el consumo.");
+                    throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
                 }
 
                 $material->decrement('reserved_quantity', $om->estimated_quantity);
@@ -260,7 +260,7 @@ class InventoryService
             $diff = $newActual - $oldActual;
 
             if ($diff > 0 && $material->stock_quantity < $diff) {
-                throw new Exception("Stock insuficiente para corregir consumo: {$material->name}");
+                throw new Exception("No hay suficiente material en el punto de venta: {$material->name}");
             }
 
             $material->decrement('stock_quantity', $diff);

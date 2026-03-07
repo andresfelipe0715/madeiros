@@ -84,5 +84,17 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('edit-special-services', function (\App\Models\User $user) {
             return $user->role->hasPermission('special_services', 'edit');
         });
+
+        \Illuminate\Support\Facades\Gate::define('view-bodega', function (\App\Models\User $user) {
+            return $user->role->hasPermission('bodega', 'view');
+        });
+
+        \Illuminate\Support\Facades\Gate::define('create-bodega', function (\App\Models\User $user) {
+            return $user->role->hasPermission('bodega', 'create');
+        });
+
+        \Illuminate\Support\Facades\Gate::define('edit-bodega', function (\App\Models\User $user) {
+            return $user->role->hasPermission('bodega', 'edit');
+        });
     }
 }

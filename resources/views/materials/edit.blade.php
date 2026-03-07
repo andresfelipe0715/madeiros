@@ -38,7 +38,7 @@
                                 <div class="mb-3">
                                     <label for="stock_quantity"
                                         class="form-label text-muted small text-uppercase font-weight-bold">Cantidad en
-                                        Stock</label>
+                                        Stock (Punto de Venta)</label>
                                     <input type="number" step="0.01"
                                         class="form-control @error('stock_quantity') is-invalid @enderror"
                                         id="stock_quantity" name="stock_quantity"

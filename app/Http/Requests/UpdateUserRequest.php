@@ -11,7 +11,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return \Illuminate\Support\Facades\Gate::allows('edit-users');
     }
 
     public function rules(): array
@@ -24,7 +24,7 @@ class UpdateUserRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                'unique:users,document,' . $user->id,
+                'unique:users,document,'.$user->id,
                 function ($attribute, $value, $fail) use ($user) {
                     if ($value !== $user->document) {
                         // Check if user has orders or logs

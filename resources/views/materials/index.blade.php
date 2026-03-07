@@ -61,7 +61,7 @@
                             <thead class="bg-light text-muted text-uppercase small font-weight-bold">
                                 <tr>
                                     <th class="px-4 py-3">Nombre</th>
-                                    <th class="px-4 py-3">Stock Total</th>
+                                    <th class="px-4 py-3">Punto de Venta</th>
                                     <th class="px-4 py-3">Reservada</th>
                                     <th class="px-4 py-3">Disponible</th>
                                     <th class="px-4 py-3 text-center">Acciones</th>
@@ -87,8 +87,8 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            @can('edit-materials')
-                                                <div class="d-flex justify-content-center gap-2">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                @can('edit-materials')
                                                     <a href="{{ route('materials.edit', $material) }}"
                                                         class="btn btn-sm btn-outline-primary" title="Editar Material">
                                                         <i class="fas fa-edit"></i> Editar
@@ -102,8 +102,8 @@
                                                             <i class="fas fa-trash"></i> Eliminar
                                                         </button>
                                                     </form>
-                                                </div>
-                                            @endcan
+                                                @endcan
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

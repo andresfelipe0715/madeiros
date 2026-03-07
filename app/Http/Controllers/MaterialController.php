@@ -13,17 +13,18 @@ class MaterialController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('view-materials');
 
         $query = Material::query();
 
-        if ($search = request('search')) {
-            $query->where('name', 'LIKE', "%{$search}%");
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
         }
 
-        $materials = $query->latest()->paginate(15)->withQueryString();
+        $materials = $query->orderBy('name')->paginate(15)->withQueryString();
 
         return view('materials.index', compact('materials'));
     }

@@ -13,6 +13,7 @@ class Material extends Model
         'name',
         'stock_quantity',
         'reserved_quantity',
+        'bodega_quantity',
     ];
 
     protected function casts(): array
@@ -20,6 +21,7 @@ class Material extends Model
         return [
             'stock_quantity' => 'decimal:2',
             'reserved_quantity' => 'decimal:2',
+            'bodega_quantity' => 'decimal:2',
         ];
     }
 

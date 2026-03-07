@@ -40,6 +40,12 @@
                         </x-nav-link>
                     @endcan
 
+                    @can('view-bodega')
+                        <x-nav-link :href="route('bodega.index')" :active="request()->routeIs('bodega.*')">
+                            {{ __('Bodega') }}
+                        </x-nav-link>
+                    @endcan
+
                     @can('view-special-services')
                         <x-nav-link :href="route('special-services.index')"
                             :active="request()->routeIs('special-services.*')">
@@ -133,6 +139,12 @@
             @can('view-materials')
                 <x-responsive-nav-link :href="route('materials.index')" :active="request()->routeIs('materials.*')">
                     {{ __('Materiales') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('view-bodega')
+                <x-responsive-nav-link :href="route('bodega.index')" :active="request()->routeIs('bodega.*')">
+                    {{ __('Bodega') }}
                 </x-responsive-nav-link>
             @endcan
 
