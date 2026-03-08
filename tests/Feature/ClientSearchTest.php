@@ -19,9 +19,9 @@ it('can search clients by name', function () {
     $response = $this->getJson(route('clients.search', ['q' => 'Alice']));
 
     $response->assertStatus(200)
-        ->assertJsonCount(1)
-        ->assertJsonPath('0.name', 'Alice Smith')
-        ->assertJsonPath('0.document', '12345');
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.name', 'Alice Smith')
+        ->assertJsonPath('data.0.document', '12345');
 });
 
 it('can search clients by document', function () {
@@ -29,9 +29,9 @@ it('can search clients by document', function () {
     $response = $this->getJson(route('clients.search', ['q' => '6789']));
 
     $response->assertStatus(200)
-        ->assertJsonCount(1)
-        ->assertJsonPath('0.name', 'Bob Johnson')
-        ->assertJsonPath('0.document', '67890');
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.name', 'Bob Johnson')
+        ->assertJsonPath('data.0.document', '67890');
 });
 
 it('returns multiple results if matches', function () {
@@ -41,5 +41,5 @@ it('returns multiple results if matches', function () {
     $response = $this->getJson(route('clients.search', ['q' => 'Smith']));
 
     $response->assertStatus(200)
-        ->assertJsonCount(2);
+        ->assertJsonCount(2, 'data');
 });

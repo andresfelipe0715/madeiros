@@ -49,7 +49,7 @@ it('allows remittance to a valid previous stage', function () {
         ->assertSessionHas('status', 'Pedido remitido.');
 });
 
-it('aborts with 400 if target stage does not belong to the order', function () {
+it('fails if target stage does not belong to the order', function () {
     $order = Order::create([
         'client_id' => $this->client->id,
         'created_by' => $this->user->id,
@@ -67,10 +67,11 @@ it('aborts with 400 if target stage does not belong to the order', function () {
             'target_stage_id' => $anotherStage->id,
             'notes' => 'Attempting illegal remit',
         ])
-        ->assertStatus(400);
+        ->assertRedirect()
+        ->assertSessionHasErrors('auth');
 });
 
-it('aborts with 400 if target stage sequence is >= current stage sequence', function () {
+it('fails if target stage sequence is >= current stage sequence or already completed', function () {
     $order = Order::create([
         'client_id' => $this->client->id,
         'created_by' => $this->user->id,
@@ -85,12 +86,14 @@ it('aborts with 400 if target stage sequence is >= current stage sequence', func
             'target_stage_id' => $this->stage2->id,
             'notes' => 'Attempting forward remit',
         ])
-        ->assertStatus(400);
+        ->assertRedirect()
+        ->assertSessionHasErrors('auth');
 
     actingAs($this->user)
         ->post(route('order-stages.remit', $os1->id), [
             'target_stage_id' => $this->stage1->id,
             'notes' => 'Attempting same stage remit',
         ])
-        ->assertStatus(400);
+        ->assertRedirect()
+        ->assertSessionHasErrors('auth');
 });

@@ -68,13 +68,13 @@ it('denies a non-admin from deleting another user\'s file', function () {
     $this->assertDatabaseHas('order_files', ['id' => $this->orderFile->id]);
 });
 
-it('blocks deletion if the order is already delivered', function () {
+it('allows deletion even if the order is already delivered', function () {
     $this->order->update(['delivered_at' => now()]);
     actingAs($this->admin);
 
     $response = $this->delete(route('order-files.destroy', $this->orderFile));
 
     $response->assertStatus(302);
-    $response->assertSessionHasErrors(['auth']);
-    $this->assertDatabaseHas('order_files', ['id' => $this->orderFile->id]);
+    $response->assertSessionHas('status', 'Archivo eliminado correctamente.');
+    $this->assertDatabaseMissing('order_files', ['id' => $this->orderFile->id]);
 });

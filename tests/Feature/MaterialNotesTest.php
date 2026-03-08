@@ -108,7 +108,7 @@ it('displays material name and notes together in the index', function () {
 
     $response = get(route('orders.index'));
 
-    $response->assertSee('Melamina Blanca - TEST NOTE');
+    $response->assertSee('Melamina Blanca (5) - TEST NOTE');
 });
 
 it('can view the order edit page with materials', function () {
