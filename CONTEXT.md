@@ -70,11 +70,15 @@ Auth:
 ---
 
 ### Inventory & Materials
-- **Reservation System**: Stock is reserved (`reserved_quantity`) upon order creation.
+- **Strict Interface Isolation**:
+  - `Punto de Venta` (Materials): Manages POS `stock_quantity`. Only accessible via `create-/edit-materials` permissions. Bodega is entirely hidden here.
+  - `Bodega` (Warehouse): Manages `bodega_quantity`. Only accessible via `view-/edit-bodega`. POS is strictly read-only informational here.
+- **Reservation System (POS Only)**: Stock is reserved (`reserved_quantity`) upon order creation. Bodega stock is completely ignored during order creation/reservation.
 - **Differential Adjustment**: Editing an order's materials adjusts the `reserved_quantity` based on the difference (NEW - OLD).
 - **Consumption Lifecycle**: 
   - On final stage completion, reserved quantity is released, and `stock_quantity` is deducted.
   - **Post-Delivery Correction**: Authorized users can update `actual_quantity` after delivery, triggering stock reconciliation.
+- **Transfers**: Moving physical goods from Warehouse to POS is done explicitly via the `/bodega` interface using the "Transferir" function.
 
 ---
 
@@ -201,6 +205,7 @@ CREATE TABLE materials (
     name VARCHAR(255) NOT NULL,
     stock_quantity DECIMAL(12, 2) NOT NULL DEFAULT 0,
     reserved_quantity DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    bodega_quantity DECIMAL(12, 2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
