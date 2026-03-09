@@ -28,7 +28,7 @@ class OrderLog extends Model
      */
     public function getRemitDataAttribute(): ?array
     {
-        if (!str_starts_with($this->action, 'remit|')) {
+        if (! str_starts_with($this->action, 'remit|')) {
             return null;
         }
 

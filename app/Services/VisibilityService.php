@@ -32,7 +32,7 @@ class VisibilityService
     protected function check(string $field): bool
     {
         // If no record exists, default to TRUE as per requirements (fail-safe)
-        if (!$this->permissions) {
+        if (! $this->permissions) {
             return true;
         }
 

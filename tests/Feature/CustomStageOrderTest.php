@@ -51,7 +51,7 @@ class CustomStageOrderTest extends TestCase
 
         $payload = [
             'client_id' => $this->client->id,
-            'invoice_number' => 'INV-TEST-CUSTOM-' . rand(100, 999),
+            'invoice_number' => 'INV-TEST-CUSTOM-'.rand(100, 999),
             'lleva_herrajeria' => false,
             'lleva_manual_armado' => false,
             'materials' => [
@@ -92,7 +92,7 @@ class CustomStageOrderTest extends TestCase
 
         $payload = [
             'client_id' => $this->client->id,
-            'invoice_number' => 'INV-TEST-GAP-' . rand(100, 999),
+            'invoice_number' => 'INV-TEST-GAP-'.rand(100, 999),
             'materials' => [
                 ['material_id' => $this->material->id, 'estimated_quantity' => 10],
             ],

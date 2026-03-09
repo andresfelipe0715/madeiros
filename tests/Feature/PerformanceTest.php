@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\User;
-use App\Models\Role;
 use App\Models\Order;
-use App\Models\Stage;
 use App\Models\OrderStage;
+use App\Models\Role;
 use App\Models\RolePermission;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Stage;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -94,7 +94,7 @@ it('provides paginated details via AJAX', function () {
 
     // Create 20 completions
     for ($i = 0; $i < 20; $i++) {
-        $order = Order::factory()->create(['invoice_number' => 'INV-' . str_pad($i, 3, '0', STR_PAD_LEFT)]);
+        $order = Order::factory()->create(['invoice_number' => 'INV-'.str_pad($i, 3, '0', STR_PAD_LEFT)]);
         OrderStage::create([
             'order_id' => $order->id,
             'stage_id' => $stage->id,
@@ -174,7 +174,7 @@ it('filters details by stage_id', function () {
     // Request with stage_id filter for Stage 1
     $response = $this->actingAs($this->admin)->getJson(route('performance.details', [
         'user' => $this->admin->id,
-        'stage_id' => $stage1->id
+        'stage_id' => $stage1->id,
     ]));
 
     $response->assertOk();
@@ -184,7 +184,7 @@ it('filters details by stage_id', function () {
     // Request with stage_id filter for Stage 2
     $response = $this->actingAs($this->admin)->getJson(route('performance.details', [
         'user' => $this->admin->id,
-        'stage_id' => $stage2->id
+        'stage_id' => $stage2->id,
     ]));
 
     $response->assertOk();

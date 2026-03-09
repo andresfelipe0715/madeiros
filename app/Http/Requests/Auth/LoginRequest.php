@@ -44,7 +44,7 @@ class LoginRequest extends FormRequest
         $credentials = $this->only('document', 'password');
 
         // 1. Verify credentials without logging in to keep error generic if they fail
-        if (!Auth::validate($credentials)) {
+        if (! Auth::validate($credentials)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -55,7 +55,7 @@ class LoginRequest extends FormRequest
         // 2. Credentials are correct, now verify active status
         $user = \App\Models\User::where('document', $this->document)->first();
 
-        if (!$user || !$user->active) {
+        if (! $user || ! $user->active) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -76,7 +76,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -97,6 +97,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('document')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->string('document')).'|'.$this->ip());
     }
 }

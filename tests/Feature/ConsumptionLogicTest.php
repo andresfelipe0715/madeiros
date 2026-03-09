@@ -450,7 +450,7 @@ it('cancelling a non-consumed material releases its reservation from stock', fun
                     'material_id' => $this->material->id,
                     'estimated_quantity' => 15,
                     'cancelled' => true,
-                ]
+                ],
             ],
         ])->assertSessionDoesntHaveErrors();
 
@@ -485,7 +485,7 @@ it('cancelling a consumed material correctly returns actual quantity to stock', 
                     'material_id' => $this->material->id,
                     'estimated_quantity' => 10,
                     'cancelled' => true,
-                ]
+                ],
             ],
         ])->assertSessionDoesntHaveErrors();
 

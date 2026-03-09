@@ -31,7 +31,7 @@ class UpdateClientRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                'unique:clients,document,' . $clientId,
+                'unique:clients,document,'.$clientId,
                 function ($attribute, $value, $fail) use ($client) {
                     if ($client->orders()->exists() && $value !== $client->document) {
                         $fail('El documento no se puede modificar porque este cliente ya tiene órdenes asociadas.');

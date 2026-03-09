@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +36,7 @@ class UserController extends Controller
         Gate::authorize('create-users');
 
         $roles = Role::all();
+
         return view('users.create', compact('roles'));
     }
 
@@ -59,6 +58,7 @@ class UserController extends Controller
         Gate::authorize('edit-users');
 
         $roles = Role::all();
+
         return view('users.edit', compact('user', 'roles'));
     }
 

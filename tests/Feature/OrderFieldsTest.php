@@ -42,7 +42,7 @@ it('can create an order with hardware and manual fields', function () {
         'lleva_herrajeria' => '1',
         'lleva_manual_armado' => '1',
         'stages' => [
-            ['stage_id' => $this->stage->id, 'sequence' => 1]
+            ['stage_id' => $this->stage->id, 'sequence' => 1],
         ],
         'materials' => [
             ['material_id' => $this->material->id, 'estimated_quantity' => 1],

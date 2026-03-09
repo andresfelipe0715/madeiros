@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
-use Carbon\Carbon;
 
 class PerformanceController extends Controller
 {
@@ -169,6 +169,7 @@ class PerformanceController extends Controller
         // Transform for display
         $stages->getCollection()->transform(function ($os) {
             $seconds = (int) abs($os->completed_at->diffInSeconds($os->started_at));
+
             return [
                 'order_invoice' => $os->order->invoice_number,
                 'stage_name' => $os->stage->name,
@@ -190,7 +191,7 @@ class PerformanceController extends Controller
             ],
             'summary' => [
                 'total_stages' => $stages->total(),
-            ]
+            ],
         ]);
     }
 
@@ -206,7 +207,7 @@ class PerformanceController extends Controller
         $remainingSeconds = $seconds % 60;
 
         if ($minutes < 60) {
-            return "{$minutes}m " . ($remainingSeconds > 0 ? "{$remainingSeconds}s" : "0s");
+            return "{$minutes}m ".($remainingSeconds > 0 ? "{$remainingSeconds}s" : '0s');
         }
 
         $hours = floor($minutes / 60);

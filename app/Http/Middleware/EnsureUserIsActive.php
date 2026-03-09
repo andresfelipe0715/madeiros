@@ -15,7 +15,7 @@ class EnsureUserIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && !auth()->user()->active) {
+        if (auth()->check() && ! auth()->user()->active) {
             auth()->logout();
 
             $request->session()->invalidate();

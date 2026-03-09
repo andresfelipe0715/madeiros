@@ -42,11 +42,12 @@ class Role extends Model
     {
         $permission = $this->permissions->firstWhere('resource_type', $resource);
 
-        if (!$permission) {
+        if (! $permission) {
             return false;
         }
 
-        $field = 'can_' . $action;
+        $field = 'can_'.$action;
+
         return (bool) ($permission->{$field} ?? false);
     }
 

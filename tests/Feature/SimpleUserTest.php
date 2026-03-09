@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -14,14 +13,14 @@ it('can create a user with a role and permissions', function () {
         'resource_type' => 'orders',
         'can_view' => true,
         'can_edit' => true,
-        'can_create' => true
+        'can_create' => true,
     ]);
 
     $role->permissions()->create([
         'resource_type' => 'clients',
         'can_view' => true,
         'can_create' => true,
-        'can_edit' => true
+        'can_edit' => true,
     ]);
 
     $role->refresh();

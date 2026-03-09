@@ -1,17 +1,14 @@
 <?php
 
 use App\Models\Client;
+use App\Models\Material;
 use App\Models\Order;
 use App\Models\Role;
 use App\Models\RolePermission;
+use App\Models\SpecialService;
 use App\Models\Stage;
 use App\Models\User;
-use App\Models\Material;
-use App\Models\SpecialService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use function Pest\Laravel\post;
-use function Pest\Laravel\put;
 
 uses(RefreshDatabase::class);
 
@@ -40,10 +37,10 @@ it('can create an order with special services', function () {
             'client_id' => $this->client->id,
             'invoice_number' => 'SS-123',
             'stages' => [
-                ['stage_id' => $this->stage->id, 'sequence' => 1]
+                ['stage_id' => $this->stage->id, 'sequence' => 1],
             ],
             'materials' => [
-                ['material_id' => $this->material->id, 'estimated_quantity' => 1]
+                ['material_id' => $this->material->id, 'estimated_quantity' => 1],
             ],
             'special_services' => [
                 ['service_id' => $this->specialService->id, 'notes' => 'Test Note'],
@@ -66,7 +63,7 @@ it('can update special services on an order', function () {
 
     $oss = $order->orderSpecialServices()->create([
         'service_id' => $this->specialService->id,
-        'notes' => 'Old Note'
+        'notes' => 'Old Note',
     ]);
 
     // Add a new service and update existing one
@@ -76,19 +73,19 @@ it('can update special services on an order', function () {
         ->put(route('orders.update', $order), [
             'invoice_number' => 'SS-124',
             'materials' => [
-                ['material_id' => $this->material->id, 'estimated_quantity' => 1]
+                ['material_id' => $this->material->id, 'estimated_quantity' => 1],
             ],
             'special_services' => [
                 [
                     'id' => $oss->id,
                     'service_id' => $this->specialService->id,
                     'notes' => 'Updated Note',
-                    'cancelled' => 0
+                    'cancelled' => 0,
                 ],
                 [
                     'service_id' => $newService->id,
                     'notes' => 'New Service Note',
-                ]
+                ],
             ],
         ])
         ->assertRedirect(route('orders.index'));
@@ -108,22 +105,22 @@ it('can cancel a special service during update', function () {
 
     $oss = $order->orderSpecialServices()->create([
         'service_id' => $this->specialService->id,
-        'notes' => 'To be cancelled'
+        'notes' => 'To be cancelled',
     ]);
 
     $this->actingAs($this->user)
         ->put(route('orders.update', $order), [
             'invoice_number' => 'SS-125',
             'materials' => [
-                ['material_id' => $this->material->id, 'estimated_quantity' => 1]
+                ['material_id' => $this->material->id, 'estimated_quantity' => 1],
             ],
             'special_services' => [
                 [
                     'id' => $oss->id,
                     'service_id' => $this->specialService->id,
                     'notes' => 'To be cancelled',
-                    'cancelled' => 1
-                ]
+                    'cancelled' => 1,
+                ],
             ],
         ])
         ->assertRedirect(route('orders.index'));

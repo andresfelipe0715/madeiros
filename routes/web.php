@@ -66,6 +66,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Performance Module
     Route::get('/performance', [\App\Http\Controllers\PerformanceController::class, 'index'])->name('performance.index');
     Route::get('/performance/details/{user}', [\App\Http\Controllers\PerformanceController::class, 'details'])->name('performance.details');
+
+    // Material Consumption Calendar
+    Route::get('/materials-consumption', [\App\Http\Controllers\MaterialConsumptionController::class, 'index'])->name('materials.consumption');
 });
 
 require __DIR__.'/auth.php';

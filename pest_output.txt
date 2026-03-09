@@ -1,0 +1,1990 @@
+﻿
+Warning: Module "openssl" is already loaded in Unknown on line 0
+
+   FAIL  Tests\Feature\MaterialConsumptionViewTest
+  Γ£ô it allows authorized users to acΓÇª 0.42s  
+  Γ£ô it restricts unauthorized usersΓÇª  0.03s  
+  Γ£ô it displays grouped consumptionΓÇª  0.04s  
+  Γ¿» it filters by material correctly  0.05s  
+  Γ¿» it filters by month and year corΓÇª 0.04s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\MaterialConsumptΓÇª   
+  Expected: <!DOCTYPE html>\n
+<html lang="es">\n
+\n
+<head>\n
+    <meta charset="utf-8">\n
+    <meta name="viewport" content="width=device-width, initial-scale=1">\n
+    <meta name="csrf-token" content="Rw5k1l03WTAaVhbefDAbJEsSHeYmMVidEbAyZiuZ">\n
+\n
+    <title>Madeiros</title>\n
+    <link rel="icon" type="image/png" href="http://localhost:8000/img/madeiros.png">\n
+\n
+    <!-- Fonts -->\n
+    <link rel="preconnect" href="https://fonts.bunny.net">\n
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />\n
+\n
+    <!-- Scripts -->\n
+    <script type="module" src="http://[::1]:5173/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5173/resources/css/app.css" /><link rel="stylesheet" href="http://[::1]:5173/resources/sass/app.scss" /><script type="module" src="http://[::1]:5173/resources/js/app.js"></script></head>\n
+\n
+<body class="font-sans antialiased">\n
+    <div class="min-h-screen bg-gray-100">\n
+        <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">\n
+    <!-- Primary Navigation Menu -->\n
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">\n
+        <div class="flex justify-between h-16">\n
+            <div class="flex">\n
+                <!-- Logo -->\n
+                <div class="shrink-0 flex items-center">\n
+                    <a href="http://localhost:8000/dashboard">\n
+                        <img src="http://localhost:8000/img/madeiros.png" alt="Laravel" class="block h-12 w-auto">                    </a>\n
+                </div>\n
+\n
+                <!-- Navigation Links -->\n
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">\n
+                    <a class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/dashboard">\n
+    Dashboard\n
+</a>\n
+\n
+                    \n
+                    \n
+                    \n
+                                            <a class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/materials">\n
+    Materiales\n
+</a>\n
+\n
+                        <a class="inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out" href="http://localhost:8000/materials-consumption">\n
+    Consumo\n
+</a>\n
+                    \n
+                    \n
+                    \n
+                                    </div>\n
+            </div>\n
+\n
+            <!-- Settings Dropdown -->\n
+            <div class="hidden sm:flex sm:items-center sm:ms-6">\n
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">\n
+    <div @click="open = ! open">\n
+        <button\n
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">\n
+                            <div>Corbin Osinski</div>\n
+\n
+                            <div class="ms-1">\n
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"\n
+                                    viewBox="0 0 20 20">\n
+                                    <path fill-rule="evenodd"\n
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"\n
+                                        clip-rule="evenodd" />\n
+                                </svg>\n
+                            </div>\n
+                        </button>\n
+    </div>\n
+\n
+    <div x-show="open"\n
+            x-transition:enter="transition ease-out duration-200"\n
+            x-transition:enter-start="opacity-0 scale-95"\n
+            x-transition:enter-end="opacity-100 scale-100"\n
+            x-transition:leave="transition ease-in duration-75"\n
+            x-transition:leave-start="opacity-100 scale-100"\n
+            x-transition:leave-end="opacity-0 scale-95"\n
+            class="absolute z-50 mt-2 w-48 rounded-md shadow-lg ltr:origin-top-right rtl:origin-top-left end-0"\n
+            style="display: none;"\n
+            @click="open = false">\n
+        <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">\n
+            <!-- Authentication -->\n
+                        <form method="POST" action="http://localhost:8000/logout">\n
+                            <input type="hidden" name="_token" value="Rw5k1l03WTAaVhbefDAbJEsSHeYmMVidEbAyZiuZ" autocomplete="off">\n
+                            <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out" href="http://localhost:8000/logout" onclick="event.preventDefault();\n
+                                                this.closest('form').submit();">Cerrar sesi├│n</a>\n
+                        </form>\n
+        </div>\n
+    </div>\n
+</div>\n
+            </div>\n
+\n
+            <!-- Hamburger -->\n
+            <div class="-me-2 flex items-center sm:hidden">\n
+                <button @click="open = ! open"\n
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">\n
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">\n
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex"\n
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n
+                            d="M4 6h16M4 12h16M4 18h16" />\n
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round"\n
+                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />\n
+                    </svg>\n
+                </button>\n
+            </div>\n
+        </div>\n
+    </div>\n
+\n
+    <!-- Responsive Navigation Menu -->\n
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">\n
+        <div class="pt-2 pb-3 space-y-1">\n
+            <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/dashboard">\n
+    Dashboard\n
+</a>\n
+\n
+            \n
+            \n
+            \n
+                            <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/materials">\n
+    Materiales\n
+</a>\n
+\n
+                <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-indigo-400 text-start text-base font-medium text-indigo-700 bg-indigo-50 focus:outline-none focus:text-indigo-800 focus:bg-indigo-100 focus:border-indigo-700 transition duration-150 ease-in-out" href="http://localhost:8000/materials-consumption">\n
+    Consumo\n
+</a>\n
+            \n
+            \n
+            \n
+                    </div>\n
+\n
+        <!-- Responsive Settings Options -->\n
+        <div class="pt-4 pb-1 border-t border-gray-200">\n
+            <div class="px-4">\n
+                <div class="font-medium text-base text-gray-800">Corbin Osinski</div>\n
+                <div class="font-medium text-sm text-gray-500">500570260</div>\n
+            </div>\n
+\n
+            <div class="mt-3 space-y-1">\n
+\n
+                <!-- Authentication -->\n
+                <form method="POST" action="http://localhost:8000/logout">\n
+                    <input type="hidden" name="_token" value="Rw5k1l03WTAaVhbefDAbJEsSHeYmMVidEbAyZiuZ" autocomplete="off">\n
+                    <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/logout" onclick="event.preventDefault();\n
+                                        this.closest('form').submit();">\n
+    Cerrar sesi├│n\n
+</a>\n
+                </form>\n
+            </div>\n
+        </div>\n
+    </div>\n
+</nav>\n
+        <!-- Page Heading -->\n
+                    <header class="bg-white shadow">\n
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">\n
+                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">\r\n
+            Consumo de Materiales\r\n
+        </h2>\n
+                </div>\n
+            </header>\n
+        \n
+        <!-- Page Content -->\n
+        <main>\n
+            <div class="py-12">\r\n
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">\r\n
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">\r\n
+                <!-- Filters -->\r\n
+                <form action="http://localhost:8000/materials-consumption" method="GET" class="mb-8">\r\n
+                    <div class="row g-3">\r\n
+                        <div class="col-md-3">\r\n
+                            <label for="month" class="form-label small fw-bold text-muted">Mes</label>\r\n
+                            <select name="month" id="month" class="form-select border-gray-300 rounded-md shadow-sm">\r\n
+                                                                    <option value="1" >\r\n
+                                        enero\r\n
+                                    </option>\r\n
+                                                                    <option value="2" >\r\n
+                                        febrero\r\n
+                                    </option>\r\n
+                                                                    <option value="3" selected>\r\n
+                                        marzo\r\n
+                                    </option>\r\n
+                                                                    <option value="4" >\r\n
+                                        abril\r\n
+                                    </option>\r\n
+                                                                    <option value="5" >\r\n
+                                        mayo\r\n
+                                    </option>\r\n
+                                                                    <option value="6" >\r\n
+                                        junio\r\n
+                                    </option>\r\n
+                                                                    <option value="7" >\r\n
+                                        julio\r\n
+                                    </option>\r\n
+                                                                    <option value="8" >\r\n
+                                        agosto\r\n
+                                    </option>\r\n
+                                                                    <option value="9" >\r\n
+                                        septiembre\r\n
+                                    </option>\r\n
+                                                                    <option value="10" >\r\n
+                                        octubre\r\n
+                                    </option>\r\n
+                                                                    <option value="11" >\r\n
+                                        noviembre\r\n
+                                    </option>\r\n
+                                                                    <option value="12" >\r\n
+                                        diciembre\r\n
+                                    </option>\r\n
+                                                            </select>\r\n
+                        </div>\r\n
+                        <div class="col-md-2">\r\n
+                            <label for="year" class="form-label small fw-bold text-muted">A├▒o</label>\r\n
+                            <select name="year" id="year" class="form-select border-gray-300 rounded-md shadow-sm">\r\n
+                                                                    <option value="2024" >\r\n
+                                        2024\r\n
+                                    </option>\r\n
+                                                                    <option value="2025" >\r\n
+                                        2025\r\n
+                                    </option>\r\n
+                                                                    <option value="2026" selected>\r\n
+                                        2026\r\n
+                                    </option>\r\n
+                                                                    <option value="2027" >\r\n
+                                        2027\r\n
+                                    </option>\r\n
+                                                            </select>\r\n
+                        </div>\r\n
+                        <div class="col-md-4">\r\n
+                            <label for="material_id"\r\n
+                                class="form-label small fw-bold text-muted">Material (Opcional)</label>\r\n
+                            <select name="material_id" id="material_id"\r\n
+                                class="form-select border-gray-300 rounded-md shadow-sm">\r\n
+                                <option value="">Todos los materiales</option>\r\n
+                                                                    <option value="1" selected>\r\n
+                                        Hierro\r\n
+                                    </option>\r\n
+                                                                    <option value="2" >\r\n
+                                        Madera\r\n
+                                    </option>\r\n
+                                                            </select>\r\n
+                        </div>\r\n
+                        <div class="col-md-3 d-flex align-items-end">\r\n
+                            <button type="submit" class="btn btn-primary w-100 shadow-sm border-0"\r\n
+                                style="background-color: #0d6efd;">\r\n
+                                <i class="bi bi-filter me-1"></i> Filtrar\r\n
+                            </button>\r\n
+                        </div>\r\n
+                    </div>\r\n
+                </form>\r\n
+\r\n
+                <!-- Month Navigation -->\r\n
+                <div class="d-flex justify-content-between align-items-center mb-4">\r\n
+                    <h3 class="h4 mb-0 fw-bold text-capitalize">\r\n
+                        marzo 2026\r\n
+                    </h3>\r\n
+                    <div class="btn-group">\r\n
+                        <a href="http://localhost:8000/materials-consumption?month=2&amp;year=2026&amp;material_id=1"\r\n
+                            class="btn btn-outline-secondary btn-sm shadow-sm">\r\n
+                            <i class="bi bi-chevron-left"></i> Anterior\r\n
+                        </a>\r\n
+                        <a href="http://localhost:8000/materials-consumption?month=3&amp;year=2026&amp;material_id=1"\r\n
+                            class="btn btn-outline-secondary btn-sm shadow-sm">\r\n
+                            Hoy\r\n
+                        </a>\r\n
+                        <a href="http://localhost:8000/materials-consumption?month=4&amp;year=2026&amp;material_id=1"\r\n
+                            class="btn btn-outline-secondary btn-sm shadow-sm">\r\n
+                            Siguiente <i class="bi bi-chevron-right"></i>\r\n
+                        </a>\r\n
+                    </div>\r\n
+                </div>\r\n
+\r\n
+                <!-- Calendar View -->\r\n
+                <div class="calendar-container border rounded overflow-hidden shadow-sm">\r\n
+                    <div class="row g-0 fw-bold text-center bg-gray-50 border-bottom">\r\n
+                                                    <div class="col py-2 border-end small text-muted">Dom</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Lun</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Mar</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Mi├⌐</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Jue</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Vie</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">S├íb</div>\r\n
+                                            </div>\r\n
+\r\n
+                    \r\n
+                                                                        <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            1\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            2\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            3\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            4\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            5\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            6\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            7\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            8\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge bg-primary shadow-sm rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            9\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                                                            <div class="consumption-list d-flex flex-column gap-1 overflow-auto"\r\n
+                                            style="max-height: 90px;">\r\n
+                                                                                            <div class="bg-blue-50 border-start border-4 border-primary p-1 rounded-end mb-1"\r\n
+                                                    style="font-size: 0.75rem;">\r\n
+                                                    <div class="fw-bold text-primary text-truncate"\r\n
+                                                        title="Hierro">\r\n
+                                                        Hierro\r\n
+                                                    </div>\r\n
+                                                    <div class="text-muted d-flex justify-content-between">\r\n
+                                                        <span>10</span>\r\n
+                                                        <span class="fw-bold">1\r\n
+                                                            ped.</span>\r\n
+                                                    </div>\r\n
+                                                    <div class="mt-1 d-flex flex-wrap gap-1">\r\n
+                                                                                                                    <a href="http://localhost:8000/orders/1/edit"\r\n
+                                                                class="badge bg-white text-primary border border-primary-subtle text-decoration-none"\r\n
+                                                                style="font-size: 0.65rem;">\r\n
+                                                                #FAC-6283\r\n
+                                                            </a>\r\n
+                                                                                                            </div>\r\n
+                                                </div>\r\n
+                                                                                    </div>\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            10\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            11\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            12\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            13\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            14\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            15\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            16\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            17\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            18\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            19\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            20\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            21\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            22\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            23\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            24\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            25\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            26\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            27\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            28\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            29\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            30\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            31\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                </div>\r\n
+\r\n
+                <div class="mt-4 p-3 bg-light rounded shadow-sm small text-muted border">\r\n
+                    <div class="d-flex align-items-center">\r\n
+                        <i class="bi bi-info-circle me-2 text-primary"></i>\r\n
+                        <span>Este calendario muestra el consumo real de materiales registrado al finalizar la etapa de Corte.</span>\r\n
+                    </div>\r\n
+                </div>\r\n
+            </div>\r\n
+        </div>\r\n
+    </div>\n
+        </main>\n
+    </div>\n
+\n
+    <script>\n
+        let searchTimeout = null;\n
+        function debounceSubmit(form) {\n
+            if (searchTimeout) {\n
+                clearTimeout(searchTimeout);\n
+            }\n
+            searchTimeout = setTimeout(() => {\n
+                const searchInput = form.querySelector('input[name="search"]');\n
+                const value = searchInput ? searchInput.value.trim() : '';\n
+\n
+                // Only submut if value is empty (reset) or >= 2 chars\n
+                if (value.length === 0 || value.length >= 2) {\n
+                    form.submit();\n
+                }\n
+            }, 500); // 500ms delay\n
+        }\n
+    </script>\n
+    <div class="modal fade" id="imageLightboxModal" tabindex="-1" aria-hidden="true" style="z-index: 99999;">\r\n
+    <div class="modal-dialog modal-xl modal-dialog-centered">\r\n
+        <div class="modal-content bg-dark border-0 shadow-lg" style="min-height: 80vh;">\r\n
+            <div class="modal-header border-0 pb-0">\r\n
+                <button type="button" class="btn-close btn-close-white ms-auto shadow-none" data-bs-dismiss="modal"\r\n
+                    aria-label="Close"></button>\r\n
+            </div>\r\n
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center"\r\n
+                style="background: #000; position: relative;">\r\n
+                <div id="lightboxCarousel" class="carousel slide" data-bs-interval="false" style="width: 100%;">\r\n
+                    <div class="carousel-inner" id="carouselInner" style="width: 100%;">\r\n
+                        \r\n
+                    </div>\r\n
+                    <button class="carousel-control-prev" type="button" data-bs-target="#lightboxCarousel"\r\n
+                        data-bs-slide="prev" id="carouselPrev">\r\n
+                        <span class="carousel-control-prev-icon p-4 bg-dark bg-opacity-75 rounded-circle"\r\n
+                            aria-hidden="true"></span>\r\n
+                        <span class="visually-hidden">Anterior</span>\r\n
+                    </button>\r\n
+                    <button class="carousel-control-next" type="button" data-bs-target="#lightboxCarousel"\r\n
+                        data-bs-slide="next" id="carouselNext">\r\n
+                        <span class="carousel-control-next-icon p-4 bg-dark bg-opacity-75 rounded-circle"\r\n
+                            aria-hidden="true"></span>\r\n
+                        <span class="visually-hidden">Siguiente</span>\r\n
+                    </button>\r\n
+                </div>\r\n
+            </div>\r\n
+            <div class="modal-footer border-0 pt-0 justify-content-center">\r\n
+                <div class="badge bg-secondary px-3 py-2 rounded-pill shadow-sm" id="carouselCounter"></div>\r\n
+            </div>\r\n
+        </div>\r\n
+    </div>\r\n
+</div>\r\n
+\r\n
+<script>\r\n
+    function openLightbox(images, startIndex = 0) {\r\n
+        console.log('openLightbox called', { images, startIndex });\r\n
+        if (!images || images.length === 0) {\r\n
+            console.error('No images provided to openLightbox');\r\n
+            return;\r\n
+        }\r\n
+\r\n
+        if (typeof images === 'string') {\r\n
+            images = [images];\r\n
+        }\r\n
+\r\n
+        const index = parseInt(startIndex) || 0;\r\n
+        const carouselInner = document.getElementById('carouselInner');\r\n
+        const carouselEl = document.getElementById('lightboxCarousel');\r\n
+        const modalEl = document.getElementById('imageLightboxModal');\r\n
+\r\n
+        if (!carouselInner || !carouselEl || !modalEl) {\r\n
+            console.error('Lightbox modal elements not found in DOM');\r\n
+            return;\r\n
+        }\r\n
+\r\n
+        // Cleanup previous state\r\n
+        const existingCarousel = bootstrap.Carousel.getInstance(carouselEl);\r\n
+        if (existingCarousel) {\r\n
+            existingCarousel.dispose();\r\n
+        }\r\n
+\r\n
+        carouselInner.innerHTML = '';\r\n
+\r\n
+        images.forEach((url, i) => {\r\n
+            const itemDiv = document.createElement('div');\r\n
+            itemDiv.className = 'carousel-item' + (i === index ? ' active' : '');\r\n
+\r\n
+            itemDiv.innerHTML = `\r\n
+                <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 75vh; background: #000;">\r\n
+                    <img src="${url}"\r\n
+                         class="img-fluid rounded shadow-lg"\r\n
+                         style="max-height: 100%; max-width: 100%; object-fit: contain;"\r\n
+                         alt="Imagen ${i + 1}"\r\n
+                         onerror="this.src='/img/madeiros.png'; console.warn('Failed to load image:', '${url}')">\r\n
+                </div>`;\r\n
+            carouselInner.appendChild(itemDiv);\r\n
+        });\r\n
+\r\n
+        const prevBtn = document.getElementById('carouselPrev');\r\n
+        const nextBtn = document.getElementById('carouselNext');\r\n
+        const counter = document.getElementById('carouselCounter');\r\n
+\r\n
+        if (images.length <= 1) {\r\n
+            if (prevBtn) prevBtn.classList.add('d-none');\r\n
+            if (nextBtn) nextBtn.classList.add('d-none');\r\n
+            if (counter) counter.innerText = '1 / 1';\r\n
+        } else {\r\n
+            if (prevBtn) prevBtn.classList.remove('d-none');\r\n
+            if (nextBtn) nextBtn.classList.remove('d-none');\r\n
+            if (counter) counter.innerText = (index + 1) + ' / ' + images.length;\r\n
+        }\r\n
+\r\n
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);\r\n
+\r\n
+        // Initialize carousel\r\n
+        new bootstrap.Carousel(carouselEl, {\r\n
+            interval: false,\r\n
+            wrap: true\r\n
+        });\r\n
+\r\n
+        // Counter logic\r\n
+        const updateCounter = function (event) {\r\n
+            if (counter) counter.innerText = (event.to + 1) + ' / ' + images.length;\r\n
+        };\r\n
+        carouselEl.removeEventListener('slide.bs.carousel', updateCounter);\r\n
+        carouselEl.addEventListener('slide.bs.carousel', updateCounter);\r\n
+\r\n
+        modal.show();\r\n
+    }\r\n
+</script>\r\n
+\r\n
+<style>\r\n
+    .cursor-zoom-in {\r\n
+        cursor: zoom-in;\r\n
+    }\r\n
+\r\n
+    #imageLightboxModal .carousel-control-prev,\r\n
+    #imageLightboxModal .carousel-control-next {\r\n
+        width: 15%;\r\n
+        opacity: 0.85;\r\n
+    }\r\n
+\r\n
+    #imageLightboxModal .carousel-item {\r\n
+        background-color: #000;\r\n
+        transition: transform 0.4s ease-in-out, opacity 0.2s ease-out;\r\n
+    }\r\n
+\r\n
+    /* Force display block on active carousel item just in case Bootstrap CSS is overridden or missing */\r\n
+    #imageLightboxModal .carousel-item.active {\r\n
+        display: block !important;\r\n
+        opacity: 1 !important;\r\n
+        visibility: visible !important;\r\n
+        z-index: 10 !important;\r\n
+    }\r\n
+</style>    <form id="globalDeleteForm" method="POST" style="display: none;">\n
+        <input type="hidden" name="_token" value="Rw5k1l03WTAaVhbefDAbJEsSHeYmMVidEbAyZiuZ" autocomplete="off">        <input type="hidden" name="_method" value="DELETE">    </form>\n
+\n
+    <script>\n
+        window.confirmDeletion = function (url) {\n
+            if (confirm('┬┐Est├í seguro de eliminar esta foto? Esta acci├│n no se puede deshacer.')) {\n
+                const form = document.getElementById('globalDeleteForm');\n
+                if (form) {\n
+                    form.action = url;\n
+                    form.submit();\n
+                }\n
+            }\n
+        };\n
+    </script>\n
+</body>\n
+\n
+</html>
+
+  Not to contain: Madera
+
+  at tests\Feature\MaterialConsumptionViewTest.php:92
+     88Γûò         ->get(route('materials.consumption', ['material_id' => $this->material->id]));
+     89Γûò 
+     90Γûò     $response->assertSee('Hierro');
+     91Γûò     $response->assertSee('10');
+  Γ₧£  92Γûò     $response->assertDontSee('Madera');
+     93Γûò });
+     94Γûò 
+     95Γûò it('filters by month and year correctly', function () {
+     96Γûò     $order = Order::factory()->create(['client_id' => $this->client->id, 'created_by' => $this->user->id]);
+
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\MaterialConsumptΓÇª   
+  Expected: <!DOCTYPE html>\n
+<html lang="es">\n
+\n
+<head>\n
+    <meta charset="utf-8">\n
+    <meta name="viewport" content="width=device-width, initial-scale=1">\n
+    <meta name="csrf-token" content="3LLqst80IHq8RrCWJaTxMNIDE2iu1Bxosq8GbvFe">\n
+\n
+    <title>Madeiros</title>\n
+    <link rel="icon" type="image/png" href="http://localhost:8000/img/madeiros.png">\n
+\n
+    <!-- Fonts -->\n
+    <link rel="preconnect" href="https://fonts.bunny.net">\n
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />\n
+\n
+    <!-- Scripts -->\n
+    <script type="module" src="http://[::1]:5173/@vite/client"></script><link rel="stylesheet" href="http://[::1]:5173/resources/css/app.css" /><link rel="stylesheet" href="http://[::1]:5173/resources/sass/app.scss" /><script type="module" src="http://[::1]:5173/resources/js/app.js"></script></head>\n
+\n
+<body class="font-sans antialiased">\n
+    <div class="min-h-screen bg-gray-100">\n
+        <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">\n
+    <!-- Primary Navigation Menu -->\n
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">\n
+        <div class="flex justify-between h-16">\n
+            <div class="flex">\n
+                <!-- Logo -->\n
+                <div class="shrink-0 flex items-center">\n
+                    <a href="http://localhost:8000/dashboard">\n
+                        <img src="http://localhost:8000/img/madeiros.png" alt="Laravel" class="block h-12 w-auto">                    </a>\n
+                </div>\n
+\n
+                <!-- Navigation Links -->\n
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">\n
+                    <a class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/dashboard">\n
+    Dashboard\n
+</a>\n
+\n
+                    \n
+                    \n
+                    \n
+                                            <a class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/materials">\n
+    Materiales\n
+</a>\n
+\n
+                        <a class="inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out" href="http://localhost:8000/materials-consumption">\n
+    Consumo\n
+</a>\n
+                    \n
+                    \n
+                    \n
+                                    </div>\n
+            </div>\n
+\n
+            <!-- Settings Dropdown -->\n
+            <div class="hidden sm:flex sm:items-center sm:ms-6">\n
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">\n
+    <div @click="open = ! open">\n
+        <button\n
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">\n
+                            <div>Mrs. Nova Torphy</div>\n
+\n
+                            <div class="ms-1">\n
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"\n
+                                    viewBox="0 0 20 20">\n
+                                    <path fill-rule="evenodd"\n
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"\n
+                                        clip-rule="evenodd" />\n
+                                </svg>\n
+                            </div>\n
+                        </button>\n
+    </div>\n
+\n
+    <div x-show="open"\n
+            x-transition:enter="transition ease-out duration-200"\n
+            x-transition:enter-start="opacity-0 scale-95"\n
+            x-transition:enter-end="opacity-100 scale-100"\n
+            x-transition:leave="transition ease-in duration-75"\n
+            x-transition:leave-start="opacity-100 scale-100"\n
+            x-transition:leave-end="opacity-0 scale-95"\n
+            class="absolute z-50 mt-2 w-48 rounded-md shadow-lg ltr:origin-top-right rtl:origin-top-left end-0"\n
+            style="display: none;"\n
+            @click="open = false">\n
+        <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">\n
+            <!-- Authentication -->\n
+                        <form method="POST" action="http://localhost:8000/logout">\n
+                            <input type="hidden" name="_token" value="3LLqst80IHq8RrCWJaTxMNIDE2iu1Bxosq8GbvFe" autocomplete="off">\n
+                            <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out" href="http://localhost:8000/logout" onclick="event.preventDefault();\n
+                                                this.closest('form').submit();">Cerrar sesi├│n</a>\n
+                        </form>\n
+        </div>\n
+    </div>\n
+</div>\n
+            </div>\n
+\n
+            <!-- Hamburger -->\n
+            <div class="-me-2 flex items-center sm:hidden">\n
+                <button @click="open = ! open"\n
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">\n
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">\n
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex"\n
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n
+                            d="M4 6h16M4 12h16M4 18h16" />\n
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round"\n
+                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />\n
+                    </svg>\n
+                </button>\n
+            </div>\n
+        </div>\n
+    </div>\n
+\n
+    <!-- Responsive Navigation Menu -->\n
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">\n
+        <div class="pt-2 pb-3 space-y-1">\n
+            <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/dashboard">\n
+    Dashboard\n
+</a>\n
+\n
+            \n
+            \n
+            \n
+                            <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/materials">\n
+    Materiales\n
+</a>\n
+\n
+                <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-indigo-400 text-start text-base font-medium text-indigo-700 bg-indigo-50 focus:outline-none focus:text-indigo-800 focus:bg-indigo-100 focus:border-indigo-700 transition duration-150 ease-in-out" href="http://localhost:8000/materials-consumption">\n
+    Consumo\n
+</a>\n
+            \n
+            \n
+            \n
+                    </div>\n
+\n
+        <!-- Responsive Settings Options -->\n
+        <div class="pt-4 pb-1 border-t border-gray-200">\n
+            <div class="px-4">\n
+                <div class="font-medium text-base text-gray-800">Mrs. Nova Torphy</div>\n
+                <div class="font-medium text-sm text-gray-500">226395196</div>\n
+            </div>\n
+\n
+            <div class="mt-3 space-y-1">\n
+\n
+                <!-- Authentication -->\n
+                <form method="POST" action="http://localhost:8000/logout">\n
+                    <input type="hidden" name="_token" value="3LLqst80IHq8RrCWJaTxMNIDE2iu1Bxosq8GbvFe" autocomplete="off">\n
+                    <a class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out" href="http://localhost:8000/logout" onclick="event.preventDefault();\n
+                                        this.closest('form').submit();">\n
+    Cerrar sesi├│n\n
+</a>\n
+                </form>\n
+            </div>\n
+        </div>\n
+    </div>\n
+</nav>\n
+        <!-- Page Heading -->\n
+                    <header class="bg-white shadow">\n
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">\n
+                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">\r\n
+            Consumo de Materiales\r\n
+        </h2>\n
+                </div>\n
+            </header>\n
+        \n
+        <!-- Page Content -->\n
+        <main>\n
+            <div class="py-12">\r\n
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">\r\n
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">\r\n
+                <!-- Filters -->\r\n
+                <form action="http://localhost:8000/materials-consumption" method="GET" class="mb-8">\r\n
+                    <div class="row g-3">\r\n
+                        <div class="col-md-3">\r\n
+                            <label for="month" class="form-label small fw-bold text-muted">Mes</label>\r\n
+                            <select name="month" id="month" class="form-select border-gray-300 rounded-md shadow-sm">\r\n
+                                                                    <option value="1" >\r\n
+                                        enero\r\n
+                                    </option>\r\n
+                                                                    <option value="2" >\r\n
+                                        febrero\r\n
+                                    </option>\r\n
+                                                                    <option value="3" selected>\r\n
+                                        marzo\r\n
+                                    </option>\r\n
+                                                                    <option value="4" >\r\n
+                                        abril\r\n
+                                    </option>\r\n
+                                                                    <option value="5" >\r\n
+                                        mayo\r\n
+                                    </option>\r\n
+                                                                    <option value="6" >\r\n
+                                        junio\r\n
+                                    </option>\r\n
+                                                                    <option value="7" >\r\n
+                                        julio\r\n
+                                    </option>\r\n
+                                                                    <option value="8" >\r\n
+                                        agosto\r\n
+                                    </option>\r\n
+                                                                    <option value="9" >\r\n
+                                        septiembre\r\n
+                                    </option>\r\n
+                                                                    <option value="10" >\r\n
+                                        octubre\r\n
+                                    </option>\r\n
+                                                                    <option value="11" >\r\n
+                                        noviembre\r\n
+                                    </option>\r\n
+                                                                    <option value="12" >\r\n
+                                        diciembre\r\n
+                                    </option>\r\n
+                                                            </select>\r\n
+                        </div>\r\n
+                        <div class="col-md-2">\r\n
+                            <label for="year" class="form-label small fw-bold text-muted">A├▒o</label>\r\n
+                            <select name="year" id="year" class="form-select border-gray-300 rounded-md shadow-sm">\r\n
+                                                                    <option value="2024" >\r\n
+                                        2024\r\n
+                                    </option>\r\n
+                                                                    <option value="2025" >\r\n
+                                        2025\r\n
+                                    </option>\r\n
+                                                                    <option value="2026" selected>\r\n
+                                        2026\r\n
+                                    </option>\r\n
+                                                                    <option value="2027" >\r\n
+                                        2027\r\n
+                                    </option>\r\n
+                                                            </select>\r\n
+                        </div>\r\n
+                        <div class="col-md-4">\r\n
+                            <label for="material_id"\r\n
+                                class="form-label small fw-bold text-muted">Material (Opcional)</label>\r\n
+                            <select name="material_id" id="material_id"\r\n
+                                class="form-select border-gray-300 rounded-md shadow-sm">\r\n
+                                <option value="">Todos los materiales</option>\r\n
+                                                                    <option value="1" >\r\n
+                                        Hierro\r\n
+                                    </option>\r\n
+                                                            </select>\r\n
+                        </div>\r\n
+                        <div class="col-md-3 d-flex align-items-end">\r\n
+                            <button type="submit" class="btn btn-primary w-100 shadow-sm border-0"\r\n
+                                style="background-color: #0d6efd;">\r\n
+                                <i class="bi bi-filter me-1"></i> Filtrar\r\n
+                            </button>\r\n
+                        </div>\r\n
+                    </div>\r\n
+                </form>\r\n
+\r\n
+                <!-- Month Navigation -->\r\n
+                <div class="d-flex justify-content-between align-items-center mb-4">\r\n
+                    <h3 class="h4 mb-0 fw-bold text-capitalize">\r\n
+                        marzo 2026\r\n
+                    </h3>\r\n
+                    <div class="btn-group">\r\n
+                        <a href="http://localhost:8000/materials-consumption?month=2&amp;year=2026"\r\n
+                            class="btn btn-outline-secondary btn-sm shadow-sm">\r\n
+                            <i class="bi bi-chevron-left"></i> Anterior\r\n
+                        </a>\r\n
+                        <a href="http://localhost:8000/materials-consumption?month=3&amp;year=2026"\r\n
+                            class="btn btn-outline-secondary btn-sm shadow-sm">\r\n
+                            Hoy\r\n
+                        </a>\r\n
+                        <a href="http://localhost:8000/materials-consumption?month=4&amp;year=2026"\r\n
+                            class="btn btn-outline-secondary btn-sm shadow-sm">\r\n
+                            Siguiente <i class="bi bi-chevron-right"></i>\r\n
+                        </a>\r\n
+                    </div>\r\n
+                </div>\r\n
+\r\n
+                <!-- Calendar View -->\r\n
+                <div class="calendar-container border rounded overflow-hidden shadow-sm">\r\n
+                    <div class="row g-0 fw-bold text-center bg-gray-50 border-bottom">\r\n
+                                                    <div class="col py-2 border-end small text-muted">Dom</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Lun</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Mar</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Mi├⌐</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Jue</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">Vie</div>\r\n
+                                                    <div class="col py-2 border-end small text-muted">S├íb</div>\r\n
+                                            </div>\r\n
+\r\n
+                    \r\n
+                                                                        <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            1\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            2\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            3\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            4\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            5\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            6\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            7\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            8\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge bg-primary shadow-sm rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            9\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            10\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            11\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            12\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            13\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            14\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            15\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            16\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            17\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            18\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            19\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            20\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            21\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            22\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            23\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            24\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            25\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            26\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            27\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            28\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                                                    <div class="row g-0 border-bottom" style="min-height: 120px;">\r\n
+                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            29\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            30\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 "\r\n
+                                style="width: 14.28%;">\r\n
+                                                                    \r\n
+                                    <div class="d-flex justify-content-between align-items-start mb-1">\r\n
+                                        <span\r\n
+                                            class="badge text-muted rounded-circle p-1"\r\n
+                                            style="width: 24px; height: 24px;">\r\n
+                                            31\r\n
+                                        </span>\r\n
+                                    </div>\r\n
+\r\n
+                                    \r\n
+                                                                                                </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                                        \r\n
+                            <div class="col border-end p-2 bg-light"\r\n
+                                style="width: 14.28%;">\r\n
+                                                            </div>\r\n
+\r\n
+                                                            </div>\r\n
+                                                                </div>\r\n
+\r\n
+                <div class="mt-4 p-3 bg-light rounded shadow-sm small text-muted border">\r\n
+                    <div class="d-flex align-items-center">\r\n
+                        <i class="bi bi-info-circle me-2 text-primary"></i>\r\n
+                        <span>Este calendario muestra el consumo real de materiales registrado al finalizar la etapa de Corte.</span>\r\n
+                    </div>\r\n
+                </div>\r\n
+            </div>\r\n
+        </div>\r\n
+    </div>\n
+        </main>\n
+    </div>\n
+\n
+    <script>\n
+        let searchTimeout = null;\n
+        function debounceSubmit(form) {\n
+            if (searchTimeout) {\n
+                clearTimeout(searchTimeout);\n
+            }\n
+            searchTimeout = setTimeout(() => {\n
+                const searchInput = form.querySelector('input[name="search"]');\n
+                const value = searchInput ? searchInput.value.trim() : '';\n
+\n
+                // Only submut if value is empty (reset) or >= 2 chars\n
+                if (value.length === 0 || value.length >= 2) {\n
+                    form.submit();\n
+                }\n
+            }, 500); // 500ms delay\n
+        }\n
+    </script>\n
+    <div class="modal fade" id="imageLightboxModal" tabindex="-1" aria-hidden="true" style="z-index: 99999;">\r\n
+    <div class="modal-dialog modal-xl modal-dialog-centered">\r\n
+        <div class="modal-content bg-dark border-0 shadow-lg" style="min-height: 80vh;">\r\n
+            <div class="modal-header border-0 pb-0">\r\n
+                <button type="button" class="btn-close btn-close-white ms-auto shadow-none" data-bs-dismiss="modal"\r\n
+                    aria-label="Close"></button>\r\n
+            </div>\r\n
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center"\r\n
+                style="background: #000; position: relative;">\r\n
+                <div id="lightboxCarousel" class="carousel slide" data-bs-interval="false" style="width: 100%;">\r\n
+                    <div class="carousel-inner" id="carouselInner" style="width: 100%;">\r\n
+                        \r\n
+                    </div>\r\n
+                    <button class="carousel-control-prev" type="button" data-bs-target="#lightboxCarousel"\r\n
+                        data-bs-slide="prev" id="carouselPrev">\r\n
+                        <span class="carousel-control-prev-icon p-4 bg-dark bg-opacity-75 rounded-circle"\r\n
+                            aria-hidden="true"></span>\r\n
+                        <span class="visually-hidden">Anterior</span>\r\n
+                    </button>\r\n
+                    <button class="carousel-control-next" type="button" data-bs-target="#lightboxCarousel"\r\n
+                        data-bs-slide="next" id="carouselNext">\r\n
+                        <span class="carousel-control-next-icon p-4 bg-dark bg-opacity-75 rounded-circle"\r\n
+                            aria-hidden="true"></span>\r\n
+                        <span class="visually-hidden">Siguiente</span>\r\n
+                    </button>\r\n
+                </div>\r\n
+            </div>\r\n
+            <div class="modal-footer border-0 pt-0 justify-content-center">\r\n
+                <div class="badge bg-secondary px-3 py-2 rounded-pill shadow-sm" id="carouselCounter"></div>\r\n
+            </div>\r\n
+        </div>\r\n
+    </div>\r\n
+</div>\r\n
+\r\n
+<script>\r\n
+    function openLightbox(images, startIndex = 0) {\r\n
+        console.log('openLightbox called', { images, startIndex });\r\n
+        if (!images || images.length === 0) {\r\n
+            console.error('No images provided to openLightbox');\r\n
+            return;\r\n
+        }\r\n
+\r\n
+        if (typeof images === 'string') {\r\n
+            images = [images];\r\n
+        }\r\n
+\r\n
+        const index = parseInt(startIndex) || 0;\r\n
+        const carouselInner = document.getElementById('carouselInner');\r\n
+        const carouselEl = document.getElementById('lightboxCarousel');\r\n
+        const modalEl = document.getElementById('imageLightboxModal');\r\n
+\r\n
+        if (!carouselInner || !carouselEl || !modalEl) {\r\n
+            console.error('Lightbox modal elements not found in DOM');\r\n
+            return;\r\n
+        }\r\n
+\r\n
+        // Cleanup previous state\r\n
+        const existingCarousel = bootstrap.Carousel.getInstance(carouselEl);\r\n
+        if (existingCarousel) {\r\n
+            existingCarousel.dispose();\r\n
+        }\r\n
+\r\n
+        carouselInner.innerHTML = '';\r\n
+\r\n
+        images.forEach((url, i) => {\r\n
+            const itemDiv = document.createElement('div');\r\n
+            itemDiv.className = 'carousel-item' + (i === index ? ' active' : '');\r\n
+\r\n
+            itemDiv.innerHTML = `\r\n
+                <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 75vh; background: #000;">\r\n
+                    <img src="${url}"\r\n
+                         class="img-fluid rounded shadow-lg"\r\n
+                         style="max-height: 100%; max-width: 100%; object-fit: contain;"\r\n
+                         alt="Imagen ${i + 1}"\r\n
+                         onerror="this.src='/img/madeiros.png'; console.warn('Failed to load image:', '${url}')">\r\n
+                </div>`;\r\n
+            carouselInner.appendChild(itemDiv);\r\n
+        });\r\n
+\r\n
+        const prevBtn = document.getElementById('carouselPrev');\r\n
+        const nextBtn = document.getElementById('carouselNext');\r\n
+        const counter = document.getElementById('carouselCounter');\r\n
+\r\n
+        if (images.length <= 1) {\r\n
+            if (prevBtn) prevBtn.classList.add('d-none');\r\n
+            if (nextBtn) nextBtn.classList.add('d-none');\r\n
+            if (counter) counter.innerText = '1 / 1';\r\n
+        } else {\r\n
+            if (prevBtn) prevBtn.classList.remove('d-none');\r\n
+            if (nextBtn) nextBtn.classList.remove('d-none');\r\n
+            if (counter) counter.innerText = (index + 1) + ' / ' + images.length;\r\n
+        }\r\n
+\r\n
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);\r\n
+\r\n
+        // Initialize carousel\r\n
+        new bootstrap.Carousel(carouselEl, {\r\n
+            interval: false,\r\n
+            wrap: true\r\n
+        });\r\n
+\r\n
+        // Counter logic\r\n
+        const updateCounter = function (event) {\r\n
+            if (counter) counter.innerText = (event.to + 1) + ' / ' + images.length;\r\n
+        };\r\n
+        carouselEl.removeEventListener('slide.bs.carousel', updateCounter);\r\n
+        carouselEl.addEventListener('slide.bs.carousel', updateCounter);\r\n
+\r\n
+        modal.show();\r\n
+    }\r\n
+</script>\r\n
+\r\n
+<style>\r\n
+    .cursor-zoom-in {\r\n
+        cursor: zoom-in;\r\n
+    }\r\n
+\r\n
+    #imageLightboxModal .carousel-control-prev,\r\n
+    #imageLightboxModal .carousel-control-next {\r\n
+        width: 15%;\r\n
+        opacity: 0.85;\r\n
+    }\r\n
+\r\n
+    #imageLightboxModal .carousel-item {\r\n
+        background-color: #000;\r\n
+        transition: transform 0.4s ease-in-out, opacity 0.2s ease-out;\r\n
+    }\r\n
+\r\n
+    /* Force display block on active carousel item just in case Bootstrap CSS is overridden or missing */\r\n
+    #imageLightboxModal .carousel-item.active {\r\n
+        display: block !important;\r\n
+        opacity: 1 !important;\r\n
+        visibility: visible !important;\r\n
+        z-index: 10 !important;\r\n
+    }\r\n
+</style>    <form id="globalDeleteForm" method="POST" style="display: none;">\n
+        <input type="hidden" name="_token" value="3LLqst80IHq8RrCWJaTxMNIDE2iu1Bxosq8GbvFe" autocomplete="off">        <input type="hidden" name="_method" value="DELETE">    </form>\n
+\n
+    <script>\n
+        window.confirmDeletion = function (url) {\n
+            if (confirm('┬┐Est├í seguro de eliminar esta foto? Esta acci├│n no se puede deshacer.')) {\n
+                const form = document.getElementById('globalDeleteForm');\n
+                if (form) {\n
+                    form.action = url;\n
+                    form.submit();\n
+                }\n
+            }\n
+        };\n
+    </script>\n
+</body>\n
+\n
+</html>
+
+  Not to contain: 25
+
+  at tests\Feature\MaterialConsumptionViewTest.php:114
+    110Γûò             'month' => now()->month,
+    111Γûò             'year' => now()->year
+    112Γûò         ]));
+    113Γûò 
+  Γ₧£ 114Γûò     $responseCurrent->assertDontSee('25');
+    115Γûò 
+    116Γûò     // Check last month
+    117Γûò     $responseLast = $this->actingAs($this->user)
+    118Γûò         ->get(route('materials.consumption', [
+
+
+  Tests:    2 failed, 3 passed (11 assertions)
+  Duration: 0.80s
+

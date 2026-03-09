@@ -11,8 +11,7 @@ class DashboardController extends Controller
 {
     public function __construct(
         protected StageAuthorizationService $authService
-    ) {
-    }
+    ) {}
 
     /**
      * Show the main dashboard menu.
@@ -37,7 +36,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Authorization: Check if user has access to this stage
-        if (!$user->role->stages->contains($stage->id)) {
+        if (! $user->role->stages->contains($stage->id)) {
             abort(403, 'No tiene acceso a este módulo.');
         }
 
