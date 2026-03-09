@@ -55,7 +55,7 @@ class MaterialConsumptionController extends Controller
             });
         }
 
-        $materials = Material::orderBy('name')->get();
+        $selectedMaterial = $materialId ? Material::find($materialId) : null;
 
         $currentDate = Carbon::createFromDate($year, $month, 1);
         $prevMonth = $currentDate->copy()->subMonth();
@@ -63,7 +63,7 @@ class MaterialConsumptionController extends Controller
 
         return view('materials-consumption.index', compact(
             'dailyData',
-            'materials',
+            'selectedMaterial',
             'month',
             'year',
             'materialId',

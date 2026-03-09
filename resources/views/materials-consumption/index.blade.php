@@ -35,13 +35,14 @@
                             <label for="material_id"
                                 class="form-label small fw-bold text-muted">{{ __('Material (Opcional)') }}</label>
                             <select name="material_id" id="material_id"
-                                class="form-select border-gray-300 rounded-md shadow-sm">
+                                class="form-select border-gray-300 rounded-md shadow-sm"
+                                placeholder="{{ __('Buscar material...') }}">
                                 <option value="">{{ __('Todos los materiales') }}</option>
-                                @foreach($materials as $material)
-                                    <option value="{{ $material->id }}" {{ $materialId == $material->id ? 'selected' : '' }}>
-                                        {{ $material->name }}
+                                @if($selectedMaterial)
+                                    <option value="{{ $selectedMaterial->id }}" selected>
+                                        {{ $selectedMaterial->name }}
                                     </option>
-                                @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
@@ -198,6 +199,65 @@
             .consumption-list::-webkit-scrollbar-thumb:hover {
                 background: #a0aec0;
             }
+
+            /* TomSelect Customizations to match standard inputs */
+            .ts-wrapper .ts-control {
+                border-color: #dee2e6;
+                border-radius: 0.375rem;
+                padding: 0.375rem 0.75rem;
+                min-height: 38px;
+            }
+
+            .ts-wrapper.focus .ts-control {
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+            .ts-dropdown {
+                border-radius: 0.375rem;
+                margin-top: 5px;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            }
         </style>
     @endpush
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const materialSelect = document.getElementById('material_id');
+            if (materialSelect) {
+                new TomSelect(materialSelect, {
+                    valueField: 'id',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    placeholder: '{{ __("Buscar material...") }}',
+                    loadThrottle: 300,
+                    plugins: ['virtual_scroll'],
+                    shouldLoad: function(query) {
+                        return query.length >= 2;
+                    },
+                    firstUrl: function(query) {
+                        return '{{ route("materials.search") }}?q=' + encodeURIComponent(query);
+                    },
+                    load: function(query, callback) {
+                        const url = this.getUrl(query);
+                        if (!url) return callback();
+
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(json => {
+                                this.setNextUrl(query, json.next_page_url);
+                                callback(json.data);
+                            }).catch(() => callback());
+                    },
+                    render: {
+                        option: (item, escape) => `<div class="py-2 px-3 border-bottom">
+                            <span class="d-block">${escape(item.name)}</span>
+                            <small class="text-muted">Disponible: ${item.available_quantity}</small>
+                        </div>`,
+                        item: (item, escape) => `<div class="py-0">${escape(item.name)}</div>`
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-layout>
