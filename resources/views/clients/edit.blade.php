@@ -16,7 +16,8 @@
                 <div class="col-md-8">
                     <div class="card shadow-sm">
                         <div class="card-header bg-white py-3">
-                            <h5 class="card-title mb-0">Información del Cliente: {{ $client->name }}</h5>
+                            <h5 class="card-title mb-0">Información del Cliente:
+                                {{ \Illuminate\Support\Str::limit($client->name, 50) }}</h5>
                         </div>
                         <div class="card-body">
                             <form action="{{ route('clients.update', $client) }}" method="POST" novalidate>

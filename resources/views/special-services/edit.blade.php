@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="h4 font-weight-bold mb-0">
-                {{ __('Editar Servicio Especial') }}: {{ $specialService->name }}
+                {{ __('Editar Servicio Especial') }}: {{ \Illuminate\Support\Str::limit($specialService->name, 50) }}
             </h2>
             <a href="{{ route('special-services.index') }}" class="btn btn-secondary">
                 {{ __('Volver') }}

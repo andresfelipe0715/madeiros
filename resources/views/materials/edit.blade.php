@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="h4 font-weight-bold mb-0">
-                {{ __('Editar Material') }}: {{ $material->name }}
+                {{ __('Editar Material') }}: {{ \Illuminate\Support\Str::limit($material->name, 50) }}
             </h2>
             <a href="{{ route('materials.index') }}" class="btn btn-secondary">
                 {{ __('Volver') }}

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="h4 font-weight-bold mb-0">
-                {{ __('Editar Usuario') }}: {{ $user->name }}
+                {{ __('Editar Usuario') }}: {{ \Illuminate\Support\Str::limit($user->name, 50) }}
             </h2>
             <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Volver
