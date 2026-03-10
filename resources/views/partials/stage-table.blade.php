@@ -13,6 +13,9 @@
             <h4 class="mb-0 font-weight-bolder">{{ $stageName }}</h4>
         </div>
         <div class="d-flex align-items-center gap-3">
+            <button type="button" onclick="window.location.reload();" class="btn btn-sm btn-light border rounded-pill d-flex align-items-center px-3 text-muted" title="Actualizar registros">
+                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+            </button>
             <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
                 <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-light search-pill" 
                     style="width: 250px; transition: border-color 0.2s ease-in-out;">

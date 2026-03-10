@@ -15,22 +15,27 @@
     <div class="py-4">
         <div class="container-fluid px-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <form action="{{ route('orders.index') }}" method="GET" class="d-flex align-items-center">
-                    <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill"
-                        style="width:350px;">
-                        <span class="input-group-text bg-transparent border-0 ps-3">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
-                        <input type="text" name="search" class="form-control bg-transparent border-0 py-2 shadow-none"
-                            placeholder="Factura, cliente o documento..." value="{{ request('search') }}"
-                            onkeyup="debounceSubmit(this.form)">
-                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" onclick="window.location.reload();" class="btn btn-sm btn-light border rounded-pill d-flex align-items-center px-3 shadow-none text-muted" title="Actualizar registros">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+                    </button>
+                    <form action="{{ route('orders.index') }}" method="GET" class="d-flex align-items-center">
+                        <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill"
+                            style="width:350px;">
+                            <span class="input-group-text bg-transparent border-0 ps-3">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control bg-transparent border-0 py-2 shadow-none"
+                                placeholder="Factura, cliente o documento..." value="{{ request('search') }}"
+                                onkeyup="debounceSubmit(this.form)">
+                        </div>
 
-                    @if(request('search'))
-                        <a href="{{ route('orders.index') }}"
-                            class="btn btn-link btn-sm text-decoration-none text-muted ms-2">Limpiar</a>
-                    @endif
-                </form>
+                        @if(request('search'))
+                            <a href="{{ route('orders.index') }}"
+                                class="btn btn-link btn-sm text-decoration-none text-muted ms-2">Limpiar</a>
+                        @endif
+                    </form>
+                </div>
                 <div class="text-muted small">
                     Mostrando {{ $orders->firstItem() ?? 0 }} - {{ $orders->lastItem() ?? 0 }} de {{ $orders->total() }}
                     órdenes

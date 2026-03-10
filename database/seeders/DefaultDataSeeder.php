@@ -29,7 +29,7 @@ class DefaultDataSeeder extends Seeder
             'Corte 1' => ['sequence' => 10, 'group' => 'Corte'],
             'Corte 2' => ['sequence' => 15, 'group' => 'Corte'],
             'Enchape 1' => ['sequence' => 20, 'group' => 'Enchape'],
-            'Enchape 2' => ['sequence' => 30, 'group' => 'Enchape'],
+            'Enchape 2' => ['sequence' => 25, 'group' => 'Enchape'],
             'Servicios Especiales' => ['sequence' => 40, 'group' => 'Servicios Especiales'],
             'Revisión' => ['sequence' => 50, 'group' => 'Revisión'],
             'Entrega' => ['sequence' => 60, 'group' => 'Entrega'],
