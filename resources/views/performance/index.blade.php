@@ -131,7 +131,17 @@
                                                     {{ strtoupper(substr($user->name, 0, 2)) }}
                                                 </div>
                                                 <div>
-                                                    <div class="font-weight-bold">{{ $user->name }}</div>
+                                                    <div class="font-weight-bold">
+                                                        @if(Str::length($user->name) > 50)
+                                                            <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                                data-bs-target="#performanceNameModal{{ $user->id }}">
+                                                                {{ Str::limit($user->name, 50) }}
+                                                                <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                            </span>
+                                                        @else
+                                                            {{ $user->name }}
+                                                        @endif
+                                                    </div>
                                                     <div class="text-muted small">{{ $user->document }} •
                                                         {{ $user->role->name }}</div>
                                                 </div>
@@ -182,6 +192,31 @@
             </div>
         </div>
     </div>
+
+    {{-- Modals Loop --}}
+    @foreach($users as $u)
+        {{-- Modal de Nombre de Empleado (Performance) --}}
+        @if(Str::length($u->name) > 50)
+            <div class="modal fade" id="performanceNameModal{{ $u->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title font-weight-bold">Nombre del Empleado</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $u->name }}</span></p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
 
     {{-- Single Performance Detail Modal --}}
     <div class="modal fade" id="performanceDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
@@ -324,7 +359,11 @@
                     tbody.innerHTML += `
                         <tr>
                             <td class="px-3 py-2 font-weight-bold">#${item.order_invoice}</td>
-                            <td class="px-3 py-2"><span class="badge bg-secondary-subtle text-secondary border small">${item.stage_name}</span></td>
+                            <td class="px-3 py-2">
+                                <span class="badge bg-secondary-subtle text-secondary border small">
+                                    <span class="preserve-text">${item.stage_name}</span>
+                                </span>
+                            </td>
                             <td class="px-3 py-2 small text-muted">${item.started_at}</td>
                             <td class="px-3 py-2 small text-muted">${item.completed_at}</td>
                             <td class="px-3 py-2 text-end text-nowrap">

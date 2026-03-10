@@ -18,7 +18,10 @@ class SearchController extends Controller
 
         $materials = Material::query()
             ->when($query, function ($qb) use ($query) {
-                $qb->where('name', 'LIKE', "%{$query}%");
+                $qb->where(function ($q) use ($query) {
+                    $q->where('name', 'LIKE', "%{$query}%")
+                        ->orWhere('reference_number', 'LIKE', "%{$query}%");
+                });
             })
             ->orderBy('name')
             ->paginate(25);
@@ -27,6 +30,7 @@ class SearchController extends Controller
             return [
                 'id' => $material->id,
                 'name' => $material->name,
+                'reference_number' => $material->reference_number,
                 'available_quantity' => $material->availableQuantity(),
             ];
         });

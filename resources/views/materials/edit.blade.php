@@ -29,8 +29,22 @@
                                         Material</label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
                                         id="name" name="name" value="{{ old('name', $material->name) }}" required
-                                        autofocus>
+                                        autofocus maxlength="255">
                                     @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="reference_number"
+                                        class="form-label text-muted small text-uppercase font-weight-bold">Número de
+                                        Referencia</label>
+                                    <input type="text"
+                                        class="form-control @error('reference_number') is-invalid @enderror"
+                                        id="reference_number" name="reference_number"
+                                        value="{{ old('reference_number', $material->reference_number) }}"
+                                        maxlength="50" placeholder="Ej. REF-001 (Opcional)">
+                                    @error('reference_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

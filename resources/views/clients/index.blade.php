@@ -116,7 +116,7 @@
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body p-4 text-start">
-                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $client->name }}</p>
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $client->name }}</span></p>
                         </div>
                         <div class="modal-footer border-0">
                             <button type="button" class="btn btn-light rounded-pill px-4"

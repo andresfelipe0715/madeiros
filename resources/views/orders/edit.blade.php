@@ -140,7 +140,8 @@
                                                             value="0">
 
                                                         <div class="col-md-5">
-                                                            <input type="hidden" :name="`materials[${index}][material_id]`"
+                                                            <input type="hidden"
+                                                                :name="`materials[${index}][material_id]`"
                                                                 x-model="material.material_id">
                                                             <select
                                                                 x-init="initMaterialSelect($el, material.material_id, material.initial_name || materialLookup[material.material_id] || null, stockLookup[material.material_id] || 0)"
@@ -157,7 +158,8 @@
                                                         </div>
 
                                                         <div class="col-md-4 col-8">
-                                                            <input type="hidden" :name="`materials[${index}][estimated_quantity]`"
+                                                            <input type="hidden"
+                                                                :name="`materials[${index}][estimated_quantity]`"
                                                                 x-model="material.estimated_quantity">
                                                             <div class="input-group input-group-sm"
                                                                 :class="material.material_id && material.estimated_quantity > getAvailableFor(material.material_id) ? 'border border-danger rounded' : ''">
@@ -219,7 +221,8 @@
                                                         <div class="col-12">
                                                             <div class="input-group input-group-sm">
                                                                 <span
-                                                                    class="input-group-text bg-primary text-white border-primary">Consumo Real</span>
+                                                                    class="input-group-text bg-primary text-white border-primary">Consumo
+                                                                    Real</span>
                                                                 <input type="number"
                                                                     :name="`materials[${index}][actual_quantity]`"
                                                                     x-model="material.actual_quantity"
@@ -727,22 +730,48 @@
         </div>
     </div>
 
-    <style>
-        .form-switch .form-check-input {
-            background-size: 1rem 1rem;
-            background-position: left center;
-        }
+    @push('styles')
+        <style>
+            .form-switch .form-check-input {
+                background-size: 1rem 1rem !important;
+                background-position: left center !important;
+            }
 
-        .form-switch .form-check-input:checked {
-            background-position: right center;
-        }
+            .form-switch .form-check-input:checked {
+                background-position: right center !important;
+            }
 
-        .last-child-no-border:last-child {
-            border-bottom: none !important;
-            margin-bottom: 0 !important;
-            padding-bottom: 0 !important;
-        }
-    </style>
+            .workflow-container .form-check {
+                display: flex;
+                align-items: center;
+                padding-left: 0;
+                /* Remove Bootstrap default padding for flex layout */
+                margin-bottom: 0;
+            }
+
+            .workflow-container .form-check-input {
+                margin-top: 0;
+                margin-left: 0;
+                float: none;
+                /* Reset Bootstrap float */
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .workflow-container .form-check-label {
+                margin-left: 0.75rem;
+                cursor: pointer;
+                line-height: 1.2;
+                padding: 0;
+            }
+
+            .last-child-no-border:last-child {
+                border-bottom: none !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+            }
+        </style>
+    @endpush
 
     <script>
         window.initMaterialSelect = function (el, initialId = null, initialName = null, initialStock = 0) {
@@ -750,7 +779,7 @@
             const ts = new TomSelect(el, {
                 valueField: 'id',
                 labelField: 'name',
-                searchField: ['name'],
+                searchField: ['name', 'reference_number'],
                 placeholder: 'Seleccione material...',
                 loadThrottle: 300,
                 plugins: ['virtual_scroll'],
@@ -777,10 +806,10 @@
                 },
                 render: {
                     option: (item, escape) => `<div class="py-2 px-3 border-bottom">
-                        <span class="d-block">${escape(item.name)}</span>
+                        <span class="d-block">${escape(item.name)} ${item.reference_number ? `<span class="badge bg-secondary ms-1">${escape(item.reference_number)}</span>` : ''}</span>
                         <small class="text-muted">Disponible: ${item.available_quantity}</small>
                     </div>`,
-                    item: (item, escape) => `<div class="py-0">${escape(item.name)}</div>`
+                    item: (item, escape) => `<div class="py-0">${escape(item.name)} ${item.reference_number ? `(${escape(item.reference_number)})` : ''}</div>`
                 },
                 onChange: function (value) {
                     const option = this.options[value];

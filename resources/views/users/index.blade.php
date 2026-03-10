@@ -58,7 +58,17 @@
                                 @forelse($users as $user)
                                     <tr>
                                         <td class="px-4 py-3 text-muted">#{{ $user->id }}</td>
-                                        <td class="px-4 py-3 font-weight-bold">{{ $user->name }}</td>
+                                        <td class="px-4 py-3 font-weight-bold">
+                                            @if(Str::length($user->name) > 50)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#userNameModal{{ $user->id }}">
+                                                    {{ Str::limit($user->name, 50) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $user->name }}
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-nowrap">{{ $user->document }}</td>
                                         <td class="px-4 py-3 text-nowrap">
                                             <span class="badge bg-secondary opacity-75">{{ $user->role->name }}</span>
@@ -106,6 +116,32 @@
         </div>
     </div>
 
+    {{-- Modals Loop --}}
+    @foreach($users as $user)
+        {{-- Modal de Nombre de Usuario --}}
+        @if(Str::length($user->name) > 50)
+            <div class="modal fade" id="userNameModal{{ $user->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title font-weight-bold">Nombre del Usuario - ID #{{ $user->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $user->name }}</span>
+                            </p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
     {{-- Details Modals --}}
     @foreach($users as $u)
         <div class="modal fade" id="userModal{{ $u->id }}" tabindex="-1" aria-hidden="true">
@@ -119,11 +155,11 @@
                     <div class="modal-body p-4 text-start">
                         <div class="mb-3">
                             <label class="text-muted small text-uppercase font-weight-bold">Nombre Completo</label>
-                            <p class="mb-0 text-dark">{{ $u->name }}</p>
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $u->name }}</span></p>
                         </div>
                         <div class="mb-3">
                             <label class="text-muted small text-uppercase font-weight-bold">Documento</label>
-                            <p class="mb-0 text-dark">{{ $u->document }}</p>
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $u->document }}</span></p>
                         </div>
                         <div class="mb-3">
                             <label class="text-muted small text-uppercase font-weight-bold">Rol</label>

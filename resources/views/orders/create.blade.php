@@ -484,231 +484,232 @@
     </div>
     </div>
 
-    <style>
-        input:-webkit-autofill,
-        textarea:-webkit-autofill,
-        select:-webkit-autofill {
-            -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
-            -webkit-text-fill-color: #212529 !important;
-        }
+    @push('styles')
+        <style>
+            input:-webkit-autofill,
+            textarea:-webkit-autofill,
+            select:-webkit-autofill {
+                -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+                -webkit-text-fill-color: #212529 !important;
+            }
 
-        .bg-soft-info {
-            background-color: rgba(13, 202, 240, 0.1);
-        }
+            .bg-soft-info {
+                background-color: rgba(13, 202, 240, 0.1);
+            }
 
-        .bg-soft-success {
-            background-color: rgba(25, 135, 84, 0.1);
-        }
+            .bg-soft-success {
+                background-color: rgba(25, 135, 84, 0.1);
+            }
 
-        .hover-elevate:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
-        }
+            .hover-elevate:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+            }
 
-        .transition-all {
-            transition: all 0.2s ease;
-        }
+            .transition-all {
+                transition: all 0.2s ease;
+            }
 
-        .workflow-container {
-            max-width: 100%;
-        }
+            .workflow-container {
+                max-width: 100%;
+            }
 
-        /* Improved Input Alignment and Focus */
-        .custom-input-group {
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
-            background-color: #fff;
-            position: relative;
-            /* Ensure dropdown displays correctly */
-        }
+            /* Improved Input Alignment and Focus */
+            .custom-input-group {
+                border: 1px solid #dee2e6;
+                border-radius: 0.5rem;
+                transition: all 0.2s ease;
+                background-color: #fff;
+                position: relative;
+                /* Ensure dropdown displays correctly */
+            }
 
-        .custom-input-group:focus-within {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-        }
+            .custom-input-group:focus-within {
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+            }
 
-        .custom-input-group .input-group-text,
-        .custom-input-group .form-control,
-        .custom-input-group .form-select {
-            border: none;
-            box-shadow: none;
-            background-color: transparent;
-        }
+            .custom-input-group .input-group-text,
+            .custom-input-group .form-control,
+            .custom-input-group .form-select {
+                border: none;
+                box-shadow: none;
+                background-color: transparent;
+            }
 
-        .custom-input-group .form-control:focus,
-        .custom-input-group .form-select:focus {
-            box-shadow: none;
-        }
+            .custom-input-group .form-control:focus,
+            .custom-input-group .form-select:focus {
+                box-shadow: none;
+            }
 
-        .custom-input-group .input-group-text {
-            padding-right: 0.25rem;
-            color: #6c757d;
-        }
+            .custom-input-group .input-group-text {
+                padding-right: 0.25rem;
+                color: #6c757d;
+            }
 
-        .custom-input-group .form-control,
-        .custom-input-group .form-select {
-            padding-left: 0.5rem;
-        }
+            .custom-input-group .form-control,
+            .custom-input-group .form-select {
+                padding-left: 0.5rem;
+            }
 
-        /* Border radius fixes since we removed overflow:hidden */
-        .custom-input-group> :first-child {
-            border-top-left-radius: 0.4rem;
-            border-bottom-left-radius: 0.4rem;
-        }
+            /* Border radius fixes since we removed overflow:hidden */
+            .custom-input-group> :first-child {
+                border-top-left-radius: 0.4rem;
+                border-bottom-left-radius: 0.4rem;
+            }
 
-        .custom-input-group> :last-child {
-            border-top-right-radius: 0.4rem;
-            border-bottom-right-radius: 0.4rem;
-        }
+            .custom-input-group> :last-child {
+                border-top-right-radius: 0.4rem;
+                border-bottom-right-radius: 0.4rem;
+            }
 
-        /* Tom Select Integration */
-        .ts-wrapper.form-select {
-            padding: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
+            /* Tom Select Integration */
+            .ts-wrapper.form-select {
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
 
-        .ts-control {
-            border: none !important;
-            padding: 0.375rem 0.5rem !important;
-            background: transparent !important;
-            box-shadow: none !important;
-        }
+            .ts-control {
+                border: none !important;
+                padding: 0.375rem 0.5rem !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
 
-        .ts-wrapper.single .ts-control {
-            background-image: none !important;
-        }
+            .ts-wrapper.single .ts-control {
+                background-image: none !important;
+            }
 
-        .ts-wrapper.single.input-active .ts-control {
-            background: #fff !important;
-        }
+            .ts-wrapper.single.input-active .ts-control {
+                background: #fff !important;
+            }
 
-        .ts-dropdown {
-            border-radius: 0.5rem !important;
-            margin-top: 5px !important;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-            border: 1px solid #dee2e6 !important;
-            background-color: #fff !important;
-            z-index: 1050 !important;
-        }
+            .ts-dropdown {
+                border-radius: 0.5rem !important;
+                margin-top: 5px !important;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                border: 1px solid #dee2e6 !important;
+                background-color: #fff !important;
+                z-index: 1050 !important;
+            }
 
-        .ts-wrapper .ts-control input::placeholder {
-            color: #6c757d !important;
-            opacity: 1;
-        }
+            .ts-wrapper .ts-control input::placeholder {
+                color: #6c757d !important;
+                opacity: 1;
+            }
 
-        .ts-wrapper.loading .ts-control::after {
-            content: " ";
-            display: block;
-            width: 14px;
-            height: 14px;
-            margin: 0;
-            border-radius: 50%;
-            border: 2px solid #0d6efd;
-            border-color: #0d6efd transparent #0d6efd transparent;
-            animation: ts-spinner 1.2s linear infinite;
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            margin-top: -7px;
-        }
+            .ts-wrapper.loading .ts-control::after {
+                content: " ";
+                display: block;
+                width: 14px;
+                height: 14px;
+                margin: 0;
+                border-radius: 50%;
+                border: 2px solid #0d6efd;
+                border-color: #0d6efd transparent #0d6efd transparent;
+                animation: ts-spinner 1.2s linear infinite;
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                margin-top: -7px;
+            }
 
-        @keyframes ts-spinner {
-            0% {
+            @keyframes ts-spinner {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .form-switch .form-check-input {
+                background-size: 1rem 1rem !important;
+                background-position: left center !important;
+            }
+
+            .form-switch .form-check-input:checked {
+                background-position: right center !important;
+            }
+
+            .workflow-container .form-check {
+                display: flex;
+                align-items: center;
+                padding-left: 0;
+                /* Remove Bootstrap default padding for flex layout */
+                margin-bottom: 0;
+            }
+
+            .workflow-container .form-check-input {
+                margin-top: 0;
+                margin-left: 0;
+                float: none;
+                /* Reset Bootstrap float */
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .workflow-container .form-check-label {
+                margin-left: 0.75rem;
+                cursor: pointer;
+                line-height: 1.2;
+                padding: 0;
+            }
+
+            .last-child-no-border:last-child {
+                border-bottom: none !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+            }
+
+            .btn-reorder-dynamic {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 10px;
+                border: 1px solid #e2e8f0;
+                background: #fff;
+                color: #64748b;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                padding: 0;
+                cursor: pointer;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+
+            .btn-reorder-dynamic:hover {
+                color: #0d6efd;
+                border-color: #0d6efd;
+                background: #f0f7ff;
+                box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
+            }
+
+            .btn-reorder-dynamic:active {
+                transform: scale(0.92);
+            }
+
+            .btn-reorder-dynamic svg {
+                width: 18px;
+                height: 18px;
+                transition: transform 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            }
+
+            .rotate-up {
+                transform: rotate(180deg);
+            }
+
+            .rotate-down {
                 transform: rotate(0deg);
             }
 
-            100% {
-                transform: rotate(360deg);
+            .chevron-icon {
+                will-change: transform;
             }
-        }
-
-
-        .form-switch .form-check-input {
-            background-size: 1rem 1rem;
-            background-position: left center;
-        }
-
-        .form-switch .form-check-input:checked {
-            background-position: right center;
-        }
-
-        .workflow-container .form-check {
-            display: flex;
-            align-items: center;
-            padding-left: 0;
-            /* Remove Bootstrap default padding for flex layout */
-            margin-bottom: 0;
-        }
-
-        .workflow-container .form-check-input {
-            margin-top: 0;
-            margin-left: 0;
-            float: none;
-            /* Reset Bootstrap float */
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .workflow-container .form-check-label {
-            margin-left: 0.75rem;
-            cursor: pointer;
-            line-height: 1.2;
-            padding: 0;
-        }
-
-        .last-child-no-border:last-child {
-            border-bottom: none !important;
-            margin-bottom: 0 !important;
-            padding-bottom: 0 !important;
-        }
-
-        .btn-reorder-dynamic {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            background: #fff;
-            color: #64748b;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 0;
-            cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-reorder-dynamic:hover {
-            color: #0d6efd;
-            border-color: #0d6efd;
-            background: #f0f7ff;
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
-        }
-
-        .btn-reorder-dynamic:active {
-            transform: scale(0.92);
-        }
-
-        .btn-reorder-dynamic svg {
-            width: 18px;
-            height: 18px;
-            transition: transform 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
-        }
-
-        .rotate-up {
-            transform: rotate(180deg);
-        }
-
-        .rotate-down {
-            transform: rotate(0deg);
-        }
-
-        .chevron-icon {
-            will-change: transform;
-        }
-    </style>
+        </style>
+    @endpush
 
     <script>
         // Use window.onload or similar to ensure helpers are global before Alpine
@@ -717,7 +718,7 @@
             const ts = new TomSelect(el, {
                 valueField: 'id',
                 labelField: 'name',
-                searchField: ['name'],
+                searchField: ['name', 'reference_number'],
                 placeholder: 'Seleccione material...',
                 loadThrottle: 300,
                 plugins: ['virtual_scroll'],
@@ -744,10 +745,10 @@
                 },
                 render: {
                     option: (item, escape) => `<div class="py-2 px-3 border-bottom">
-                        <span class="d-block">${escape(item.name)}</span>
+                        <span class="d-block">${escape(item.name)} ${item.reference_number ? `<span class="badge bg-secondary ms-1">${escape(item.reference_number)}</span>` : ''}</span>
                         <small class="text-muted">Disponible: ${item.available_quantity}</small>
                     </div>`,
-                    item: (item, escape) => `<div class="py-0">${escape(item.name)}</div>`
+                    item: (item, escape) => `<div class="py-0">${escape(item.name)} ${item.reference_number ? `(${escape(item.reference_number)})` : ''}</div>`
                 },
                 onChange: function (value) {
                     const option = this.options[value];

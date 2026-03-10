@@ -21,7 +21,10 @@ class MaterialController extends Controller
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where('name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%");
+            });
         }
 
         $materials = $query->orderBy('name')->paginate(15)->withQueryString();
@@ -48,6 +51,7 @@ class MaterialController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:materials,name'],
+            'reference_number' => ['nullable', 'string', 'max:50', 'unique:materials,reference_number'],
             'stock_quantity' => ['required', 'numeric', 'min:0'],
         ]);
 
@@ -74,7 +78,8 @@ class MaterialController extends Controller
         Gate::authorize('edit-materials');
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:materials,name,' . $material->id],
+            'name' => ['required', 'string', 'max:255', 'unique:materials,name,'.$material->id],
+            'reference_number' => ['nullable', 'string', 'max:50', 'unique:materials,reference_number,'.$material->id],
         ]);
 
         $material->update($validated);

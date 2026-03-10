@@ -220,7 +220,7 @@
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body p-4 text-start">
-                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ $order->client->name }}</p>
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $order->client->name }}</span></p>
                         </div>
                         <div class="modal-footer border-0">
                             <button type="button" class="btn btn-light rounded-pill px-4"
@@ -253,7 +253,7 @@
                                 @foreach($activeMaterials as $om)
                                     <li class="list-group-item px-0 border-0 py-1">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold">{{ $om->material->name }}</span>
+                                            <span class="fw-bold text-break"><span class="preserve-text">{{ $om->material->name }}</span></span>
                                             <span class="badge bg-light text-dark border">{{ $om->estimated_quantity }}</span>
                                         </div>
                                         @if($om->notes)
@@ -271,7 +271,7 @@
                                     <li class="list-group-item px-0 border-0 py-1 opacity-75">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span
-                                                class="text-danger fw-bold text-decoration-line-through">{{ $om->material->name }}</span>
+                                                class="text-danger fw-bold text-decoration-line-through text-break"><span class="preserve-text">{{ $om->material->name }}</span></span>
                                             <span class="badge bg-danger-subtle text-danger">{{ $om->estimated_quantity }}
                                                 (Cancelado)</span>
                                         </div>

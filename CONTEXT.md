@@ -100,10 +100,13 @@ This project uses a relational SQL database. The schema below is the single sour
 - `users`: Staff accounts
 - `clients`: Order owners
 - `orders`: Core job data
+- `stage_groups`: Groupings for stages
 - `stages`: Global stage definitions
 - `order_stages`: The order-specific workflow
 - `materials`: Global stock tracking
 - `order_materials`: Order-specific material usage (Pivot)
+- `special_services`: Global special services
+- `order_special_services`: Order-specific special services usage (Pivot)
 - `file_types`: Lookup for file categories
 - `order_files`: File metadata and paths
 - `order_logs`: Operational audit trail
@@ -223,6 +226,26 @@ CREATE TABLE order_materials (
     updated_at TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE
+);
+
+CREATE TABLE special_services (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT 1,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+CREATE TABLE order_special_services (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    order_id INTEGER NOT NULL, -- INDEX: FK
+    service_id INTEGER NOT NULL, -- INDEX: FK
+    notes VARCHAR(50) NULL,
+    cancelled_at TIMESTAMP NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_id) REFERENCES special_services(id) ON DELETE CASCADE
 );
 
 CREATE TABLE order_logs (

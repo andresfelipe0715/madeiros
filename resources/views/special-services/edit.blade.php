@@ -30,7 +30,7 @@
                                         Servicio</label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
                                         id="name" name="name" value="{{ old('name', $specialService->name) }}" required
-                                        autofocus>
+                                        autofocus maxlength="255">
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -62,4 +62,17 @@
             </div>
         </div>
     </div>
+
+    @push('styles')
+        <style>
+            .form-switch .form-check-input {
+                background-size: 1rem 1rem !important;
+                background-position: left center !important;
+            }
+
+            .form-switch .form-check-input:checked {
+                background-position: right center !important;
+            }
+        </style>
+    @endpush
 </x-app-layout>

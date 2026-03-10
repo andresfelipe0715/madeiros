@@ -61,6 +61,7 @@
                             <thead class="bg-light text-muted text-uppercase small font-weight-bold">
                                 <tr>
                                     <th class="px-4 py-3">Nombre</th>
+                                    <th class="px-4 py-3">Referencia</th>
                                     <th class="px-4 py-3">Punto de Venta</th>
                                     <th class="px-4 py-3">Reservada</th>
                                     <th class="px-4 py-3">Disponible</th>
@@ -71,7 +72,28 @@
                                 @forelse ($materials as $material)
                                     <tr>
                                         <td class="px-4 py-3 font-weight-bold">
-                                            {{ $material->name }}
+                                            @if(Str::length($material->name) > 50)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#materialNameModal{{ $material->id }}">
+                                                    {{ Str::limit($material->name, 50) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $material->name }}
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if($material->reference_number)
+                                                <a href="#"
+                                                    class="text-decoration-none badge bg-secondary bg-opacity-10 text-secondary border"
+                                                    data-bs-toggle="modal" data-bs-target="#refModal{{ $material->id }}"
+                                                    title="Ver referencia completa">
+                                                    <i
+                                                        class="bi bi-upc-scan me-1"></i>{{ \Illuminate\Support\Str::limit($material->reference_number, 10) }}
+                                                </a>
+                                            @else
+                                                <span class="text-muted small">N/A</span>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3 text-muted">
                                             {{ floor($material->stock_quantity) == $material->stock_quantity ? number_format($material->stock_quantity, 0) : number_format($material->stock_quantity, 2) }}
@@ -164,6 +186,54 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    @if($material->reference_number)
+                                        <!-- Reference Number Modal -->
+                                        <div class="modal fade" id="refModal{{ $material->id }}" tabindex="-1"
+                                            aria-labelledby="refModalLabel{{ $material->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-sm modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header border-0 pb-0">
+                                                        <h6 class="modal-title font-weight-bold text-muted text-uppercase small"
+                                                            id="refModalLabel{{ $material->id }}">Número de Referencia</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body text-center py-4">
+                                                        <div class="text-break font-monospace fs-5 bg-light p-3 rounded border">
+                                                            <span class="preserve-text">{{ $material->reference_number }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(Str::length($material->name) > 50)
+                                        <!-- Name Modal -->
+                                        <div class="modal fade" id="materialNameModal{{ $material->id }}" tabindex="-1"
+                                            aria-labelledby="materialNameModalLabel{{ $material->id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content border-0 shadow">
+                                                    <div class="modal-header bg-dark text-white border-0">
+                                                        <h5 class="modal-title font-weight-bold"
+                                                            id="materialNameModalLabel{{ $material->id }}">Nombre del Material
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body p-4 text-start">
+                                                        <p class="mb-0 text-dark text-break"><span
+                                                                class="preserve-text">{{ $material->name }}</span></p>
+                                                    </div>
+                                                    <div class="modal-footer border-0">
+                                                        <button type="button" class="btn btn-light rounded-pill px-4"
+                                                            data-bs-dismiss="modal">Cerrar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 @empty
                                     <tr>
                                         <td colspan="5" class="px-4 py-5 text-center text-muted">

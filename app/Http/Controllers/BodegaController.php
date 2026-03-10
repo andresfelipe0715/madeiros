@@ -21,7 +21,10 @@ class BodegaController extends Controller
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where('name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%");
+            });
         }
 
         $materials = $query->orderBy('name')->paginate(15)->withQueryString();
@@ -65,7 +68,7 @@ class BodegaController extends Controller
         Gate::authorize('edit-bodega');
 
         $validated = $request->validate([
-            'quantity' => ['required', 'numeric', 'min:0.01', 'max:' . $material->bodega_quantity],
+            'quantity' => ['required', 'numeric', 'min:0.01', 'max:'.$material->bodega_quantity],
         ]);
 
         $quantity = (float) $validated['quantity'];

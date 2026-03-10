@@ -69,7 +69,15 @@
                                 @forelse ($services as $service)
                                     <tr>
                                         <td class="px-4 py-3 font-weight-bold">
-                                            {{ $service->name }}
+                                            @if(Str::length($service->name) > 50)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#serviceNameModal{{ $service->id }}">
+                                                    {{ Str::limit($service->name, 50) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $service->name }}
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3">
                                             @if($service->active)
@@ -120,6 +128,33 @@
                     </div>
                 @endif
             </div>
+
+            {{-- Modals Loop --}}
+            @foreach($services as $service)
+                {{-- Modal de Nombre de Servicio --}}
+                @if(Str::length($service->name) > 50)
+                    <div class="modal fade" id="serviceNameModal{{ $service->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header bg-dark text-white border-0">
+                                    <h5 class="modal-title font-weight-bold">Nombre del Servicio Especial</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4 text-start">
+                                    <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $service->name }}</span>
+                                    </p>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-light rounded-pill px-4"
+                                        data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+
         </div>
     </div>
 
