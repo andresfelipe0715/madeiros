@@ -74,8 +74,7 @@ class MaterialController extends Controller
         Gate::authorize('edit-materials');
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:materials,name,'.$material->id],
-            'stock_quantity' => ['required', 'numeric', 'min:0'],
+            'name' => ['required', 'string', 'max:255', 'unique:materials,name,' . $material->id],
         ]);
 
         $material->update($validated);
@@ -97,5 +96,44 @@ class MaterialController extends Controller
         $material->delete();
 
         return redirect()->route('materials.index')->with('success', 'Material eliminado exitosamente.');
+    }
+
+    /**
+     * Adjust the stock quantity of the specified material securely.
+     */
+    public function adjustStock(Request $request, Material $material): RedirectResponse
+    {
+        Gate::authorize('edit-materials');
+
+        $validated = $request->validate([
+            'adjusted_stock' => ['required', 'numeric', 'min:0'],
+            'reason' => ['required', 'string', 'max:300'],
+        ]);
+
+        $newStock = (float) $validated['adjusted_stock'];
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($material, $newStock, $validated) {
+            if (app()->environment() !== 'testing') {
+                $material->lockForUpdate();
+            }
+            $material->refresh();
+
+            $previousStock = $material->stock_quantity;
+
+            $material->update([
+                'stock_quantity' => $newStock,
+            ]);
+
+            \App\Models\InventoryLog::create([
+                'material_id' => $material->id,
+                'user_id' => auth()->id(),
+                'action' => 'adjustment',
+                'previous_stock_quantity' => $previousStock,
+                'new_stock_quantity' => $newStock,
+                'notes' => $validated['reason'],
+            ]);
+        });
+
+        return redirect()->route('materials.index')->with('success', 'Stock del material ajustado exitosamente.');
     }
 }

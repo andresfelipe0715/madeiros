@@ -39,13 +39,10 @@
                                     <label for="stock_quantity"
                                         class="form-label text-muted small text-uppercase font-weight-bold">Cantidad en
                                         Stock (Punto de Venta)</label>
-                                    <input type="number" step="0.01"
-                                        class="form-control @error('stock_quantity') is-invalid @enderror"
-                                        id="stock_quantity" name="stock_quantity"
-                                        value="{{ old('stock_quantity', $material->stock_quantity) }}" required>
-                                    @error('stock_quantity')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <input type="number" step="0.01" class="form-control bg-light" id="stock_quantity"
+                                        name="stock_quantity" value="{{ $material->stock_quantity }}" readonly disabled>
+                                    <div class="form-text small">La cantidad en stock se gestiona a través de
+                                        transferencias de bodega y consumos de órdenes.</div>
                                 </div>
 
                                 <div class="mt-4 p-3 bg-light rounded border">

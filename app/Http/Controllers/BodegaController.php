@@ -65,7 +65,7 @@ class BodegaController extends Controller
         Gate::authorize('edit-bodega');
 
         $validated = $request->validate([
-            'quantity' => ['required', 'numeric', 'min:0.01', 'max:'.$material->bodega_quantity],
+            'quantity' => ['required', 'numeric', 'min:0.01', 'max:' . $material->bodega_quantity],
         ]);
 
         $quantity = (float) $validated['quantity'];
@@ -80,8 +80,19 @@ class BodegaController extends Controller
                 throw new \Exception('No hay suficiente cantidad en bodega.');
             }
 
+            $previousStock = $material->stock_quantity;
+
             $material->decrement('bodega_quantity', $quantity);
             $material->increment('stock_quantity', $quantity);
+
+            \App\Models\InventoryLog::create([
+                'material_id' => $material->id,
+                'user_id' => auth()->id(),
+                'action' => 'transfer',
+                'previous_stock_quantity' => $previousStock,
+                'new_stock_quantity' => $previousStock + $quantity,
+                'notes' => 'Transferencia desde bodega',
+            ]);
         });
 
         return back()->with('success', 'Transferencia realizada exitosamente.');

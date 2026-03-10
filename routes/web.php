@@ -52,6 +52,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
 
     // Materials Management (POS Stock Only)
+    Route::post('materials/{material}/adjust', [\App\Http\Controllers\MaterialController::class, 'adjustStock'])->name('materials.adjust');
     Route::resource('materials', \App\Http\Controllers\MaterialController::class)->except(['show']);
 
     // Bodega Management (Bodega Stock Only)

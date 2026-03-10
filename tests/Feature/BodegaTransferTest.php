@@ -70,6 +70,13 @@ it('allows admin to transfer from bodega to stock', function () {
     $this->material->refresh();
     expect((float) $this->material->bodega_quantity)->toBe(15.0);
     expect((float) $this->material->stock_quantity)->toBe(15.0);
+
+    $log = \App\Models\InventoryLog::where('action', 'transfer')->latest()->first();
+    expect($log)->not->toBeNull();
+    expect($log->material_id)->toBe($this->material->id);
+    expect($log->user_id)->toBe($this->admin->id);
+    expect((float) $log->previous_stock_quantity)->toBe(10.0);
+    expect((float) $log->new_stock_quantity)->toBe(15.0);
 });
 
 it('allows bodega user to transfer from bodega to stock', function () {
@@ -81,6 +88,13 @@ it('allows bodega user to transfer from bodega to stock', function () {
     $this->material->refresh();
     expect((float) $this->material->bodega_quantity)->toBe(15.0);
     expect((float) $this->material->stock_quantity)->toBe(15.0);
+
+    $log = \App\Models\InventoryLog::where('action', 'transfer')->latest()->first();
+    expect($log)->not->toBeNull();
+    expect($log->material_id)->toBe($this->material->id);
+    expect($log->user_id)->toBe($this->bodegaUser->id);
+    expect((float) $log->previous_stock_quantity)->toBe(10.0);
+    expect((float) $log->new_stock_quantity)->toBe(15.0);
 });
 
 it('allows bodega user to update bodega_quantity via bodega edit route', function () {

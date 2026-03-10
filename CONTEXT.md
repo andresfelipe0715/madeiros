@@ -82,12 +82,12 @@ Auth:
 
 ---
 
-### Traceability (Order Logs)
-- Logs all critical actions (Start, Finish, Remit, Inventory Adjustments).
-- **Structured Action Grammar**:
+### Traceability (Order Logs & Inventory Logs)
+- **Order Logs**: Tracks order-related workflow and consumptions. Kept for operational history (pruned after 6 months to save space).
   - `inventory|reserve|material:X|qty:Y`
   - `remit|from:ID|to:ID|reason:TEXT`
   - `inventory|consume|material:X|qty_est:Y|qty_act:Z`
+- **Inventory Logs**: Tracks direct, manual stock manipulations (Adjustments in POS, Transfers from Bodega). Kept permanently for financial/stock auditing.
 
 ---
 
@@ -106,7 +106,8 @@ This project uses a relational SQL database. The schema below is the single sour
 - `order_materials`: Order-specific material usage (Pivot)
 - `file_types`: Lookup for file categories
 - `order_files`: File metadata and paths
-- `order_logs`: Audit trail
+- `order_logs`: Operational audit trail
+- `inventory_logs`: Permanent audit trail for direct material stock changes
 - `order_tracking_links`: Client access tokens
 - `role_stages`: Process permissions
 - `role_permissions`: Resource permissions
@@ -232,6 +233,20 @@ CREATE TABLE order_logs (
     created_at TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE inventory_logs (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    material_id INTEGER NOT NULL, -- INDEX: FK
+    user_id INTEGER NOT NULL, -- INDEX: FK
+    action VARCHAR(255) NOT NULL,
+    previous_stock_quantity DECIMAL(12, 2) NOT NULL,
+    new_stock_quantity DECIMAL(12, 2) NOT NULL,
+    notes VARCHAR(300) NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE file_types (

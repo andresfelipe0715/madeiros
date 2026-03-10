@@ -4,6 +4,11 @@
             <h2 class="h4 font-weight-bold mb-0">
                 {{ __('Gestión de Bodega') }}
             </h2>
+            @can('create-materials')
+                <a href="{{ route('materials.create') }}" class="btn btn-primary">
+                    {{ __('Nuevo Material') }}
+                </a>
+            @endcan
         </div>
     </x-slot>
 

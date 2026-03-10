@@ -34,4 +34,9 @@ class Material extends Model
     {
         return (float) ($this->stock_quantity - $this->reserved_quantity);
     }
+
+    public function inventoryLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InventoryLog::class);
+    }
 }
