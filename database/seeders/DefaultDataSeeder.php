@@ -26,7 +26,8 @@ class DefaultDataSeeder extends Seeder
 
         // 1. Create Stages
         $stagesData = [
-            'Corte' => ['sequence' => 10, 'group' => 'Corte'],
+            'Corte 1' => ['sequence' => 10, 'group' => 'Corte'],
+            'Corte 2' => ['sequence' => 15, 'group' => 'Corte'],
             'Enchape 1' => ['sequence' => 20, 'group' => 'Enchape'],
             'Enchape 2' => ['sequence' => 30, 'group' => 'Enchape'],
             'Servicios Especiales' => ['sequence' => 40, 'group' => 'Servicios Especiales'],
@@ -76,7 +77,7 @@ class DefaultDataSeeder extends Seeder
 
         // 3. Create a dedicated Role and User for each specific Stage
         foreach ($stages as $stageName => $stageModel) {
-            $roleName = 'Empleado de '.strtolower($stageName);
+            $roleName = 'Empleado de ' . strtolower($stageName);
             $role = Role::firstOrCreate(['name' => $roleName]);
 
             // Sync only this specific stage to this role
@@ -85,9 +86,9 @@ class DefaultDataSeeder extends Seeder
             // Create a test user for this role
             $slug = strtolower(str_replace(' ', '_', $stageName));
             User::firstOrCreate(
-                ['document' => $slug.'_123'],
+                ['document' => $slug . '_123'],
                 [
-                    'name' => $roleName.' Test',
+                    'name' => $roleName . ' Test',
                     'role_id' => $role->id,
                     'password' => Hash::make('password'),
                     'active' => true,

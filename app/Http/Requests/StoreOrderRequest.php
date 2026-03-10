@@ -58,7 +58,7 @@ class StoreOrderRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $stages = $this->input('stages', []);
-            if (! is_array($stages) || empty($stages)) {
+            if (!is_array($stages) || empty($stages)) {
                 return;
             }
 
@@ -77,6 +77,24 @@ class StoreOrderRequest extends FormRequest
                     break;
                 }
                 $expected++;
+            }
+
+            // Check if at least one 'Corte' stage is selected
+            $corteGroup = \App\Models\StageGroup::where('name', 'Corte')->first();
+            if ($corteGroup) {
+                $corteStageIds = $corteGroup->stages->pluck('id')->toArray();
+                $hasCorte = false;
+
+                foreach ($stages as $stageData) {
+                    if (isset($stageData['stage_id']) && in_array($stageData['stage_id'], $corteStageIds)) {
+                        $hasCorte = true;
+                        break;
+                    }
+                }
+
+                if (!$hasCorte) {
+                    $validator->errors()->add('stages', 'Debe seleccionar al menos una etapa de Corte.');
+                }
             }
         });
     }
