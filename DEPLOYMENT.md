@@ -85,19 +85,49 @@ Build and start the containers:
 ```bash
 docker compose up -d --build
 ```
+> [!NOTE]
+> On the first run, Docker will automatically create the `docker/mysql` directory on your VPS. MySQL will then take a few seconds to initialize these files before it becomes ready to accept connections.
 
-### 6. Post-Launch Setup
+### 6. Post-Launch Setup (First Time Only)
 Install dependencies and run migrations:
 ```bash
 docker compose exec app composer install --no-dev --optimize-autoloader
 docker compose exec app php artisan key:generate
+
+# 1. Create tables
 docker compose exec app php artisan migrate --force
+
+# 2. Populate essential data (Roles, Stages and Admin user)
 docker compose exec app php artisan db:seed --class=ProductionDataSeeder --force
 
-# Setup storage and permissions
+# 3. Setup storage and permissions
 docker compose exec app php artisan storage:link
 docker compose exec app chmod -R 775 storage bootstrap/cache
 ```
+
+---
+
+## Data Management
+
+### 1. Persistence
+Your database data is stored locally in the `docker/mysql` directory. This directory is ignored by Git to avoid conflicts between different environments. When you backup this folder, you are backing up your raw database files.
+
+### 2. Loading Existing Data
+If you have a SQL dump (e.g., `backup.sql`) from another installation, you have two ways to load it:
+
+#### Option A: Using phpMyAdmin (Recommended for GUI)
+1. Start the GUI: `docker compose -f docker-compose.gui.yml up -d`
+2. Open `http://your-vps-ip:8080`.
+3. Select your database and use the **Import** tab to upload your `.sql` file.
+
+#### Option B: Using the Command Line
+Place your `backup.sql` in the project root and run:
+```bash
+# Import the SQL file into the database container
+docker exec -i madeiros-db mysql -u root -p'YOUR_PASSWORD' madeiros < backup.sql
+```
+
+---
 
 ---
 
