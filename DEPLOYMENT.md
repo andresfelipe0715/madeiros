@@ -1,0 +1,133 @@
+# Deployment and Docker Guide
+
+This guide provides the necessary commands to manage the application's Docker containers and instructions for setting up a VPS from scratch.
+
+## Docker Commands Reference
+
+### Starting Containers
+```bash
+# Start all containers in the background
+docker compose up -d
+
+# Start all containers and see the output (hot-reload for logs)
+docker compose up
+```
+
+### Stopping Containers
+```bash
+# Stop and remove containers
+docker compose down
+
+# Stop containers without removing them
+docker compose stop
+```
+
+### Running Commands Inside Docker
+Since the application runs inside containers, you need to use `docker compose exec` to run Artisan or Composer commands.
+
+```bash
+# Run Artisan commands
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed --class=ProductionDataSeeder
+
+# Run Composer commands
+docker compose exec app composer install
+
+# Open a shell inside the app container
+docker compose exec app bash
+```
+
+---
+
+## VPS Setup Guide (Ubuntu/Debian)
+
+### 1. Initial Server Setup
+Connect to your VPS:
+```bash
+ssh root@your_vps_ip
+```
+
+Update system packages:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### 2. Install Docker & Docker Compose
+Install Docker:
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+```
+
+Install Docker Compose:
+```bash
+sudo apt install docker-compose-plugin -y
+```
+
+### 3. Clone the Project
+```bash
+git clone https://github.com/your-username/madeiros.git
+cd madeiros
+```
+
+### 4. Configuration
+Create the `.env` file from the example:
+```bash
+cp .env.example .env
+```
+Edit the `.env` file to set your production values (DB_PASSWORD, APP_URL, etc.):
+```bash
+nano .env
+```
+
+### 5. Launch the Application
+Build and start the containers:
+```bash
+docker compose up -d --build
+```
+
+### 6. Post-Launch Setup
+Install dependencies and run migrations:
+```bash
+docker compose exec app composer install --no-dev --optimize-autoloader
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --force
+docker compose exec app php artisan db:seed --class=ProductionDataSeeder --force
+
+# Setup storage and permissions
+docker compose exec app php artisan storage:link
+docker compose exec app chmod -R 775 storage bootstrap/cache
+```
+
+---
+
+## Maintenance
+
+### Updating the Application
+```bash
+git pull origin main
+docker compose up -d --build
+docker compose exec app php artisan migrate --force
+```
+
+### Checking Logs
+```bash
+docker compose logs -f
+```
+
+---
+
+## On-Demand Maintenance GUI
+
+The database GUI is kept separate from the core production services for security and performance. Only start it when you explicitly need to perform manual database operations.
+
+### 1. Launch phpMyAdmin
+```bash
+docker compose -f docker-compose.gui.yml up -d
+```
+Access via: `http://your-vps-ip:8080`
+
+### 2. Stop phpMyAdmin
+```bash
+docker compose -f docker-compose.gui.yml stop
+```

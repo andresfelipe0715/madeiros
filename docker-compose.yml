@@ -1,0 +1,78 @@
+version: '3.8'
+services:
+
+  # PHP Service
+  app:
+    build:
+      args:
+        user: laravel
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: madeiros-app
+    container_name: madeiros-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - madeiros
+
+  # Database Service
+  db:
+    image: mysql:8.0
+    container_name: madeiros-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    networks:
+      - madeiros
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -u root -p'${DB_PASSWORD}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: madeiros-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - madeiros
+
+  # Cron Service
+  cron:
+    build:
+      args:
+        user: laravel
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: madeiros-app
+    container_name: madeiros-cron
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - madeiros
+
+networks:
+  madeiros:
+    driver: bridge
