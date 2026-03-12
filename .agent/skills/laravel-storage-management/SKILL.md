@@ -12,7 +12,7 @@ date_added: "2026-03-12"
 
 Storage files failing to load (403 Forbidden or 404) often result from a mismatch between the container's internal filesystem, the Nginx root, the `APP_URL`, and the generated symlink. Without this skill, agents waste time on file permissions when the issue is actually the symlink's absolute path or the `.env` configuration.
 
-**Core principle:** A broken storage link is a configuration mismatch until proven otherwise.
+**Core principle:** A broken storage link is a configuration mismatch until proven otherwise. Ensure `APP_URL` matches the actual access point (e.g., `http://localhost` for local development or `http://your-vps-ip` for VPS deployment).
 
 ## The Iron Law
 

@@ -3,9 +3,9 @@
 Use this quick checklist to diagnose 403/Broken Storage links in seconds.
 
 ## 1. Environment Check
-- [ ] `APP_URL` in `.env` matches the browser address (e.g., `http://localhost`).
+- [ ] `APP_URL` in `.env` matches the browser address (e.g., `http://localhost`, `http://your-vps-ip`, or `http://yourdomain.com`).
 - [ ] `FILESYSTEM_DISK` is set to `public`.
-- [ ] Nginx `server_name` matches `APP_URL` domain.
+- [ ] Nginx `server_name` matches `APP_URL` domain/IP.
 
 ## 2. Symlink Verification (Inside Container)
 - [ ] Run `docker compose exec app ls -la public/storage`.
@@ -18,6 +18,6 @@ Use this quick checklist to diagnose 403/Broken Storage links in seconds.
 - [ ] If it's `0`, the issue is in the Controller/Request upload logic.
 
 ## 4. Final Pulse Check
-- [ ] Run `curl -I http://localhost/storage/path/to/file.pdf`.
+- [ ] Run `curl -I <APP_URL>/storage/path/to/file.pdf`.
 - [ ] Result is `200 OK`.
 - [ ] If `403`, check Nginx error logs: `docker logs madeiros-nginx`.

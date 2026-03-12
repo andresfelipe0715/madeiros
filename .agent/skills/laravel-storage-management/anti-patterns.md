@@ -11,6 +11,7 @@ Identifying what NOT to do is as important as knowing the correct steps. These a
 - In 90% of containerized Laravel cases, the 403 is caused by Nginx trying to follow a broken symlink or a symlink that points to a path that doesn't exist *inside* the Nginx container.
 - It creates a security vulnerability without solving the root configuration issue.
 - Even with 777 permissions, if the symlink is broken, Nginx will still return 403 or 404.
+- **Project Standard:** For VPS deployments, use `chmod -R 775 storage bootstrap/cache` as documented in `DEPLOYMENT.md`, but only *after* verifying the symlink and `APP_URL`.
 
 ## The "Host-Side Fix"
 
