@@ -161,3 +161,43 @@ Access via: `http://your-vps-ip:8080`
 ```bash
 docker compose -f docker-compose.gui.yml stop
 ```
+
+---
+
+## Troubleshooting
+
+### Docker Build: "image already exists"
+If you encounter an error like `failed to solve: image "madeiros-app:latest": already exists` during a build, it is likely a BuildKit cache synchronization issue.
+
+**Solution:**
+1. Clear the builder cache:
+   ```bash
+   docker builder prune -f
+   ```
+2. Rebuild the main app service without cache:
+   ```bash
+   docker compose build --no-cache app
+   ```
+3. Start the containers normally:
+   ```bash
+   docker compose up -d
+   ```
+
+### Frontend not styling or "Vite manifest" error
+If the application appears unstyled or you see an error about a missing Vite manifest, it usually means the frontend assets aren't compiled or the app is stuck in "hot reload" mode.
+
+**Solution:**
+1. Ensure the `public/hot` file is deleted (this file forces the app to look for a dev server):
+   ```bash
+   # Windows
+   del public\hot
+   # Linux/Mac
+   rm public/hot
+   ```
+2. Compile the assets on your host machine:
+   ```bash
+   npm run build
+   ```
+3. Refresh the browser. Since the project root is mapped as a volume to the `app` container, the new `public/build` files will be available immediately.
+
+
