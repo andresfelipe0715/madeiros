@@ -82,6 +82,37 @@ If you are thinking:
 
 **ALL of these mean: STOP. Return to Phase 1.**
 
+## Phase 4: Troubleshooting
+
+If you encounter issues during Phase 2 or Phase 3, follow these steps before retrying.
+
+### **Database Corruption or Crash Loop**
+
+If `madeiros-db` container repeatedly exits or logs show `Table 'mysql.plugin' doesn't exist` or privilege table errors, the data directory is likely corrupted.
+
+1. **Verify**: Run `docker compose logs --tail=50 db` to inspect the error.
+2. **Stop & Remove Container**: `docker compose stop db`, then `docker compose rm -f db`.
+3. **Wipe Local Data**: Delete the contents of the local `docker/mysql` directory (e.g., `Remove-Item -Recurse -Force .\docker\mysql\*` on Windows or `rm -rf docker/mysql/*` on Linux/macOS). **Warning: This destroys all local database data.**
+4. **Restart**: `docker compose up -d db`. Observe the logs to ensure a clean initialization. Wait for `mysqld: ready for connections`.
+
+### **DNS or Build Error (Image Already Exists)**
+
+If `docker compose build` fails with `failed to solve: image "madeiros-app:latest": already exists` or random DNS lookup failures (e.g., `lookup registry-1.docker.io: no such host`):
+
+1. **Verify Internet/DNS**: Ensure your host machine can reach the internet (e.g., `ping docker.io`).
+2. **Clear BuildKit Cache**: Run `docker builder prune -f` to clear caching issues.
+3. **Rebuild**: `docker compose build --no-cache app`.
+
+### **GUI (phpMyAdmin) Empty or Showing "Ghost" Data**
+
+If phpMyAdmin logs in successfully but shows "No tables found" while terminal commands (`show tables`) or the app work correctly:
+
+1. **Verify Connectivity**: Run `docker exec madeiros-phpmyadmin getent hosts madeiros-db` to ensure it resolves to the correct internal IP.
+2. **Explicit Hostname**: Ensure `PMA_HOST` in `docker-compose.gui.yml` is set to the explicit container name `madeiros-db` instead of the service alias `db`.
+3. **Port Collision**: If using port `8080` on Windows, another service (or a hidden ghost container from a different project) might be hijacking the traffic. 
+   - **Fix**: Change the host port in `docker-compose.gui.yml` to something unique like `8099:80`.
+4. **Restart**: `docker compose -f docker-compose.gui.yml up -d --force-recreate`.
+
 ## Quick Reference
 
 | Phase | Key Actions | Success Criteria |
@@ -89,3 +120,4 @@ If you are thinking:
 | **1. Checks** | Validate `.env`, ports | Environment is ready |
 | **2. Lifecycle**| `up -d --build`, `ps` | All services are "Up" |
 | **3. App Init** | `composer install`, `migrate` | App is functional |
+| **4. Troubleshoot** | Wipe `/docker/mysql`, use port 8099 | DB logs clean, GUI shows 25+ tables |
