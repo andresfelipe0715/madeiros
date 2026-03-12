@@ -177,7 +177,7 @@ class OrderStageController extends Controller
                 $order = \App\Models\Order::find($orderStage->order_id);
 
                 // Check for "Corte" stage to trigger consumption
-                if ($orderStage->stage->name === 'Corte') {
+                if ($orderStage->stage->stageGroup && $orderStage->stage->stageGroup->name === 'Corte') {
                     $this->inventory->consume($order);
                 }
 
@@ -278,7 +278,7 @@ class OrderStageController extends Controller
                 ]);
 
                 // 1.5 Handle Consumption Reversal if applicable
-                $corteStage = $order->orderStages()->whereHas('stage', function ($q) {
+                $corteStage = $order->orderStages()->whereHas('stage.stageGroup', function ($q) {
                     $q->where('name', 'Corte');
                 })->first();
 

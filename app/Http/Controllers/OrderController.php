@@ -88,6 +88,11 @@ class OrderController extends Controller
                 // Handle File Upload
                 if ($request->hasFile('order_file')) {
                     $path = $request->file('order_file')->store('orders', 'public');
+                    \Illuminate\Support\Facades\Log::info('Order file stored', [
+                        'order_id' => $order->id,
+                        'path' => $path,
+                        'is_string' => is_string($path),
+                    ]);
                     $fileType = FileType::firstOrCreate(['name' => 'Orden']);
                     $order->orderFiles()->create([
                         'file_type_id' => $fileType->id,
@@ -97,6 +102,10 @@ class OrderController extends Controller
                 }
             });
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Order creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return back()->with('error', 'Error al crear la orden: '.$e->getMessage())->withInput();
         }
 

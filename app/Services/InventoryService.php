@@ -343,7 +343,7 @@ class InventoryService
     protected function isCorteFinished(\App\Models\Order $order): bool
     {
         return $order->orderStages()
-            ->whereHas('stage', function ($query) {
+            ->whereHas('stage.stageGroup', function ($query) {
                 $query->where('name', 'Corte');
             })
             ->whereNotNull('completed_at')

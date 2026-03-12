@@ -13,8 +13,11 @@ use Illuminate\Support\Facades\Auth;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // 0. Setup Stage Groups
+    $this->corteGroup = \App\Models\StageGroup::create(['name' => 'Corte']);
+
     // 1. Setup Stages
-    $this->corte = Stage::create(['name' => 'Corte', 'default_sequence' => 10]);
+    $this->corte = Stage::create(['name' => 'Corte', 'default_sequence' => 10, 'stage_group_id' => $this->corteGroup->id]);
     $this->enchape = Stage::create(['name' => 'Enchape', 'default_sequence' => 20]);
 
     // 2. Setup Client
