@@ -41,7 +41,7 @@ To start the project from scratch or apply major configuration changes:
 
 ### 4. Database Visibility (phpMyAdmin)
 - **Problem**: Empty database view due to service alias collisions and port 8080 conflicts.
-- **Fix**: Updated `PMA_HOST` to `madeiros-db` and shifted the host port to **8099**.
+- **Fix**: Updated `PMA_HOST` to `madeiros-db`, shifted the host port to **8099**, and moved the main app to **8888** to avoid system conflicts.
 
 ---
 

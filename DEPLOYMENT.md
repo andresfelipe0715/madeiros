@@ -181,6 +181,53 @@ docker compose -f docker-compose.gui.yml stop
 
 ---
 
+## Domain & SSL Management (Nginx Proxy Manager)
+
+The project now includes **Nginx Proxy Manager** (NPM) to handle SSL certificates and domain routing automatically.
+
+### 1. Launch & Initial Setup
+Nginx Proxy Manager starts automatically with `docker compose up -d`.
+- **Admin Dashboard**: `http://your-vps-ip:81`
+- **Default Credentials**: `admin@example.com` / `changeme`
+
+> [!IMPORTANT]
+> Change the default admin email and password immediately upon first login.
+
+### 2. Setting up SSL (Let's Encrypt)
+1. In the NPM dashboard, go to **Proxy Hosts** -> **Add Proxy Host**.
+2. **Domain Names**: Enter your domain (e.g., `madeiros.com`).
+3. **Scheme**: `http`
+4. **Forward Hostname / IP**: `nginx` (this matches the service name in docker-compose)
+5. **Forward Port**: `80`
+6. Go to the **SSL** tab, select **Request a new SSL Certificate**, and enable **Force SSL**.
+7. Click **Save**.
+
+### 3. Port Management: Local vs VPS (Important)
+
+To avoid conflicts on your local machine and ensure smooth VPS routing, the project uses a "Front Door / Side Door" approach:
+
+| Connection Type | Port Used | Description |
+| :--- | :--- | :--- |
+| **Local Access** | `8888` | The "Side Door". Access your app at `localhost:8888`. |
+| **VPS External** | `80` / `443` | The "Front Doors". Handled by Nginx Proxy Manager. |
+| **Internal Docker** | `80` | The "Internal Hallway". Containers talk to each other here. |
+
+**Key Rule for Nginx Proxy Manager UI:**
+- When adding a Proxy Host for the `nginx` service, always set the **Forward Port** to `80`.
+- Even though your `docker-compose.yml` maps `8888:80`, the Proxy Manager talks to the `nginx` container *internally* through port 80.
+
+### 4. Security Hardening (VPS Firewall)
+To prevent unauthorized access to the Proxy dashboard:
+```bash
+# Example using UFW (Ubuntu)
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+# Only allow your home/office IP to access the admin portal:
+sudo ufw allow from YOUR_IP_ADDRESS to any port 81 proto tcp
+```
+
+---
+
 ## Troubleshooting
 
 ### Docker Build: "image already exists"
