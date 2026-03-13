@@ -73,7 +73,7 @@ it('persists permissions correctly through seeder', function () {
     expect($adminRole->hasPermission('materials', 'view'))->toBeTrue();
     expect($adminRole->hasPermission('special_services', 'create'))->toBeTrue();
 
-    $corteRole = Role::where('name', 'Empleado de corte')->first();
+    $corteRole = Role::where('name', 'Empleado de corte 1')->first();
     expect($corteRole->hasPermission('orders', 'view'))->toBeFalse();
     expect($corteRole->hasPermission('clients', 'view'))->toBeFalse();
     expect($corteRole->hasPermission('performance', 'view'))->toBeFalse();

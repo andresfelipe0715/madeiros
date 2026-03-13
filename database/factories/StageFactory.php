@@ -14,6 +14,7 @@ class StageFactory extends Factory
         return [
             'name' => $this->faker->unique()->word(),
             'default_sequence' => $this->faker->numberBetween(1, 10),
+            'stage_group_id' => \App\Models\StageGroup::factory(),
             'is_delivery_stage' => false,
         ];
     }

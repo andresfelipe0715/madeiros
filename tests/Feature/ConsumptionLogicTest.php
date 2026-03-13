@@ -29,7 +29,8 @@ beforeEach(function () {
 
 it('auto-fills actual quantity and deducts stock upon Corte stage finish', function () {
     $order = Order::factory()->create(['client_id' => $this->client->id, 'created_by' => $this->user->id]);
-    $s = Stage::factory()->create(['name' => 'Corte']);
+    $group = \App\Models\StageGroup::create(['name' => 'Corte']);
+    $s = Stage::factory()->create(['name' => 'Corte', 'stage_group_id' => $group->id]);
     $os = $order->orderStages()->create(['stage_id' => $s->id, 'sequence' => 1, 'started_at' => now(), 'started_by' => $this->user->id]);
 
     $om = $order->orderMaterials()->create([
@@ -149,7 +150,8 @@ it('reverses consumption and restores reservations upon remit', function () {
     ]);
 
     $s1 = Stage::factory()->create(['default_sequence' => 1]);
-    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2]);
+    $group = \App\Models\StageGroup::create(['name' => 'Corte']);
+    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2, 'stage_group_id' => $group->id]);
 
     $os1 = $order->orderStages()->create(['stage_id' => $s1->id, 'sequence' => 1, 'completed_at' => now()]);
     $os2 = $order->orderStages()->create(['stage_id' => $s2->id, 'sequence' => 2, 'started_at' => now(), 'started_by' => $this->user->id]);
@@ -181,7 +183,8 @@ it('reverses consumption and restores reservations upon remit', function () {
 
 it('prevents Corte completion if stock is insufficient', function () {
     $order = Order::factory()->create();
-    $s = Stage::factory()->create(['name' => 'Corte']);
+    $group = \App\Models\StageGroup::create(['name' => 'Corte']);
+    $s = Stage::factory()->create(['name' => 'Corte', 'stage_group_id' => $group->id]);
     $os = $order->orderStages()->create(['stage_id' => $s->id, 'sequence' => 1, 'started_at' => now(), 'started_by' => $this->user->id]);
 
     $this->material->update(['stock_quantity' => 5]);
@@ -205,7 +208,8 @@ it('prevents remitting if the order has already been delivered', function () {
     ]);
 
     $s1 = Stage::factory()->create(['default_sequence' => 1]);
-    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2]);
+    $group = \App\Models\StageGroup::firstOrCreate(['name' => 'Corte']);
+    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2, 'stage_group_id' => $group->id]);
 
     $os1 = $order->orderStages()->create(['stage_id' => $s1->id, 'sequence' => 1, 'completed_at' => now()]);
     $os2 = $order->orderStages()->create(['stage_id' => $s2->id, 'sequence' => 2, 'started_at' => now(), 'started_by' => $this->user->id]);
@@ -222,7 +226,8 @@ it('prevents remitting if the order has already been delivered', function () {
 
 it('instantly consumes new materials added after Corte stage is finished', function () {
     $order = Order::factory()->create(['client_id' => $this->client->id, 'created_by' => $this->user->id]);
-    $s = Stage::factory()->create(['name' => 'Corte']);
+    $group = \App\Models\StageGroup::create(['name' => 'Corte']);
+    $s = Stage::factory()->create(['name' => 'Corte', 'stage_group_id' => $group->id]);
     $os = $order->orderStages()->create(['stage_id' => $s->id, 'sequence' => 1, 'started_at' => now(), 'completed_at' => now()]);
 
     $newMaterial = Material::create([
@@ -253,7 +258,8 @@ it('instantly consumes new materials added after Corte stage is finished', funct
 
 it('instantly consumes restored materials after Corte stage is finished', function () {
     $order = Order::factory()->create(['client_id' => $this->client->id, 'created_by' => $this->user->id]);
-    $s = Stage::factory()->create(['name' => 'Corte']);
+    $group = \App\Models\StageGroup::create(['name' => 'Corte']);
+    $s = Stage::factory()->create(['name' => 'Corte', 'stage_group_id' => $group->id]);
     $os = $order->orderStages()->create(['stage_id' => $s->id, 'sequence' => 1, 'started_at' => now(), 'completed_at' => now()]);
 
     $om = $order->orderMaterials()->create([
@@ -353,7 +359,8 @@ it('only reverses consumption if remitting to Corte or an earlier stage', functi
     ]);
 
     $s1 = Stage::factory()->create(['default_sequence' => 1]);
-    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2]);
+    $group = \App\Models\StageGroup::firstOrCreate(['name' => 'Corte']);
+    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2, 'stage_group_id' => $group->id]);
     $s3 = Stage::factory()->create(['default_sequence' => 3]);
     $s4 = Stage::factory()->create(['default_sequence' => 4]);
 
@@ -396,7 +403,8 @@ it('only reverses consumption if remitting to Corte or an earlier stage', functi
 it('properly restores reserved_quantity for materials added after Corte when reversing', function () {
     $order = Order::factory()->create(['client_id' => $this->client->id, 'created_by' => $this->user->id]);
     $s1 = Stage::factory()->create(['default_sequence' => 1]);
-    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2]);
+    $group = \App\Models\StageGroup::create(['name' => 'Corte']);
+    $s2 = Stage::factory()->create(['name' => 'Corte', 'default_sequence' => 2, 'stage_group_id' => $group->id]);
     $s3 = Stage::factory()->create(['default_sequence' => 3]);
 
     $os1 = $order->orderStages()->create(['stage_id' => $s1->id, 'sequence' => 1, 'completed_at' => now()->subMinute()]);
