@@ -141,19 +141,33 @@
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label for="modal_password" class="form-label font-weight-bold">Nueva Contraseña</label>
-                            <input type="password" name="password" id="modal_password" minlength="6" maxlength="30" 
-                                placeholder="Contraseña"
-                                class="form-control @error('password') is-invalid @enderror" required>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="input-group">
+                                <input type="password" name="password" id="modal_password" minlength="6" maxlength="30" 
+                                    placeholder="Contraseña"
+                                    class="form-control shadow-none @error('password') is-invalid @enderror" 
+                                    style="box-shadow: none !important; border-color: #dee2e6 !important;"
+                                    required>
+                                <button class="btn btn-outline-secondary border-gray-300 toggle-password" type="button" data-target="modal_password">
+                                    <i class="bi bi-eye text-gray-500"></i>
+                                </button>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                             <div class="form-text text-muted small">Mínimo 6, máximo 30 caracteres.</div>
                         </div>
                         <div class="mb-0">
                             <label for="modal_password_confirmation" class="form-label font-weight-bold">Confirmar Nueva Contraseña</label>
-                            <input type="password" name="password_confirmation" id="modal_password_confirmation" 
-                                placeholder="Confirmar Nueva Contraseña" maxlength="30"
-                                class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password_confirmation" id="modal_password_confirmation" 
+                                    placeholder="Confirmar Nueva Contraseña" maxlength="30"
+                                    class="form-control shadow-none" 
+                                    style="box-shadow: none !important; border-color: #dee2e6 !important;"
+                                    required>
+                                <button class="btn btn-outline-secondary border-gray-300 toggle-password" type="button" data-target="modal_password_confirmation">
+                                    <i class="bi bi-eye text-gray-500"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
@@ -172,5 +186,25 @@
             };
         </script>
     @endif
+
+    <script>
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            });
+        });
+    </script>
 
 </x-app-layout>
