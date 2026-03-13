@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center w-100">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -434,14 +434,14 @@
                                     }
                                 }">
                                     <label for="order_file" class="form-label fw-bold">Archivo de la Orden <span
-                                            class="text-muted fw-normal small">(PDF, Opcional)</span></label>
+                                            class="text-muted fw-normal small">(PDF o Excel, Opcional)</span></label>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="input-group custom-input-group flex-grow-1">
                                             <span class="input-group-text bg-white border-end-0 text-muted"><i
                                                     class="bi bi-file-earmark-pdf-fill"></i></span>
                                             <input type="file" name="order_file" id="order_file"
                                                 class="form-control border-start-0 @error('order_file') is-invalid @enderror"
-                                                accept="application/pdf" x-ref="fileInput"
+                                                accept=".pdf,.xlsx,.xls" x-ref="fileInput"
                                                 @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
                                         </div>
 
@@ -460,9 +460,9 @@
                                             x-text="fileName"></span>
                                     </div>
                                 </template>
-                                <div class=" mt-1 x-small text-muted\>
- <i class=" bi bi-info-circle me-1\></i> Recomendación: Para archivos muy grandes, use un compresor de PDF (ej.
-                                    iLovePDF) antes de subir.
+                                <div class="mt-1 x-small text-muted">
+                                    <i class="bi bi-info-circle me-1"></i> Recomendación: Use archivos optimizados para
+                                    evitar demoras en la carga.
                                 </div>
                                 @error('order_file')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>

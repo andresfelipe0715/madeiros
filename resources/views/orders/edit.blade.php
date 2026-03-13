@@ -488,7 +488,7 @@
                                         }">
                                             <label for="order_file" class="form-label fw-bold">
                                                 {{ $orderPdf ? 'Reemplazar Archivo' : 'Añadir Archivo' }}
-                                                <span class="text-muted fw-normal small">(PDF, Opcional)</span>
+                                                <span class="text-muted fw-normal small">(PDF o Excel, Opcional)</span>
                                             </label>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="input-group custom-input-group flex-grow-1">
@@ -496,7 +496,7 @@
                                                             class="bi bi-upload"></i></span>
                                                     <input type="file" name="order_file" id="order_file"
                                                         class="form-control border-start-0 @error('order_file') is-invalid @enderror"
-                                                        accept="application/pdf" x-ref="fileInput" {{ $isDisabled }}
+                                                        accept=".pdf,.xlsx,.xls" x-ref="fileInput" {{ $isDisabled }}
                                                         @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
                                                 </div>
 

@@ -25,7 +25,7 @@ class StoreOrderRequest extends FormRequest
             'stages' => 'required|array|min:1',
             'stages.*.stage_id' => 'required|exists:stages,id',
             'stages.*.sequence' => 'required|integer|min:1',
-            'order_file' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB
+            'order_file' => 'nullable|file|mimes:pdf,xlsx,xls|max:5120', // Max 5MB
             'materials' => 'required|array|min:1',
             'materials.*.material_id' => 'required|exists:materials,id',
             'materials.*.estimated_quantity' => 'required|numeric|min:0.01',
@@ -47,8 +47,8 @@ class StoreOrderRequest extends FormRequest
             'materials.*.notes.max' => 'La nota del material no debe exceder los 50 caracteres.',
             'special_services.*.notes.max' => 'La nota del servicio especial no debe exceder los 50 caracteres.',
             'order_file.file' => 'El archivo de la orden debe ser un archivo válido.',
-            'order_file.mimes' => 'El archivo de la orden debe ser un PDF.',
-            'order_file.max' => 'El archivo de la orden no debe pesar más de 10MB.',
+            'order_file.mimes' => 'El archivo de la orden debe ser un PDF o Excel (.xlsx, .xls).',
+            'order_file.max' => 'El archivo no debe pesar más de 5MB.',
             'order_file.uploaded' => 'El archivo excedió el límite permitido por el servidor (PHP) o falló la conexión.',
             'notes.max' => 'Las notas no deben exceder los 300 caracteres.',
         ];

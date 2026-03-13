@@ -86,7 +86,7 @@ class BackupDatabase extends Command
     {
         $files = glob($backupDir.DIRECTORY_SEPARATOR.'backup-*.sql');
         $now = time();
-        $retentionDays = 30;
+        $retentionDays = 7;
 
         foreach ($files as $file) {
             if ($now - filemtime($file) >= ($retentionDays * 86400)) {
