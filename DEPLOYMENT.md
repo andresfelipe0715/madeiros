@@ -15,11 +15,21 @@ docker compose up
 
 ### Stopping Containers
 ```bash
-# Stop and remove containers
+# Stop and remove containers (Deletes the container instances, but keeps your data/code safe)
 docker compose down
 
 # Stop containers without removing them
 docker compose stop
+```
+
+### Restarting Containers
+Use this to refresh the services without rebuilding or deleting them.
+```bash
+# Restart the entire stack
+docker compose restart
+
+# Restart a specific service (e.g. nginx)
+docker compose restart nginx
 ```
 
 ### Running Commands Inside Docker
@@ -117,7 +127,7 @@ If you have a SQL dump (e.g., `backup.sql`) from another installation, you have 
 
 #### Option A: Using phpMyAdmin (Recommended for GUI)
 1. Start the GUI: `docker compose -f docker-compose.gui.yml up -d`
-2. Open `http://your-vps-ip:8080`.
+2. Open `http://your-vps-ip:8099`.
 3. Select your database and use the **Import** tab to upload your `.sql` file.
 
 #### Option B: Using the Command Line
@@ -140,6 +150,13 @@ docker compose up -d --build
 docker compose exec app php artisan migrate --force
 ```
 
+### Resetting the Environment (Clean Slate)
+If you need to wipe all data and start fresh (e.g., after heavy testing):
+```bash
+docker compose exec app php artisan migrate:fresh --seed --seeder=ProductionDataSeeder --force
+```
+**Warning:** This destroys all existing data in the database.
+
 ### Checking Logs
 ```bash
 docker compose logs -f
@@ -155,7 +172,7 @@ The database GUI is kept separate from the core production services for security
 ```bash
 docker compose -f docker-compose.gui.yml up -d
 ```
-Access via: `http://your-vps-ip:8080`
+Access via: `http://your-vps-ip:8099`
 
 ### 2. Stop phpMyAdmin
 ```bash
@@ -199,5 +216,38 @@ If the application appears unstyled or you see an error about a missing Vite man
    npm run build
    ```
 3. Refresh the browser. Since the project root is mapped as a volume to the `app` container, the new `public/build` files will be available immediately.
+
+### 413 Request Entity Too Large (Upload Limits)
+If you get this error when uploading large images or PDFs, it means the Nginx/PHP limits are too low.
+
+**Solution:**
+The Docker environment is pre-configured with a **64MB** limit. If you need more, you must:
+1. Update `client_max_body_size` in `docker/nginx/templates/app.conf.template`.
+2. Update `upload_max_filesize` and `post_max_size` in the `Dockerfile`.
+3. Rebuild the app: `docker compose build app` and restart: `docker compose up -d`.
+
+### Call to undefined function imagejpeg() (GD JPEG Support)
+If you see this error, the PHP GD extension was installed without JPEG support.
+
+**Solution:**
+Ensure your `Dockerfile` includes `libjpeg62-turbo-dev` and uses `docker-php-ext-configure gd --with-jpeg` before installation. (This is already included in the latest project `Dockerfile`).
+
+### 502 Bad Gateway (Nginx DNS Cache)
+If you see a 502 error after rebuilding the `app` container, Nginx might be caching a stale internal IP address.
+
+**Solution:**
+Force a restart of the entire stack to refresh the internal DNS:
+```bash
+docker compose restart
+```
+
+### Database Corruption (MySQL Crash Loop)
+If the database container crashes repeatedly or logs show table corruption:
+
+**Solution:**
+1. Stop the database: `docker compose stop db`.
+2. **Wipe local data**: Delete the contents of `docker/mysql/`.
+3. Restart: `docker compose up -d db`.
+   - *Note: You will need to re-run migrations and seeding after this.*
 
 
