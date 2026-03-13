@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\Stage;
+use App\Models\StageGroup;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -41,10 +42,12 @@ class CustomStageOrderTest extends TestCase
 
     public function test_order_creation_with_custom_substage_ordering(): void
     {
-        $enchapeStage1 = Stage::where('name', 'Enchape 1')->first();
-        $enchapeStage2 = Stage::where('name', 'Enchape 2')->first();
+        $enchapeGroup = StageGroup::where('name', 'Enchape')->first();
+        $enchapeStages = $enchapeGroup->stages()->orderBy('default_sequence')->get();
+        $enchapeStage1 = $enchapeStages[0];
+        $enchapeStage2 = $enchapeStages[1];
 
-        $corteStage = Stage::where('name', 'Corte')->first();
+        $corteStage = StageGroup::where('name', 'Corte')->first()->stages()->first();
 
         // Normally sequence is Corte(10) -> Enchape 1(20) -> Enchape 2(30)
         // We will send payload as Corte -> Enchape 2 -> Enchape 1 (swapping enchapes)
@@ -87,8 +90,8 @@ class CustomStageOrderTest extends TestCase
 
     public function test_rejects_non_contiguous_sequences(): void
     {
-        $corteStage = Stage::where('name', 'Corte')->first();
-        $enchapeStage = Stage::where('name', 'Enchape 1')->first();
+        $corteStage = StageGroup::where('name', 'Corte')->first()->stages()->first();
+        $enchapeStage = StageGroup::where('name', 'Enchape')->first()->stages()->first();
 
         $payload = [
             'client_id' => $this->client->id,
