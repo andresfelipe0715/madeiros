@@ -4,11 +4,16 @@
             <h2 class="h4 font-weight-bold mb-0">
                 {{ __('Gestión de Bodega') }}
             </h2>
-            @can('create-materials')
-                <a href="{{ route('materials.create') }}" class="btn btn-primary">
-                    {{ __('Nuevo Material') }}
+            <div class="d-flex gap-2 align-items-center">
+                <a href="{{ route('bodega.logs.all') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-clock-history me-1"></i> {{ __('Historial General') }}
                 </a>
-            @endcan
+                @can('create-materials')
+                    <a href="{{ route('materials.create') }}" class="btn btn-primary">
+                        {{ __('Nuevo Material') }}
+                    </a>
+                @endcan
+            </div>
         </div>
     </x-slot>
 
@@ -103,16 +108,24 @@
                                         <td class="px-4 py-3 text-center">
                                             <div class="d-flex justify-content-center gap-2">
                                                 @can('edit-bodega')
+                                                    <a href="{{ route('bodega.entry', $material) }}"
+                                                        class="btn btn-sm btn-success" title="Registrar Ingreso">
+                                                        <i class="fas fa-plus"></i> Ingreso
+                                                    </a>
                                                     <a href="{{ route('bodega.edit', $material) }}"
-                                                        class="btn btn-sm btn-outline-primary" title="Ajustar Bodega">
+                                                        class="btn btn-sm btn-outline-primary" title="Ajustar Manual">
                                                         <i class="fas fa-edit"></i> Ajustar
                                                     </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                                    <button type="button" class="btn btn-sm btn-outline-dark"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#transferModal{{ $material->id }}"
                                                         title="Transferir al Punto de Venta">
                                                         <i class="fas fa-exchange-alt"></i> Transferir
                                                     </button>
+                                                    <a href="{{ route('bodega.logs', $material) }}"
+                                                        class="btn btn-sm btn-outline-secondary" title="Ver Historial">
+                                                        <i class="bi bi-clock-history"></i>
+                                                    </a>
                                                 @endcan
                                             </div>
 

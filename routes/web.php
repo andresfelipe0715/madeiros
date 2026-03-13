@@ -52,13 +52,19 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::resource('users', \App\Http\Controllers\UserController::class)->except(['show', 'destroy']);
 
     // Materials Management (POS Stock Only)
+    Route::get('materials/logs', [\App\Http\Controllers\MaterialController::class, 'logs'])->name('materials.logs.all');
+    Route::get('materials/{material}/logs', [\App\Http\Controllers\MaterialController::class, 'logs'])->name('materials.logs');
     Route::post('materials/{material}/adjust', [\App\Http\Controllers\MaterialController::class, 'adjustStock'])->name('materials.adjust');
     Route::resource('materials', \App\Http\Controllers\MaterialController::class)->except(['show']);
 
     // Bodega Management (Bodega Stock Only)
     Route::get('bodega', [\App\Http\Controllers\BodegaController::class, 'index'])->name('bodega.index');
+    Route::get('bodega/logs', [\App\Http\Controllers\BodegaController::class, 'logs'])->name('bodega.logs.all');
+    Route::get('bodega/{material}/logs', [\App\Http\Controllers\BodegaController::class, 'logs'])->name('bodega.logs');
     Route::get('bodega/{material}/edit', [\App\Http\Controllers\BodegaController::class, 'edit'])->name('bodega.edit');
     Route::put('bodega/{material}', [\App\Http\Controllers\BodegaController::class, 'update'])->name('bodega.update');
+    Route::get('bodega/{material}/entry', [\App\Http\Controllers\BodegaController::class, 'entry'])->name('bodega.entry');
+    Route::post('bodega/{material}/entry', [\App\Http\Controllers\BodegaController::class, 'storeEntry'])->name('bodega.store-entry');
     Route::post('bodega/{material}/transfer', [\App\Http\Controllers\BodegaController::class, 'transfer'])->name('bodega.transfer');
 
     // Special Services Management

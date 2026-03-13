@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('action', 100);
             $table->decimal('previous_stock_quantity', 12, 2);
             $table->decimal('new_stock_quantity', 12, 2);
-            $table->string('notes', 300)->nullable();
+            $table->string('notes', 255)->nullable();
             $table->timestamps();
         });
     }

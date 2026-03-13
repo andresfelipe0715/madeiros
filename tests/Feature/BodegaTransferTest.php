@@ -97,17 +97,66 @@ it('allows bodega user to transfer from bodega to stock', function () {
     expect((float) $log->new_stock_quantity)->toBe(15.0);
 });
 
-it('allows bodega user to update bodega_quantity via bodega edit route', function () {
+it('allows bodega user to update bodega_quantity via bodega edit route and creates log', function () {
     $this->actingAs($this->bodegaUser);
 
     $this->put(route('bodega.update', $this->material), [
         'bodega_quantity' => 50,
+        'notes' => 'Ajuste de prueba',
     ])->assertStatus(302);
 
     $this->material->refresh();
     expect((float) $this->material->bodega_quantity)->toBe(50.0);
-    expect($this->material->name)->toBe('Material Test'); // Name shouldn't change
-    expect((float) $this->material->stock_quantity)->toBe(10.0); // Stock shouldn't change
+    expect($this->material->name)->toBe('Material Test');
+    expect((float) $this->material->stock_quantity)->toBe(10.0);
+
+    $log = \App\Models\InventoryLog::where('action', 'bodega_adjustment')->latest()->first();
+    expect($log)->not->toBeNull();
+    expect($log->notes)->toBe('Ajuste de prueba');
+    expect((float) $log->previous_stock_quantity)->toBe(20.0);
+    expect((float) $log->new_stock_quantity)->toBe(50.0);
+});
+
+it('allows bodega user to register a new entry and creates log', function () {
+    $this->actingAs($this->bodegaUser);
+
+    $this->post(route('bodega.store-entry', $this->material), [
+        'quantity' => 10,
+        'notes' => 'Factura #123',
+    ])->assertStatus(302);
+
+    $this->material->refresh();
+    expect((float) $this->material->bodega_quantity)->toBe(30.0); // 20 + 10
+
+    $log = \App\Models\InventoryLog::where('action', 'bodega_entry')->latest()->first();
+    expect($log)->not->toBeNull();
+    expect($log->notes)->toBe('Factura #123');
+    expect((float) $log->previous_stock_quantity)->toBe(20.0);
+    expect((float) $log->new_stock_quantity)->toBe(30.0);
+});
+
+it('shows the bodega entry form', function () {
+    $this->actingAs($this->bodegaUser);
+    $this->get(route('bodega.entry', $this->material))
+        ->assertSuccessful()
+        ->assertSee('Registrar Ingreso')
+        ->assertSee('Material Test');
+});
+
+it('shows the general bodega logs history', function () {
+    $this->actingAs($this->bodegaUser);
+    $this->get(route('bodega.logs.all'))
+        ->assertSuccessful()
+        ->assertSee('Historial de Movimientos')
+        ->assertSee('(General Bodega)');
+});
+
+it('shows the specific material logs history', function () {
+    $this->actingAs($this->bodegaUser);
+    $this->get(route('bodega.logs', $this->material))
+        ->assertSuccessful()
+        ->assertSee('Historial de Movimientos')
+        ->assertSee('Material Test');
 });
 
 it('forbids bodega user from accessing material edit form', function () {

@@ -4,11 +4,16 @@
             <h2 class="h4 font-weight-bold mb-0">
                 {{ __('Materiales') }}
             </h2>
-            @can('create-materials')
-                <a href="{{ route('materials.create') }}" class="btn btn-primary">
-                    {{ __('Nuevo Material') }}
+            <div class="d-flex gap-2">
+                <a href="{{ route('materials.logs.all') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-clock-history"></i> {{ __('Ver Historial General') }}
                 </a>
-            @endcan
+                @can('create-materials')
+                    <a href="{{ route('materials.create') }}" class="btn btn-primary">
+                        {{ __('Nuevo Material') }}
+                    </a>
+                @endcan
+            </div>
         </div>
     </x-slot>
 
@@ -111,6 +116,10 @@
                                         <td class="px-4 py-3 text-center">
                                             <div class="d-flex justify-content-center gap-2">
                                                 @can('edit-materials')
+                                                    <a href="{{ route('materials.logs', $material) }}"
+                                                        class="btn btn-sm btn-outline-secondary" title="Ver Historial">
+                                                        <i class="bi bi-clock-history"></i> Historial
+                                                    </a>
                                                     <button type="button" class="btn btn-sm btn-outline-warning"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#adjustStockModal{{ $material->id }}"

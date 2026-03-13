@@ -57,7 +57,15 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <p class="text-primary small mt-1">Éste es el inventario real almacenado en bodega.
-                                        Ajuste este valor si ingresa nueva mercancía o hay una merma.</p>
+                                        Ajuste este valor si hay una diferencia manual o error previo.</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label text-muted small text-uppercase font-weight-bold">Nota del Ajuste (Opcional)</label>
+                                    <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="2" maxlength="255" placeholder="Describa el motivo del ajuste manual...">{{ old('notes') }}</textarea>
+                                    @error('notes')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="d-grid mt-4">

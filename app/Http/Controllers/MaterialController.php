@@ -141,4 +141,24 @@ class MaterialController extends Controller
 
         return redirect()->route('materials.index')->with('success', 'Stock del material ajustado exitosamente.');
     }
+
+    /**
+     * Display a listing of inventory logs for materials.
+     */
+    public function logs(Request $request, ?Material $material = null): View
+    {
+        Gate::authorize('view-materials');
+
+        $query = \App\Models\InventoryLog::with(['material', 'user'])
+            ->whereIn('action', ['transfer', 'adjustment'])
+            ->latest();
+
+        if ($material && $material->exists) {
+            $query->where('material_id', $material->id);
+        }
+
+        $logs = $query->paginate(20)->withQueryString();
+
+        return view('materials.logs', compact('logs', 'material'));
+    }
 }
