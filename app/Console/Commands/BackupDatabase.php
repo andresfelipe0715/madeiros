@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use ZipArchive;
 
 class BackupDatabase extends Command
 {
@@ -51,6 +52,7 @@ class BackupDatabase extends Command
             '--user='.$username,
             '--password='.$password,
             '--host='.$host,
+            '--skip-ssl',
             $database,
         ];
 
@@ -75,16 +77,37 @@ class BackupDatabase extends Command
         $returnVar = proc_close($process);
 
         if ($returnVar === 0) {
-            $this->info("Backup completed successfully: $filename");
+            $this->info("Backup completed successfully to SQL: $filename");
+            $this->compressBackup($filePath);
             $this->cleanOldBackups($backupDir);
         } else {
             $this->error("Backup failed: $stderr");
         }
     }
 
+    private function compressBackup(string $filePath): void
+    {
+        $zipPath = $filePath . '.zip';
+        $zip = new ZipArchive();
+
+        if ($zip->open($zipPath, ZipArchive::CREATE) === true) {
+            $zip->addFile($filePath, basename($filePath));
+            $zip->close();
+
+            $this->info("Compression completed: " . basename($zipPath));
+
+            // Delete the original SQL file
+            unlink($filePath);
+            $this->line("Temporary SQL file removed.");
+        } else {
+            $this->error("Failed to create ZIP archive.");
+        }
+    }
+
     private function cleanOldBackups(string $backupDir): void
     {
-        $files = glob($backupDir.DIRECTORY_SEPARATOR.'backup-*.sql');
+        // Target both old .sql files and new .zip files for cleanup
+        $files = glob($backupDir.DIRECTORY_SEPARATOR.'backup-*.{sql,zip}', GLOB_BRACE);
         $now = time();
         $retentionDays = 7;
 
