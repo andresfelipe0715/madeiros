@@ -278,13 +278,17 @@ class OrderStageController extends Controller
                 ]);
 
                 // 1.5 Handle Consumption Reversal if applicable
-                $corteStage = $order->orderStages()->whereHas('stage.stageGroup', function ($q) {
+                // Check if target is in the "Corte" group OR happens before any "Corte" stage
+                $firstCorteStage = $order->orderStages()->whereHas('stage.stageGroup', function ($q) {
                     $q->where('name', 'Corte');
-                })->first();
+                })->orderBy('sequence', 'asc')->first();
 
-                $isCorteReset = $corteStage && $targetSequence <= $corteStage->sequence;
+                $isBeforeOrInCorte = $firstCorteStage && $targetSequence <= $order->orderStages()
+                    ->whereHas('stage.stageGroup', function ($q) {
+                        $q->where('name', 'Corte');
+                    })->max('sequence');
 
-                if ($isCorteReset && $order->orderMaterials()->whereNotNull('consumed_at')->exists()) {
+                if ($isBeforeOrInCorte && $order->orderMaterials()->whereNotNull('consumed_at')->exists()) {
                     $this->inventory->reverseConsumption($order);
                 }
 
