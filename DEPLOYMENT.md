@@ -40,6 +40,23 @@ sudo ufw enable
 
 ---
 
+### Phase 1.8: Central Proxy Setup
+This must be done first so the system-wide network (`proxy-tier`) is created.
+
+1. **Create the Folder**
+   ```bash
+   mkdir -p ~/docker/proxy
+   cd ~/docker/proxy
+   ```
+
+2. **Start the Proxy**
+   *Create the `docker-compose.yml` file in this folder.*
+   ```bash
+   docker compose up -d
+   ```
+
+---
+
 ### Phase 2: Application Bootstrapping
 Navigate to your project folder (`cd ~/madeiros`):
 
