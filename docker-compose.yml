@@ -54,21 +54,7 @@ services:
       - APP_DOMAIN=${APP_DOMAIN:-localhost}
     networks:
       - madeiros
-
-  # Nginx Proxy Manager
-  proxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: madeiros-proxy
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    volumes:
-      - ./docker/proxy/data:/data
-      - ./docker/proxy/letsencrypt:/etc/letsencrypt
-    networks:
-      - madeiros
+      - proxy-tier
 
   # Cron Service
   cron:
@@ -94,3 +80,5 @@ services:
 networks:
   madeiros:
     driver: bridge
+  proxy-tier:
+    external: true
