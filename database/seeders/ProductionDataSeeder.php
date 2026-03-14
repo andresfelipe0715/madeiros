@@ -24,7 +24,10 @@ class ProductionDataSeeder extends Seeder
         // 0. Create Stage Groups
         $groups = ['Corte', 'Enchape', 'Servicios Especiales', 'Revisión', 'Entrega'];
         foreach ($groups as $groupName) {
-            StageGroup::firstOrCreate(['name' => $groupName]);
+            StageGroup::firstOrCreate(
+                ['name' => $groupName],
+                ['active' => true]
+            );
         }
 
         // 1. Create Stages
@@ -48,6 +51,7 @@ class ProductionDataSeeder extends Seeder
                     'default_sequence' => $data['sequence'],
                     'stage_group_id' => $group->id,
                     'is_delivery_stage' => ($name === 'Entrega'),
+                    'active' => true,
                 ]
             );
         }
