@@ -6,34 +6,36 @@
 @endphp
 
 <div class="card mb-5 border-0 shadow-sm overflow-hidden">
-    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
             <span class="text-uppercase text-xs font-bold text-primary tracking-wider mb-1 d-block opacity-75">Módulo de
                 Producción</span>
             <h4 class="mb-0 font-weight-bolder">{{ $stageName }}</h4>
         </div>
-        <div class="d-flex align-items-center gap-3">
-            <button type="button" onclick="window.location.reload();" class="btn btn-sm btn-light border rounded-pill d-flex align-items-center px-3 text-muted" title="Actualizar registros">
-                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
-            </button>
-            <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
-                <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-light search-pill" 
-                    style="width: 250px; transition: border-color 0.2s ease-in-out;">
-                    <span class="input-group-text bg-transparent border-0 ps-3">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
-                    <input type="text" name="search" class="form-control bg-transparent border-0 py-2 shadow-none" 
-                        placeholder="Buscar por cliente o factura..." 
-                        value="{{ request('search') }}"
-                        onkeyup="debounceSubmit(this.form)"
-                        onfocus="this.parentElement.style.borderColor = '#0d6efd'"
-                        onblur="this.parentElement.style.borderColor = '#dee2e6'">
-                </div>
-                @if(request('search'))
-                    <a href="{{ url()->current() }}" class="btn btn-link btn-sm text-decoration-none text-muted ms-2">Limpiar</a>
-                @endif
-            </form>
-            <span class="badge bg-soft-primary text-primary rounded-pill">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3 w-100 w-md-auto grow-1">
+            <div class="d-flex align-items-center gap-3 flex-grow-1">
+                <button type="button" onclick="window.location.reload();" class="btn btn-sm btn-light border rounded-pill d-flex align-items-center px-3 text-muted" title="Actualizar registros">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+                </button>
+                <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center flex-grow-1 flex-sm-grow-0">
+                    <div class="input-group input-group-sm border rounded-pill overflow-hidden bg-light search-pill w-100" 
+                        style="min-width: 200px; max-width: 250px; transition: border-color 0.2s ease-in-out;">
+                        <span class="input-group-text bg-transparent border-0 ps-3">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control bg-transparent border-0 py-2 shadow-none" 
+                            placeholder="Buscar por cliente o factura..." 
+                            value="{{ request('search') }}"
+                            onkeyup="debounceSubmit(this.form)"
+                            onfocus="this.parentElement.style.borderColor = '#0d6efd'"
+                            onblur="this.parentElement.style.borderColor = '#dee2e6'">
+                    </div>
+                    @if(request('search'))
+                        <a href="{{ url()->current() }}" class="btn btn-link btn-sm text-decoration-none text-muted ms-2">Limpiar</a>
+                    @endif
+                </form>
+            </div>
+            <span class="badge bg-soft-primary text-primary rounded-pill text-nowrap">
                 {{ $orders->total() }} pedidos en cola
             </span>
         </div>

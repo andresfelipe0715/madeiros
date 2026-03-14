@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
             <h2 class="h4 font-weight-bold mb-0">
                 {{ __('Lista de Órdenes') }}
             </h2>
@@ -13,15 +13,15 @@
     </x-slot>
 
     <div class="py-4">
-        <div class="container-fluid px-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="d-flex align-items-center gap-3">
+        <div class="container-fluid px-3 px-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+                <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
                     <button type="button" onclick="window.location.reload();" class="btn btn-sm btn-light border rounded-pill d-flex align-items-center px-3 shadow-none text-muted" title="Actualizar registros">
                         <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
                     </button>
-                    <form action="{{ route('orders.index') }}" method="GET" class="d-flex align-items-center">
-                        <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill"
-                            style="width:350px;">
+                    <form action="{{ route('orders.index') }}" method="GET" class="d-flex align-items-center w-100 w-sm-auto">
+                        <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill w-100"
+                            style="min-width: 250px; max-width: 350px;">
                             <span class="input-group-text bg-transparent border-0 ps-3">
                                 <i class="bi bi-search text-muted"></i>
                             </span>

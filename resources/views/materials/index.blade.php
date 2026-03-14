@@ -1,16 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
             <h2 class="h4 font-weight-bold mb-0">
                 {{ __('Materiales') }}
             </h2>
-            <div class="d-flex gap-2">
-                <a href="{{ route('materials.logs.all') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-clock-history"></i> {{ __('Ver Historial General') }}
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <a href="{{ route('materials.logs.all') }}" class="btn btn-outline-secondary w-100 w-sm-auto">
+                    <i class="bi bi-clock-history"></i> {{ __('Historial') }}
                 </a>
                 @can('create-materials')
-                    <a href="{{ route('materials.create') }}" class="btn btn-primary">
-                        {{ __('Nuevo Material') }}
+                    <a href="{{ route('materials.create') }}" class="btn btn-primary w-100 w-sm-auto">
+                        {{ __('Nuevo') }}
                     </a>
                 @endcan
             </div>
@@ -18,11 +18,11 @@
     </x-slot>
 
     <div class="py-4">
-        <div class="container-fluid px-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <form action="{{ route('materials.index') }}" method="GET" class="d-flex align-items-center">
-                    <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill"
-                        style="width: 350px; transition: border-color 0.2s ease-in-out;">
+        <div class="container-fluid px-3 px-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+                <form action="{{ route('materials.index') }}" method="GET" class="d-flex align-items-center w-100 w-md-auto">
+                    <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-light search-pill w-100"
+                        style="min-width: 250px; max-width: 350px; transition: border-color 0.2s ease-in-out;">
                         <span class="input-group-text bg-transparent border-0 ps-3">
                             <i class="bi bi-search text-muted"></i>
                         </span>
