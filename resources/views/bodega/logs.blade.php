@@ -177,7 +177,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="px-4 py-5 text-center text-muted">
+                                            No se encontraron movimientos.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
