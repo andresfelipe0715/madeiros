@@ -147,7 +147,7 @@
          x-transition:leave="transition ease-in duration-75"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="absolute top-16 right-4 w-72 max-w-[calc(100vw-2rem)] bg-white shadow-2xl rounded-2xl border border-gray-100 z-50 overflow-hidden xl:hidden"
+         class="absolute top-16 right-4 w-72 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-5rem)] bg-white shadow-2xl rounded-2xl border border-gray-100 z-50 overflow-y-auto xl:hidden"
          style="display: none;">
         <div class="pt-4 pb-4 px-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">

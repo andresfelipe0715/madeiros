@@ -70,7 +70,7 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold">Reserva de Inventario</label>
+                                    <div class="form-label fw-bold">Reserva de Inventario</div>
                                     <p class="text-muted small mb-2">Seleccione los materiales y añada notas opcionales
                                         (ej: color, espesor, corte).</p>
 
@@ -182,8 +182,8 @@
                                     selectedSpecialServices: {{ json_encode(old('special_services', [])) }},
                                     serviceLookup: {{ json_encode($specialServices->mapWithKeys(fn($s) => [$s->id => $s->name])) }}
                                 }">
-                                    <label class="form-label fw-bold">Servicios Especiales <span
-                                            class="text-muted fw-normal small">(Opcional)</span></label>
+                                    <div class="form-label fw-bold">Servicios Especiales <span
+                                            class="text-muted fw-normal small">(Opcional)</span></div>
                                     <p class="text-muted small mb-2">Seleccione los servicios adicionales y añada notas
                                         si es necesario.</p>
 
@@ -268,7 +268,7 @@
                                 </div>
 
                                 <div class="mb-5">
-                                    <label class="form-label fw-bold d-block">Configuración Adicional</label>
+                                    <div class="form-label fw-bold d-block">Configuración Adicional</div>
                                     <div class="bg-light p-4 rounded-3 border mb-4">
                                         <div class="form-check form-switch mb-2">
                                             <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
@@ -284,7 +284,7 @@
                                         </div>
                                     </div>
 
-                                    <label class="form-label fw-bold d-block">Ruta de Producción</label>
+                                    <div class="form-label fw-bold d-block">Ruta de Producción</div>
                                     <p class="text-muted small mb-3">Seleccione las etapas que requiere este pedido. Por
                                         defecto se seleccionan todas.</p>
 
@@ -453,8 +453,7 @@
                                             </button>
                                         </template>
                                     </div>
-                                </div>
-                                <template x-if="fileName">
+                                    <template x-if="fileName">
                                     <div class="mt-2 small text-primary fw-medium">
                                         <i class="bi bi-paperclip me-1"></i> Seleccionado: <span
                                             x-text="fileName"></span>
@@ -467,7 +466,7 @@
                                 @error('order_file')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
-                        </div>
+                                </div>
 
                         <div class="d-grid mt-5">
                             <button type="submit"
