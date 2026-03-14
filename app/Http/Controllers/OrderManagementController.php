@@ -203,42 +203,27 @@ class OrderManagementController extends Controller
             })
             ->findOrFail($stageId);
 
-        // Validation rule: Block if any stage with a HIGHER default_sequence has already been started or completed.
-        // "No se puede insertar esta etapa porque ya se completaron o iniciaron etapas posteriores."
-        $hasLaterStartedOrCompletedStage = $order->orderStages()
-            ->where(function ($query) {
-                $query->whereNotNull('completed_at')
-                    ->orWhereNotNull('started_at');
+        // If a delivery stage exists, insert right before it.
+        $deliveryOrderStage = $order->orderStages()
+            ->whereHas('stage', function ($q) {
+                $q->where('is_delivery_stage', true);
             })
-            ->whereHas('stage', function ($query) use ($newStage) {
-                $query->where('default_sequence', '>', $newStage->default_sequence);
-            })
-            ->exists();
-
-        if ($hasLaterStartedOrCompletedStage) {
-            return back()->with('error', 'No se puede insertar antes de una etapa en progreso o completada. Debe pausarla primero.');
-        }
-
-        // Determine the correct insertion position (sequence) for the frozen workflow.
-        // We look for the current sequence of the stage that should logically follow this new stage.
-        $nextLogicalStage = $order->orderStages()
-            ->join('stages', 'order_stages.stage_id', '=', 'stages.id')
-            ->where('stages.default_sequence', '>', $newStage->default_sequence)
-            ->orderBy('stages.default_sequence', 'asc')
             ->first();
 
-        // If no follow-up stage exists, it goes to the end.
-        if ($nextLogicalStage) {
-            $position = $nextLogicalStage->sequence;
+        if ($deliveryOrderStage) {
+            $position = $deliveryOrderStage->sequence;
         } else {
-            $position = $order->orderStages()->max('sequence') + 1;
+            // Append to the end of the frozen workflow.
+            $maxSequence = $order->orderStages()->max('sequence') ?? 0;
+            $position = $maxSequence + 1;
         }
 
-        DB::transaction(function () use ($order, $newStage, $position) {
-            // 1. Shift existing stages up (+1) from the calculated position
-            $this->shiftStagesUp($order, $position);
+        DB::transaction(function () use ($order, $newStage, $position, $deliveryOrderStage) {
+            // If inserting before delivery, shift delivery (and anything after) up.
+            if ($deliveryOrderStage) {
+                $this->shiftStagesUp($order, $position);
+            }
 
-            // 2. Insert new stage at the calculated sequence
             OrderStage::create([
                 'order_id' => $order->id,
                 'stage_id' => $newStage->id,

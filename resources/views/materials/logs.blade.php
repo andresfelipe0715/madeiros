@@ -60,12 +60,12 @@
                                         $details = [
                                             'fecha' => $log->created_at->format('d/m/Y H:i'),
                                             'usuario' => $log->user->name ?? 'Sistema',
-                                            'material' => $log->material->name,
+                                            'material' => $log->material->name ?? 'Material Eliminado',
                                             'accion' => $actionLabel,
                                             'anterior' => number_format($log->previous_stock_quantity, 2),
                                             'nuevo' => number_format($log->new_stock_quantity, 2),
                                             'cambio' => ($diff > 0 ? '+' : '').number_format($diff, 2),
-                                            'notas' => $log->notes ?? 'Sin notas'
+                                            'notes' => $log->notes ?? 'Sin notas'
                                         ];
                                     @endphp
                                     <tr class="cursor-pointer hover-bg-light" 
@@ -88,14 +88,15 @@
                                         </td>
                                         @if(!$material)
                                             <td class="px-4 py-3 font-weight-bold">
-                                                @if(Str::length($log->material->name) > 50)
+                                                @php $matName = $log->material->name ?? 'Material Eliminado'; @endphp
+                                                @if(Str::length($matName) > 50)
                                                     <span style="cursor: pointer;" class="text-primary" data-bs-toggle="modal"
                                                         data-bs-target="#materialModal{{ $log->id }}">
-                                                        {{ Str::limit($log->material->name, 50) }}
+                                                        {{ Str::limit($matName, 50) }}
                                                         <i class="bi bi-info-circle small ms-1"></i>
                                                     </span>
                                                 @else
-                                                    {{ $log->material->name }}
+                                                    {{ $matName }}
                                                 @endif
                                             </td>
                                         @endif
@@ -127,7 +128,8 @@
                                     </tr>
 
                                     {{-- Modals for Long Text --}}
-                                    @if(Str::length($log?->material?->name) > 50)
+                                    @php $matName = $log->material->name ?? 'Material Eliminado'; @endphp
+                                    @if(Str::length($matName) > 50)
                                         <div class="modal fade" id="materialModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-scrollable">
                                                 <div class="modal-content border-0 shadow">
@@ -136,14 +138,14 @@
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body p-4 text-start" style="max-height: 50vh; overflow-y: auto;">
-                                                        <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $log->material->name }}</span></p>
+                                                        <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $matName }}</span></p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     @endif
 
-                                    @if(Str::length($log->notes) > 50)
+                                    @if(Str::length($log->notes ?? '') > 50)
                                         <div class="modal fade" id="notesModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-scrollable">
                                                 <div class="modal-content border-0 shadow">

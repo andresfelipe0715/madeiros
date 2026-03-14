@@ -60,7 +60,8 @@ Auth:
 
 - **Linear & Custom**: Each order has its own sequence of stages.
 - **Resequencing**: Adding/Removing stages triggers dynamic sequence shifting to maintain a gap-less 1-N order.
-- **Integrity Rule**: New stages cannot be inserted BEFORE a stage that has already been completed.
+- **Integrity Rule**: New stages generally cannot be inserted BEFORE a stage that has already been completed. 
+  - **Admin Override**: Admins can bypass this rule in the "Edit Order" view to handle non-standard production corrections or repeat stages.
 - **Status Lifecycle**:
   - Not started (started_at IS NULL)
   - In progress (started_at IS NOT NULL)

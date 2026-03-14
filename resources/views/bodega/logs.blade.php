@@ -62,7 +62,7 @@
                                         $details = [
                                             'fecha' => $log->created_at->format('d/m/Y H:i'),
                                             'usuario' => $log->user->name ?? 'Sistema',
-                                            'material' => $log->material->name,
+                                            'material' => $log->material->name ?? 'Material Eliminado',
                                             'accion' => $actionLabel,
                                             'anterior' => number_format($log->previous_stock_quantity, 2),
                                             'nuevo' => number_format($log->new_stock_quantity, 2),
@@ -77,11 +77,29 @@
                                             {{ $log->created_at->format('d/m/Y H:i') }}
                                         </td>
                                         <td class="px-4 py-3">
-                                            {{ $userName }}
+                                            @php $userName = $log->user->name ?? 'Sistema'; @endphp
+                                            @if(Str::length($userName) > 50)
+                                                <span style="cursor: pointer;" class="text-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#userModal{{ $log->id }}">
+                                                    {{ Str::limit($userName, 50) }}
+                                                    <i class="bi bi-person-badge small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $userName }}
+                                            @endif
                                         </td>
                                         @if(!$material)
                                             <td class="px-4 py-3 font-weight-bold">
-                                                {{ $log->material->name }}
+                                                @php $matName = $log->material->name ?? 'Material Eliminado'; @endphp
+                                                @if(Str::length($matName) > 50)
+                                                    <span style="cursor: pointer;" class="text-primary" data-bs-toggle="modal"
+                                                        data-bs-target="#materialModal{{ $log->id }}">
+                                                        {{ Str::limit($matName, 50) }}
+                                                        <i class="bi bi-info-circle small ms-1"></i>
+                                                    </span>
+                                                @else
+                                                    {{ $matName }}
+                                                @endif
                                             </td>
                                         @endif
                                         <td class="px-4 py-3">
@@ -99,17 +117,67 @@
                                             {{ $diff > 0 ? '+' : '' }}{{ number_format($diff, 2) }}
                                         </td>
                                         <td class="px-4 py-3 small text-muted">
-                                            {{ Str::limit($log->notes, 50) }}
+                                            @if(Str::length($log->notes ?? '') > 50)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#notesModal{{ $log->id }}">
+                                                    {{ Str::limit($log->notes, 50) }}
+                                                    <i class="bi bi-plus-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $log->notes ?? 'Sin notas' }}
+                                            @endif
                                         </td>
                                     </tr>
 
-                                @empty
-                                    <tr>
-                                        <td colspan="{{ $material ? 7 : 8 }}" class="px-4 py-5 text-center text-muted">
-                                            No hay registros de movimientos para este material.
-                                        </td>
-                                    </tr>
-                                @endforelse
+                                    {{-- Modals for Long Text --}}
+                                    @if(Str::length($log->material->name ?? 'Material Eliminado') > 50)
+                                        <div class="modal fade" id="materialModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-scrollable">
+                                                <div class="modal-content border-0 shadow">
+                                                    <div class="modal-header bg-dark text-white border-0">
+                                                        <h5 class="modal-title font-weight-bold">Nombre del Material</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body p-4 text-start" style="max-height: 50vh; overflow-y: auto;">
+                                                        <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $log->material->name }}</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(Str::length($log->notes ?? '') > 50)
+                                        <div class="modal fade" id="notesModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-scrollable">
+                                                <div class="modal-content border-0 shadow">
+                                                    <div class="modal-header bg-primary text-white border-0">
+                                                        <h5 class="modal-title font-weight-bold">Nota Completa</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body p-4 text-start" style="max-height: 60vh; overflow-y: auto;">
+                                                        <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $log->notes }}</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @php $uName = $log->user->name ?? 'Sistema'; @endphp
+                                    @if(Str::length($uName) > 50)
+                                        <div class="modal fade" id="userModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-scrollable">
+                                                <div class="modal-content border-0 shadow">
+                                                    <div class="modal-header bg-success text-white border-0">
+                                                        <h5 class="modal-title font-weight-bold">Nombre del Usuario</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body p-4 text-start" style="max-height: 50vh; overflow-y: auto;">
+                                                        <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $uName }}</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                             </tbody>
                         </table>
                     </div>

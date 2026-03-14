@@ -27,8 +27,8 @@ class CustomStageOrderTest extends TestCase
 
         $this->artisan('db:seed');
 
-        $this->admin = User::where('name', 'Admin Test')->first();
-        $this->client = Client::first();
+        $this->admin = User::where('name', 'Administrador')->first();
+        $this->client = Client::create(['name' => 'Test Client', 'document' => '123456789']);
 
         // DefaultDataSeeder doesn't create materials, so we create one using the factory
         $this->material = Material::factory()->create([
