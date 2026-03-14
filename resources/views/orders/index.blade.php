@@ -67,14 +67,15 @@
                                     <tr>
                                         <td class="px-4 py-3">#{{ $order->id }}</td>
                                         <td class="px-4 py-3">
-                                            @if(Str::length($order->client->name) > 25)
+                                            @php $clientName = $order->client->name ?? 'Cliente Eliminado'; @endphp
+                                            @if(Str::length($clientName) > 25)
                                                 <span style="cursor: pointer;" data-bs-toggle="modal"
                                                     data-bs-target="#clientDetailModal{{ $order->id }}">
-                                                    {{ Str::limit($order->client->name, 25) }}
+                                                    {{ Str::limit($clientName, 25) }}
                                                     <i class="bi bi-info-circle text-primary small ms-1"></i>
                                                 </span>
                                             @else
-                                                {{ $order->client->name }}
+                                                {{ $clientName }}
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-nowrap">
@@ -104,7 +105,8 @@
                                                 $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
                                                 $cancelledMaterials = $order->orderMaterials->filter(fn($om) => !is_null($om->cancelled_at));
                                                 $materialLabels = $activeMaterials->map(function ($om) {
-                                                    return $om->material->name . " (" . (floor($om->estimated_quantity) == $om->estimated_quantity ? number_format($om->estimated_quantity, 0) : number_format($om->estimated_quantity, 1)) . ")" . ($om->notes ? " - {$om->notes}" : "");
+                                                    $name = $om->material->name ?? 'Material Eliminado';
+                                                    return $name . " (" . (floor($om->estimated_quantity) == $om->estimated_quantity ? number_format($om->estimated_quantity, 0) : number_format($om->estimated_quantity, 1)) . ")" . ($om->notes ? " - {$om->notes}" : "");
                                                 });
                                                 $materialText = $materialLabels->implode(', ');
                                             @endphp
@@ -141,7 +143,7 @@
                                                     {{ Str::limit($order->notes, 20) ?: '-' }}</small>
                                                 @if($currentOrderStage)
                                                     <small class="text-primary d-block fw-bold"><span
-                                                            class="text-dark">{{ $currentOrderStage->stage->name }}:</span>
+                                                            class="text-dark">{{ $currentOrderStage->stage->name ?? 'Etapa Eliminada' }}:</span>
                                                         {{ Str::limit($currentOrderStage->notes, 20) ?: '-' }}</small>
                                                 @endif
                                                 <div class="text-primary x-small mt-1"><i class="bi bi-pencil-square"></i>
@@ -235,7 +237,8 @@
     {{-- Modals Loop --}}
     @foreach($orders as $order)
         {{-- Modal de Detalle de Cliente --}}
-        @if(Str::length($order->client->name) > 25)
+        @php $clientName = $order->client->name ?? 'Cliente Eliminado'; @endphp
+        @if(Str::length($clientName) > 25)
             <div class="modal fade" id="clientDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content border-0 shadow">
@@ -245,7 +248,7 @@
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body p-4 text-start">
-                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $order->client->name }}</span></p>
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $clientName }}</span></p>
                         </div>
                         <div class="modal-footer border-0">
                             <button type="button" class="btn btn-light rounded-pill px-4"
@@ -322,7 +325,7 @@
                                 @foreach($activeMaterials as $om)
                                     <li class="list-group-item px-0 border-0 py-1">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold text-break"><span class="preserve-text">{{ $om->material->name }}</span></span>
+                                            <span class="fw-bold text-break"><span class="preserve-text">{{ $om->material->name ?? 'Material Eliminado' }}</span></span>
                                             <span class="badge bg-light text-dark border">{{ $om->estimated_quantity }}</span>
                                         </div>
                                         @if($om->notes)
@@ -340,7 +343,7 @@
                                     <li class="list-group-item px-0 border-0 py-1 opacity-75">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span
-                                                class="text-danger fw-bold text-decoration-line-through text-break"><span class="preserve-text">{{ $om->material->name }}</span></span>
+                                                class="text-danger fw-bold text-decoration-line-through text-break"><span class="preserve-text">{{ $om->material->name ?? 'Material Eliminado' }}</span></span>
                                             <span class="badge bg-danger-subtle text-danger">{{ $om->estimated_quantity }}
                                                 (Cancelado)</span>
                                         </div>
@@ -422,7 +425,7 @@
                                         <div class="timeline-indicator bg-primary position-absolute rounded-circle" style="left: -20px; width: 12px; height: 12px; top: 5px;"></div>
                                         <div class="card border-0 shadow-sm border-left-primary" style="border-left: 3px solid #0d6efd !important;">
                                             <div class="card-body p-3">
-                                                <h6 class="text-uppercase text-xs font-weight-bold text-primary mb-2">Etapa: {{ $os->stage->name }}</h6>
+                                                <h6 class="text-uppercase text-xs font-weight-bold text-primary mb-2">Etapa: {{ $os->stage->name ?? 'Etapa Eliminada' }}</h6>
                                                 <p class="mb-0 text-dark small text-break">{{ $os->notes }}</p>
                                             </div>
                                         </div>
@@ -434,7 +437,7 @@
                                         <div class="card border-0 shadow-sm border-left-warning" style="border-left: 3px solid #ffc107 !important;">
                                             <div class="card-body p-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <h6 class="text-xs font-weight-bold text-warning mb-0 text-uppercase">Pendiente en {{ $os->stage->name }}</h6>
+                                                    <h6 class="text-xs font-weight-bold text-warning mb-0 text-uppercase">Pendiente en {{ $os->stage->name ?? 'Etapa Eliminada' }}</h6>
                                                     <small class="x-small text-muted">{{ $os->pending_marked_at?->format('d/m/Y H:i') ?? '' }}</small>
                                                 </div>
                                                 <p class="mb-0 text-dark small text-break"><span class="fw-bold">Razón:</span> {{ $os->pending_reason }}</p>

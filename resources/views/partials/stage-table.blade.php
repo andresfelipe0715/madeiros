@@ -62,9 +62,9 @@
                     @forelse($orders as $order)
                         @php
                             $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id);
-                            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'archivo_orden'));
-                            $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'proyecto'));
-                            $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina'));
+                            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'archivo_orden'));
+                            $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'proyecto'));
+                            $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'máquina'));
                             
                             $isNext = $authService->isNextInQueue($order, $stage->id);
                             $canAct = $authService->canActOnStage(auth()->user(), $order, $stage->id);
@@ -73,22 +73,24 @@
                         <tr>
                             <td>{{ $order->id }}</td>
                             <td>
-                                @if(Str::length($order->client->name) > 50)
+                                @php $clientName = $order->client->name ?? 'Cliente Eliminado'; @endphp
+                                @if(Str::length($clientName) > 50)
                                     <span style="cursor: pointer;" 
                                           data-bs-toggle="modal" 
                                           data-bs-target="#clientDetailModal{{ $orderStage->id }}">
-                                        {{ Str::limit($order->client->name, 50) }}
+                                        {{ Str::limit($clientName, 50) }}
                                         <i class="bi bi-info-circle text-primary small ms-1"></i>
                                     </span>
                                 @else
-                                    {{ $order->client->name }}
+                                    {{ $clientName }}
                                 @endif
                             </td>
                             <td>
                                 @php
                                     $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
                                     $materialLabels = $activeMaterials->map(function($om) {
-                                        return $om->material->name . " (" . (floor($om->estimated_quantity) == $om->estimated_quantity ? number_format($om->estimated_quantity, 0) : number_format($om->estimated_quantity, 1)) . ")" . ($om->notes ? " - {$om->notes}" : "");
+                                        $name = $om->material->name ?? 'Material Eliminado';
+                                        return $name . " (" . (floor($om->estimated_quantity) == $om->estimated_quantity ? number_format($om->estimated_quantity, 0) : number_format($om->estimated_quantity, 1)) . ")" . ($om->notes ? " - {$om->notes}" : "");
                                     });
                                     $materialText = $materialLabels->implode(', ');
                                 @endphp
@@ -138,7 +140,8 @@
                                 @php
                                     $activeServices = $order->orderSpecialServices->filter(fn($oss) => is_null($oss->cancelled_at));
                                     $serviceLabels = $activeServices->map(function($oss) {
-                                        return $oss->specialService->name . ($oss->notes ? " ({$oss->notes})" : "");
+                                        $name = $oss->specialService->name ?? 'Servicio Eliminado';
+                                        return $name . ($oss->notes ? " ({$oss->notes})" : "");
                                     });
                                     $serviceText = $serviceLabels->implode(', ');
                                 @endphp
@@ -212,7 +215,7 @@
                                     <small class="text-muted d-block"><span class="fw-bold">Gral:</span>
                                         {{ Str::limit($order->notes, 30) ?: '-' }}</small>
                                     <small class="text-primary d-block fw-bold"><span
-                                            class="text-dark">{{ $stageName }}:</span>
+                                            class="text-dark">{{ $stageName ?? 'Etapa Eliminada' }}:</span>
                                         {{ Str::limit($orderStage->notes, 30) ?: '-' }}</small>
                                     <div class="text-primary x-small mt-1"><i class="bi bi-pencil-square"></i> Ver/Editar
                                     </div>
@@ -261,7 +264,7 @@
                                                         data-bs-target="#evidenceModal{{ $orderStage->id }}">
                                                         <i class="bi bi-camera-fill"></i> Capturar Evidencia
                                                         @php
-                                                            $evidenceCount = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->count();
+                                                            $evidenceCount = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->count();
                                                         @endphp
                                                         @if($evidenceCount > 0)
                                                             <span class="badge bg-info text-white rounded-pill ms-1">{{ $evidenceCount }}</span>
@@ -367,7 +370,8 @@
             @endif
 
             {{-- Modal de Detalle de Cliente --}}
-            @if(Str::length($order->client->name) > 50)
+            @php $clientName = $order->client->name ?? 'Cliente Eliminado'; @endphp
+            @if(Str::length($clientName) > 50)
                 <div class="modal fade" id="clientDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-scrollable">
                         <div class="modal-content border-0 shadow">
@@ -376,7 +380,7 @@
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-4" style="max-height: 50vh; overflow-y: auto;">
-                                <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $order->client->name }}</span></p>
+                                <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $clientName }}</span></p>
                             </div>
                             <div class="modal-footer border-0">
                                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
@@ -402,7 +406,7 @@
                                 @foreach($activeMaterials as $om)
                                     <li class="list-group-item px-0 border-0">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="fw-bold text-break"><span class="preserve-text">{{ $om->material->name }}</span></span>
+                                            <span class="fw-bold text-break"><span class="preserve-text">{{ $om->material->name ?? 'Material Eliminado' }}</span></span>
                                             <span class="badge bg-light text-dark border">{{ $om->estimated_quantity }}</span>
                                         </div>
                                         @if($om->notes)
@@ -434,7 +438,7 @@
                                 @endphp
                                 @foreach($activeServices as $oss)
                                     <li class="list-group-item px-0 border-0">
-                                        <div class="fw-bold text-primary text-break"><span class="preserve-text">{{ $oss->specialService->name }}</span></div>
+                                        <div class="fw-bold text-primary text-break"><span class="preserve-text">{{ $oss->specialService->name ?? 'Servicio Eliminado' }}</span></div>
                                         @if($oss->notes)
                                             <div class="small text-muted ps-2 border-start ms-1">{{ $oss->notes }}</div>
                                         @endif
@@ -455,7 +459,7 @@
                     <div class="modal-dialog modal-dialog-scrollable">
                         <div class="modal-content border-0 shadow">
                             <form action="{{ route('order-stages.upload-evidence', $orderStage->id) }}" method="POST" enctype="multipart/form-data" 
-                                x-data="{ files: null, count: 0, existing: {{ $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->count() }} }">
+                                x-data="{ files: null, count: 0, existing: {{ $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->count() }} }">
                                 @csrf
                                 <div class="modal-header bg-info text-white border-0">
                                     <h5 class="modal-title"><i class="bi bi-camera-fill me-2"></i>Capturar Evidencia - #{{ $order->id }}</h5>
@@ -487,7 +491,7 @@
                                     </div>
 
                                     @php
-                                        $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->values();
+                                        $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->values();
                                     @endphp
                                     @if($evPhotos->count() > 0)
                                         <div class="mt-4">

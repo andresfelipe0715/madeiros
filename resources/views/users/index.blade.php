@@ -71,7 +71,7 @@
                                         </td>
                                         <td class="px-4 py-3 text-nowrap">{{ $user->document }}</td>
                                         <td class="px-4 py-3 text-nowrap">
-                                            <span class="badge bg-secondary opacity-75">{{ $user->role->name }}</span>
+                                            <span class="badge bg-secondary opacity-75">{{ $user->role->name ?? 'Sin rol' }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             @if($user->active)
@@ -164,7 +164,7 @@
                         <div class="mb-3">
                             <label class="text-muted small text-uppercase font-weight-bold">Rol</label>
                             <p class="mb-0">
-                                <span class="badge bg-secondary">{{ $u->role->name }}</span>
+                                <span class="badge bg-secondary">{{ $u->role->name ?? 'Sin rol' }}</span>
                             </p>
                         </div>
                         <div class="mb-3">

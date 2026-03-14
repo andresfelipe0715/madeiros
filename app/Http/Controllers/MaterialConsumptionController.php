@@ -43,12 +43,12 @@ class MaterialConsumptionController extends Controller
         foreach ($consumptions as $date => $items) {
             $dailyData[$date] = $items->groupBy('material_id')->map(function ($group) {
                 return [
-                    'material_name' => $group->first()->material->name,
+                    'material_name' => $group->first()->material->name ?? 'Material Eliminado',
                     'total_actual_quantity' => $group->sum('actual_quantity'),
                     'orders' => $group->map(function ($item) {
                         return [
                             'id' => $item->order_id,
-                            'invoice_number' => $item->order->invoice_number,
+                            'invoice_number' => $item->order->invoice_number ?? 'N/A',
                         ];
                     })->unique('id'),
                 ];

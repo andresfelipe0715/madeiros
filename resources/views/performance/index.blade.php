@@ -77,7 +77,7 @@
                                             <i class="bi bi-lightning-fill me-1"></i>Más Rápido
                                         </div>
                                         <div class="ps-3 border-start border-success border-2">
-                                            <div class="font-weight-bold small">{{ $bench->fastest->user->name }}</div>
+                                            <div class="font-weight-bold small">{{ $bench->fastest->user->name ?? 'Usuario Eliminado' }}</div>
                                             <div class="text-muted" style="font-size: 0.75rem;">
                                                 {{ $bench->fastest->time_human }} /etapa</div>
                                         </div>
@@ -87,7 +87,7 @@
                                             <i class="bi bi-hourglass-split me-1"></i>Más Lento
                                         </div>
                                         <div class="ps-3 border-start border-danger border-2">
-                                            <div class="font-weight-bold small">{{ $bench->slowest->user->name }}</div>
+                                            <div class="font-weight-bold small">{{ $bench->slowest->user->name ?? 'Usuario Eliminado' }}</div>
                                             <div class="text-muted" style="font-size: 0.75rem;">
                                                 {{ $bench->slowest->time_human }} /etapa</div>
                                         </div>
@@ -143,7 +143,7 @@
                                                         @endif
                                                     </div>
                                                     <div class="text-muted small">{{ $user->document }} •
-                                                        {{ $user->role->name }}</div>
+                                                        {{ $user->role->name ?? 'Sin rol' }}</div>
                                                 </div>
                                             </div>
                                         </td>

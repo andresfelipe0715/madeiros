@@ -70,7 +70,7 @@
                                     <select name="target_stage_id" class="form-select shadow-none @error('target_stage_id') is-invalid @enderror" required>
                                         <option value="" selected disabled>Seleccione etapa...</option>
                                         @foreach($order->orderStages->where('sequence', '<', $orderStage->sequence)->sortBy('sequence') as $prevStage)
-                                            <option value="{{ $prevStage->stage_id }}" {{ old('target_stage_id') == $prevStage->stage_id ? 'selected' : '' }}>{{ $prevStage->stage->name }}</option>
+                                            <option value="{{ $prevStage->stage_id }}" {{ old('target_stage_id') == $prevStage->stage_id ? 'selected' : '' }}>{{ $prevStage->stage->name ?? 'Etapa Eliminada' }}</option>
                                         @endforeach
                                     </select>
                                     @error('target_stage_id')
@@ -105,9 +105,9 @@
     @foreach($orders as $order)
         @php 
             $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id);
-            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'orden'));
-            $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'proyecto'));
-            $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina') || str_contains(strtolower($f->fileType->name), 'maquina'));
+            $orderFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'orden'));
+            $projectFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'proyecto'));
+            $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'máquina') || str_contains(strtolower($f->fileType->name ?? ''), 'maquina'));
         @endphp
         <div class="modal fade" id="filesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable">
