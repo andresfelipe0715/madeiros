@@ -1,300 +1,103 @@
-# Deployment and Docker Guide
+# VPS Deployment Guide for Madeiros
 
-This guide provides the necessary commands to manage the application's Docker containers and instructions for setting up a VPS from scratch.
+This guide provides a step-by-step process to set up your repository on a fresh Ubuntu VPS. We use Docker and Docker Compose for a consistent production environment.
 
-## Docker Commands Reference
-
-### Starting Containers
-```bash
-# Start all containers in the background
-docker compose up -d
-
-# Start all containers and see the output (hot-reload for logs)
-docker compose up
-```
-
-### Stopping Containers
-```bash
-# Stop and remove containers (Deletes the container instances, but keeps your data/code safe)
-docker compose down
-
-# Stop containers without removing them
-docker compose stop
-```
-
-### Restarting Containers
-Use this to refresh the services without rebuilding or deleting them.
-```bash
-# Restart the entire stack
-docker compose restart
-
-# Restart a specific service (e.g. nginx)
-docker compose restart nginx
-```
-
-### Running Commands Inside Docker
-Since the application runs inside containers, you need to use `docker compose exec` to run Artisan or Composer commands.
-
-```bash
-# Run Artisan commands
-docker compose exec app php artisan migrate
-docker compose exec app php artisan db:seed --class=ProductionDataSeeder
-
-# Run Composer commands
-docker compose exec app composer install
-
-# Open a shell inside the app container
-docker compose exec app bash
-```
-
----
-
-## VPS Setup Guide (Ubuntu/Debian)
-
-### 1. Initial Server Setup
-Connect to your VPS:
-```bash
-ssh root@your_vps_ip
-```
-
-Update system packages:
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
-### 2. Install Docker & Docker Compose
-Install Docker:
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-```
-
-Install Docker Compose:
-```bash
-sudo apt install docker-compose-plugin -y
-```
-
-### 3. Clone the Project
-```bash
-git clone https://github.com/your-username/madeiros.git
-cd madeiros
-```
-
-### 4. Configuration
-Create the `.env` file from the example:
-```bash
-cp .env.example .env
-```
-Edit the `.env` file to set your production values (DB_PASSWORD, APP_URL, etc.):
-```bash
-nano .env
-```
-
-### 5. Launch the Application
-Build and start the containers:
-```bash
-docker compose up -d --build
-```
-> [!NOTE]
-> On the first run, Docker will automatically create the `docker/mysql` directory on your VPS. MySQL will then take a few seconds to initialize these files before it becomes ready to accept connections.
-
-### 6. Post-Launch Setup (First Time Only)
-Install dependencies and run migrations:
-```bash
-docker compose exec app composer install --no-dev --optimize-autoloader
-docker compose exec app php artisan key:generate
-
-# 1. Create tables
-docker compose exec app php artisan migrate --force
-
-# 2. Populate essential data (Roles, Stages and Admin user)
-docker compose exec app php artisan db:seed --class=ProductionDataSeeder --force
-
-# 3. Setup storage and permissions
-docker compose exec app php artisan storage:link
-docker compose exec app chmod -R 775 storage bootstrap/cache
-```
-
----
-
-## Data Management
-
-### 1. Persistence
-Your database data is stored locally in the `docker/mysql` directory. This directory is ignored by Git to avoid conflicts between different environments. When you backup this folder, you are backing up your raw database files.
-
-### 2. Loading Existing Data
-If you have a SQL dump (e.g., `backup.sql`) from another installation, you have two ways to load it:
-
-#### Option A: Using phpMyAdmin (Recommended for GUI)
-1. Start the GUI: `docker compose -f docker-compose.gui.yml up -d`
-2. Open `http://your-vps-ip:8099`.
-3. Select your database and use the **Import** tab to upload your `.sql` file.
-
-#### Option B: Using the Command Line
-Place your `backup.sql` in the project root and run:
-```bash
-# Import the SQL file into the database container
-docker exec -i madeiros-db mysql -u root -p'YOUR_PASSWORD' madeiros < backup.sql
-```
-
----
-
----
-
-## Maintenance
-
-### Updating the Application
-```bash
-git pull origin main
-docker compose up -d --build
-docker compose exec app php artisan migrate --force
-```
-
-### Resetting the Environment (Clean Slate)
-If you need to wipe all data and start fresh (e.g., after heavy testing):
-```bash
-docker compose exec app php artisan migrate:fresh --seed --seeder=ProductionDataSeeder --force
-```
-**Warning:** This destroys all existing data in the database.
-
-### Checking Logs
-```bash
-docker compose logs -f
-```
-
----
-
-## On-Demand Maintenance GUI
-
-The database GUI is kept separate from the core production services for security and performance. Only start it when you explicitly need to perform manual database operations.
-
-### 1. Launch phpMyAdmin
-```bash
-docker compose -f docker-compose.gui.yml up -d
-```
-Access via: `http://your-vps-ip:8099`
-
-### 2. Stop phpMyAdmin
-```bash
-docker compose -f docker-compose.gui.yml stop
-```
-
----
-
-## Domain & SSL Management (Nginx Proxy Manager)
-
-The project now includes **Nginx Proxy Manager** (NPM) to handle SSL certificates and domain routing automatically.
-
-### 1. Launch & Initial Setup
-Nginx Proxy Manager starts automatically with `docker compose up -d`.
-- **Admin Dashboard**: `http://your-vps-ip:81`
-- **Default Credentials**: `admin@example.com` / `changeme`
+## User Review Required
 
 > [!IMPORTANT]
-> Change the default admin email and password immediately upon first login.
+> - Ensure you have **root** or **sudo** access on the VPS.
+> - You must manually configure the `.env` file on the VPS.
+> - Use `sudo` for all Docker commands if your user is not in the `docker` group.
 
-### 2. Setting up SSL (Let's Encrypt)
-1. In the NPM dashboard, go to **Proxy Hosts** -> **Add Proxy Host**.
-2. **Domain Names**: Enter your domain (e.g., `madeiros.com`).
-3. **Scheme**: `http`
-4. **Forward Hostname / IP**: `nginx` (this matches the service name in docker-compose)
-5. **Forward Port**: `80`
-6. Go to the **SSL** tab, select **Request a new SSL Certificate**, and enable **Force SSL**.
-7. Click **Save**.
+## Proposed Setup Steps
 
-### 3. Port Management: Local vs VPS (Important)
+### Phase 1: Server Provisioning
+Run these from any location (e.g., `~/`):
 
-To avoid conflicts on your local machine and ensure smooth VPS routing, the project uses a "Front Door / Side Door" approach:
+1. **Update System**
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   ```
 
-| Connection Type | Port Used | Description |
-| :--- | :--- | :--- |
-| **Local Access** | `8888` | The "Side Door". Access your app at `localhost:8888`. |
-| **VPS External** | `80` / `443` | The "Front Doors". Handled by Nginx Proxy Manager. |
-| **Internal Docker** | `80` | The "Internal Hallway". Containers talk to each other here. |
+2. **Install Docker & Compose**
+   ```bash
+   curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
+   sudo apt install docker-compose-plugin -y
+   ```
 
-**Key Rule for Nginx Proxy Manager UI:**
-- When adding a Proxy Host for the `nginx` service, always set the **Forward Port** to `80`.
-- Even though your `docker-compose.yml` maps `8888:80`, the Proxy Manager talks to the `nginx` container *internally* through port 80.
-
-### 4. Security Hardening (VPS Firewall)
-To prevent unauthorized access to the Proxy dashboard:
+### Phase 1.5: Firewall Configuration
+Allow traffic on essential ports:
 ```bash
-# Example using UFW (Ubuntu)
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-# Only allow your home/office IP to access the admin portal:
-sudo ufw allow from YOUR_IP_ADDRESS to any port 81 proto tcp
+sudo ufw allow 22/tcp     # SSH (Crucial)
+sudo ufw allow 80/tcp     # HTTP (Web)
+sudo ufw allow 443/tcp    # HTTPS (SSL)
+sudo ufw allow 81/tcp     # Proxy Manager Admin
+sudo ufw allow 8888/tcp   # Direct App Access (Nginx)
+sudo ufw enable
 ```
+> [!NOTE]
+> Also open these ports in your **Hostinger Cloud Dashboard** firewall settings.
 
 ---
 
-## Troubleshooting
+### Phase 2: Application Bootstrapping
+Navigate to your project folder (`cd ~/madeiros`):
 
-### Docker Build: "image already exists"
-If you encounter an error like `failed to solve: image "madeiros-app:latest": already exists` during a build, it is likely a BuildKit cache synchronization issue.
-
-**Solution:**
-1. Clear the builder cache:
+1. **Pull Latest Code**
    ```bash
-   docker builder prune -f
-   ```
-2. Rebuild the main app service without cache:
-   ```bash
-   docker compose build --no-cache app
-   ```
-3. Start the containers normally:
-   ```bash
-   docker compose up -d
+   git pull origin dev
    ```
 
-### Frontend not styling or "Vite manifest" error
-If the application appears unstyled or you see an error about a missing Vite manifest, it usually means the frontend assets aren't compiled or the app is stuck in "hot reload" mode.
-
-**Solution:**
-1. Ensure the `public/hot` file is deleted (this file forces the app to look for a dev server):
+2. **Configure Environment (`.env`)**
    ```bash
-   # Windows
-   del public\hot
-   # Linux/Mac
-   rm public/hot
+   cp .env.example .env
+   nano .env
    ```
-2. Compile the assets on your host machine:
+   *Set `APP_ENV=production`, `APP_DEBUG=false`, `DB_PASSWORD`, and `APP_URL`.*
+
+3. **Build & Start Containers**
    ```bash
-   npm run build
+   sudo docker compose up -d --build
    ```
-3. Refresh the browser. Since the project root is mapped as a volume to the `app` container, the new `public/build` files will be available immediately.
+   > [!TIP]
+   > If you see a **502 Bad Gateway** or a **404 File Not Found** after rebuilding, try a "Hard Restart":
+   > `sudo docker compose down && sudo docker compose up -d`
 
-### 413 Request Entity Too Large (Upload Limits)
-If you get this error when uploading large images or PDFs, it means the Nginx/PHP limits are too low.
+---
 
-**Solution:**
-The Docker environment is pre-configured with a **64MB** limit. If you need more, you must:
-1. Update `client_max_body_size` in `docker/nginx/templates/app.conf.template`.
-2. Update `upload_max_filesize` and `post_max_size` in the `Dockerfile`.
-3. Rebuild the app: `docker compose build app` and restart: `docker compose up -d`.
+### Phase 3: Laravel & Frontend Initialization
+Run these inside the context of the running containers:
 
-### Call to undefined function imagejpeg() (GD JPEG Support)
-If you see this error, the PHP GD extension was installed without JPEG support.
+1. **PHP Dependencies & Key**
+   ```bash
+   sudo docker compose exec app composer install --no-dev --optimize-autoloader
+   sudo docker compose exec app php artisan key:generate
+   ```
 
-**Solution:**
-Ensure your `Dockerfile` includes `libjpeg62-turbo-dev` and uses `docker-php-ext-configure gd --with-jpeg` before installation. (This is already included in the latest project `Dockerfile`).
+2. **Database Setup**
+   ```bash
+   sudo docker compose exec app php artisan migrate --force
+   sudo docker compose exec app php artisan db:seed --class=ProductionDataSeeder --force
+   ```
 
-### 502 Bad Gateway (Nginx DNS Cache)
-If you see a 502 error after rebuilding the `app` container, Nginx might be caching a stale internal IP address.
+3. **Frontend Asset Build**
+   ```bash
+   sudo docker compose exec app npm install
+   sudo docker compose exec app npm run build
+   ```
 
-**Solution:**
-Force a restart of the entire stack to refresh the internal DNS:
+4. **Storage & Permissions**
+   ```bash
+   sudo docker compose exec app php artisan storage:link
+   sudo docker compose exec app chmod -R 775 storage bootstrap/cache
+   ```
+
+## Troubleshooting 500 Errors
+If the app shows a 500 error, check the Laravel log file:
 ```bash
-docker compose restart
+sudo docker compose exec app tail -n 50 storage/logs/laravel.log
 ```
 
-### Database Corruption (MySQL Crash Loop)
-If the database container crashes repeatedly or logs show table corruption:
-
-**Solution:**
-1. Stop the database: `docker compose stop db`.
-2. **Wipe local data**: Delete the contents of `docker/mysql/`.
-3. Restart: `docker compose up -d db`.
-   - *Note: You will need to re-run migrations and seeding after this.*
-
-
+## Verification Plan
+1. **Direct Access**: Visit `http://your-vps-ip:8888`
+2. **Proxy Access**: Visit `http://your-vps-ip:81` for the Nginx Proxy Manager setup.
