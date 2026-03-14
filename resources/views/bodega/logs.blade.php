@@ -177,6 +177,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    @endif
                                 @empty
                                     <tr>
                                         <td colspan="8" class="px-4 py-5 text-center text-muted">
