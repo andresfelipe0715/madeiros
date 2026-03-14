@@ -79,22 +79,40 @@ class StoreOrderRequest extends FormRequest
                 $expected++;
             }
 
-            // Check if at least one 'Corte' stage is selected
+            // Stage-level validation
             $corteGroup = \App\Models\StageGroup::where('name', 'Corte')->first();
-            if ($corteGroup) {
-                $corteStageIds = $corteGroup->stages->pluck('id')->toArray();
-                $hasCorte = false;
+            $hasCorte = false;
 
-                foreach ($stages as $stageData) {
-                    if (isset($stageData['stage_id']) && in_array($stageData['stage_id'], $corteStageIds)) {
-                        $hasCorte = true;
-                        break;
-                    }
+            foreach ($stages as $stageData) {
+                if (!isset($stageData['stage_id'])) {
+                    continue;
                 }
 
-                if (!$hasCorte) {
-                    $validator->errors()->add('stages', 'Debe seleccionar al menos una etapa de Corte.');
+                $stage = \App\Models\Stage::with('stageGroup')->find($stageData['stage_id']);
+
+                if (!$stage) {
+                    $validator->errors()->add('stages', 'Una de las etapas seleccionadas no existe.');
+                    continue;
                 }
+
+                // Rule 1: Stage must be active
+                if (!$stage->active) {
+                    $validator->errors()->add('stages', "La etapa '{$stage->name}' se encuentra inactiva.");
+                }
+
+                // Rule 2: Stage Group must be active (if it has one)
+                if ($stage->stageGroup && !$stage->stageGroup->active) {
+                    $validator->errors()->add('stages', "El grupo de la etapa '{$stage->name}' se encuentra inactivo.");
+                }
+
+                // Corte enforcement
+                if ($corteGroup && $stage->stage_group_id === $corteGroup->id) {
+                    $hasCorte = true;
+                }
+            }
+
+            if ($corteGroup && !$hasCorte) {
+                $validator->errors()->add('stages', 'Debe seleccionar al menos una etapa de Corte.');
             }
         });
     }

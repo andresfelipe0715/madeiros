@@ -31,13 +31,18 @@ class OrderController extends Controller
         $clientId = $request->query('client_id') ?? old('client_id');
         $selectedClient = $clientId ? Client::find($clientId) : null;
         $materials = Material::all();
-        $stageGroups = \App\Models\StageGroup::with([
-            'stages' => function ($query) {
-                $query->orderBy('default_sequence');
-            },
-        ])->get()->sortBy(function ($group) {
-            return $group->stages->min('default_sequence');
-        });
+        $stageGroups = \App\Models\StageGroup::where('active', true)
+            ->with([
+                'stages' => function ($query) {
+                    $query->where('active', true)->orderBy('default_sequence');
+                },
+            ])->get()
+            ->filter(function ($group) {
+                return $group->stages->isNotEmpty();
+            })
+            ->sortBy(function ($group) {
+                return $group->stages->min('default_sequence');
+            });
 
         $specialServices = SpecialService::where('active', true)->get();
 

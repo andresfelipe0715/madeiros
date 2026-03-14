@@ -61,7 +61,15 @@ class OrderManagementController extends Controller
 
         $order->load(['client', 'orderStages.stage', 'orderMaterials.material', 'orderSpecialServices.specialService']);
 
-        $allStages = Stage::orderBy('default_sequence')->get();
+        $allStages = Stage::where('active', true)
+            ->where(function ($query) {
+                $query->whereNull('stage_group_id')
+                    ->orWhereHas('stageGroup', function ($q) {
+                        $q->where('active', true);
+                    });
+            })
+            ->orderBy('default_sequence')
+            ->get();
         $materials = Material::all();
         $specialServices = SpecialService::where('active', true)->get();
         $firstStageId = Stage::orderBy('default_sequence', 'asc')->value('id');
@@ -186,7 +194,14 @@ class OrderManagementController extends Controller
             return back()->with('error', 'La etapa ya existe en esta orden.');
         }
 
-        $newStage = Stage::findOrFail($stageId);
+        $newStage = Stage::where('active', true)
+            ->where(function ($query) {
+                $query->whereNull('stage_group_id')
+                    ->orWhereHas('stageGroup', function ($q) {
+                        $q->where('active', true);
+                    });
+            })
+            ->findOrFail($stageId);
 
         // Validation rule: Block if any stage with a HIGHER default_sequence has already been started or completed.
         // "No se puede insertar esta etapa porque ya se completaron o iniciaron etapas posteriores."

@@ -10,7 +10,14 @@ class StageGroup extends Model
     use HasFactory;
     public $timestamps = false; // Disable timestamps as they are not in the schema
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'active'];
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+        ];
+    }
 
     public function stages()
     {
