@@ -99,9 +99,9 @@
                                 @endphp
 
                                 <div class="mb-3">
-                                    <label
+                                    <label for="client_name"
                                         class="form-label text-muted small text-uppercase font-weight-bold">Cliente</label>
-                                    <input type="text" class="form-control bg-light" value="{{ $order->client->name }}"
+                                    <input type="text" id="client_name" class="form-control bg-light" value="{{ $order->client->name }}"
                                         readonly disabled>
                                 </div>
 
@@ -119,9 +119,9 @@
                                 </div>
                                 <div class="mb-4 mt-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <label class="form-label text-muted small text-uppercase font-weight-bold mb-0">
+                                        <div class="form-label text-muted small text-uppercase font-weight-bold mb-0">
                                             Reserva de Materiales
-                                        </label>
+                                        </div>
                                         <span class="badge bg-secondary rounded-pill"
                                             x-text="materials.filter(m => !m.cancelled).length + ' Activos'"></span>
                                     </div>
@@ -328,9 +328,9 @@
                                     serviceLookup: {{ json_encode($specialServices->mapWithKeys(fn($s) => [$s->id => $s->name])) }}
                                 }">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <label
+                                        <div
                                             class="form-label text-muted small text-uppercase font-weight-bold mb-0">Servicios
-                                            Especiales</label>
+                                            Especiales</div>
                                         <span class="badge bg-secondary rounded-pill"
                                             x-text="selectedSpecialServices.filter(s => !s.cancelled).length + ' Activos'"></span>
                                     </div>
@@ -436,7 +436,7 @@
                                 </div>
 
                                 <div class="mb-5">
-                                    <label class="form-label fw-bold d-block">Configuración Adicional</label>
+                                    <div class="form-label fw-bold d-block">Configuración Adicional</div>
                                     <div class="bg-light p-4 rounded-3 border mb-4">
                                         <div class="form-check form-switch mb-2">
                                             <input class="form-check-input" type="checkbox" name="lleva_herrajeria"
@@ -452,7 +452,7 @@
                                         </div>
                                     </div>
 
-                                    <label class="form-label fw-bold d-block">Gestión de Archivos y Evidencia</label>
+                                    <div class="form-label fw-bold d-block">Gestión de Archivos y Evidencia</div>
                                     <div class="bg-light p-4 rounded-3 border mb-4">
                                         <!-- PDF Section -->
                                         @php
@@ -534,7 +534,7 @@
                                             existingPhotos: {{ $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->count() }},
                                             deleting: []
                                         }">
-                                            <label class="form-label fw-bold d-block">Fotos de Evidencia</label>
+                                        <div class="form-label fw-bold d-block">Fotos de Evidencia</div>
 
                                             @php
                                                 $evPhotos = $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name ?? ''), 'evidencia'))->values();

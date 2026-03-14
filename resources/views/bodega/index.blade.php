@@ -148,8 +148,7 @@
                                                                     <p class="text-muted small">Mueve material desde Bodega
                                                                         hacia el Punto de Venta.</p>
                                                                     <div class="mb-3">
-                                                                        <label class="form-label">Cantidad a transferir (A la
-                                                                            zona de ventas)</label>
+                                                                        <label for="transfer_quantity_{{ $material->id }}" class="form-label">Cantidad a transferir (A la zona de ventas)</label>
                                                                         <div
                                                                             class="d-flex justify-content-between text-muted small mb-2">
                                                                             <span>Bodega actual:
@@ -157,7 +156,7 @@
                                                                             <span>Ventas actual:
                                                                                 {{ floor($material->stock_quantity) == $material->stock_quantity ? number_format($material->stock_quantity, 0) : number_format($material->stock_quantity, 2) }}</span>
                                                                         </div>
-                                                                        <input type="number" name="quantity"
+                                                                        <input type="number" id="transfer_quantity_{{ $material->id }}" name="quantity"
                                                                             class="form-control" step="0.01" min="0.01"
                                                                             max="{{ $material->bodega_quantity }}" required>
                                                                     </div>

@@ -25,7 +25,7 @@
                                 @csrf
 
                                 <div class="mb-4">
-                                    <label class="form-label text-muted small text-uppercase font-weight-bold">Material</label>
+                                    <div class="form-label text-muted small text-uppercase font-weight-bold">Material</div>
                                     <div class="p-3 bg-light rounded border">
                                         <div class="font-weight-bold text-dark">{{ $material->name }}</div>
                                         @if($material->reference_number)
@@ -36,7 +36,7 @@
 
                                 <div class="row mb-4">
                                     <div class="col-md-6">
-                                        <label class="form-label text-muted small text-uppercase font-weight-bold">Stock Actual en Bodega</label>
+                                        <div class="form-label text-muted small text-uppercase font-weight-bold">Stock Actual en Bodega</div>
                                         <div class="h4 mb-0 text-primary">
                                             {{ floor($material->bodega_quantity) == $material->bodega_quantity ? number_format($material->bodega_quantity, 0) : number_format($material->bodega_quantity, 2) }}
                                         </div>
