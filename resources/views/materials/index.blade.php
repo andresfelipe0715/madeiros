@@ -5,11 +5,11 @@
                 {{ __('Materiales') }}
             </h2>
             <div class="d-flex flex-column flex-sm-row gap-2">
-                <a href="{{ route('materials.logs.all') }}" class="btn btn-outline-secondary w-100 w-sm-auto">
-                    <i class="bi bi-clock-history"></i> {{ __('Historial') }}
+                <a href="{{ route('materials.logs.all') }}" class="btn btn-outline-secondary w-100 w-sm-auto d-inline-flex align-items-center justify-content-center">
+                    <i class="bi bi-clock-history me-2"></i> {{ __('Historial') }}
                 </a>
                 @can('create-materials')
-                    <a href="{{ route('materials.create') }}" class="btn btn-primary w-100 w-sm-auto">
+                    <a href="{{ route('materials.create') }}" class="btn btn-primary w-100 w-sm-auto d-inline-flex align-items-center justify-content-center">
                         {{ __('Nuevo') }}
                     </a>
                 @endcan
@@ -114,29 +114,30 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <div class="d-flex justify-content-center gap-2">
+                                            <div class="d-flex justify-content-center align-items-center gap-2">
                                                 @can('edit-materials')
                                                     <a href="{{ route('materials.logs', $material) }}"
-                                                        class="btn btn-sm btn-outline-secondary" title="Ver Historial">
-                                                        <i class="bi bi-clock-history"></i> Historial
+                                                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" title="Ver Historial">
+                                                        <i class="bi bi-clock-history me-1"></i> Historial
                                                     </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning"
+                                                    <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center justify-content-center"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#adjustStockModal{{ $material->id }}"
                                                         title="Ajustar Stock">
-                                                        <i class="fas fa-balance-scale"></i> Ajustar Stock
+                                                        <i class="fas fa-balance-scale me-1"></i> Ajustar Stock
                                                     </button>
                                                     <a href="{{ route('materials.edit', $material) }}"
-                                                        class="btn btn-sm btn-outline-primary" title="Editar Material">
-                                                        <i class="fas fa-edit"></i> Editar
+                                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" title="Editar Material">
+                                                        <i class="fas fa-edit me-1"></i> Editar
                                                     </a>
                                                     <form action="{{ route('materials.destroy', $material) }}" method="POST"
+                                                        class="d-flex align-items-center m-0"
                                                         onsubmit="return confirm('¿Está seguro de eliminar este material?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center"
                                                             title="Eliminar Material">
-                                                            <i class="fas fa-trash"></i> Eliminar
+                                                            <i class="fas fa-trash me-1"></i> Eliminar
                                                         </button>
                                                     </form>
                                                 @endcan
