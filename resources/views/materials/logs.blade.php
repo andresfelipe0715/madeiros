@@ -56,8 +56,21 @@
                                             'adjustment' => 'Ajuste Manual',
                                             default => $log->action
                                         };
+                                        
+                                        $details = [
+                                            'fecha' => $log->created_at->format('d/m/Y H:i'),
+                                            'usuario' => $log->user->name ?? 'Sistema',
+                                            'material' => $log->material->name,
+                                            'accion' => $actionLabel,
+                                            'anterior' => number_format($log->previous_stock_quantity, 2),
+                                            'nuevo' => number_format($log->new_stock_quantity, 2),
+                                            'cambio' => ($diff > 0 ? '+' : '').number_format($diff, 2),
+                                            'notas' => $log->notes ?? 'Sin notas'
+                                        ];
                                     @endphp
-                                    <tr>
+                                    <tr class="cursor-pointer hover-bg-light" 
+                                        onclick="showLogDetails(@json($details))"
+                                        style="transition: background-color 0.2s;">
                                         <td class="px-4 py-3 text-muted small">
                                             {{ $log->created_at->format('d/m/Y H:i') }}
                                         </td>
@@ -116,13 +129,13 @@
                                     {{-- Modals for Long Text --}}
                                     @if(Str::length($log?->material?->name) > 50)
                                         <div class="modal fade" id="materialModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog">
+                                            <div class="modal-dialog modal-dialog-scrollable">
                                                 <div class="modal-content border-0 shadow">
                                                     <div class="modal-header bg-dark text-white border-0">
                                                         <h5 class="modal-title font-weight-bold">Nombre del Material</h5>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <div class="modal-body p-4 text-start">
+                                                    <div class="modal-body p-4 text-start" style="max-height: 50vh; overflow-y: auto;">
                                                         <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $log->material->name }}</span></p>
                                                     </div>
                                                 </div>
@@ -132,13 +145,13 @@
 
                                     @if(Str::length($log->notes) > 50)
                                         <div class="modal fade" id="notesModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog">
+                                            <div class="modal-dialog modal-dialog-scrollable">
                                                 <div class="modal-content border-0 shadow">
                                                     <div class="modal-header bg-primary text-white border-0">
                                                         <h5 class="modal-title font-weight-bold">Nota Completa</h5>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <div class="modal-body p-4 text-start">
+                                                    <div class="modal-body p-4 text-start" style="max-height: 60vh; overflow-y: auto;">
                                                         <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $log->notes }}</span></p>
                                                     </div>
                                                 </div>
@@ -148,13 +161,13 @@
 
                                     @if(Str::length($log?->user?->name ?? 'Sistema') > 50)
                                         <div class="modal fade" id="userModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog">
+                                            <div class="modal-dialog modal-dialog-scrollable">
                                                 <div class="modal-content border-0 shadow">
                                                     <div class="modal-header bg-success text-white border-0">
                                                         <h5 class="modal-title font-weight-bold">Nombre del Usuario</h5>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <div class="modal-body p-4 text-start">
+                                                    <div class="modal-body p-4 text-start" style="max-height: 50vh; overflow-y: auto;">
                                                         <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $log->user->name ?? 'Sistema' }}</span></p>
                                                     </div>
                                                 </div>
@@ -180,4 +193,99 @@
             </div>
         </div>
     </div>
+
+    <!-- Log Detail Modal -->
+    <div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-dark text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold" id="logDetailModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>
+                        {{ __('Detalles del Movimiento') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted small fw-bold text-uppercase">{{ __('Fecha') }}</span>
+                            <span id="detailFecha" class="fw-bold"></span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted small fw-bold text-uppercase">{{ __('Usuario') }}</span>
+                            <span id="detailUsuario" class="fw-bold text-primary"></span>
+                        </div>
+                        <div class="list-group-item py-3">
+                            <span class="text-muted small fw-bold text-uppercase d-block mb-1">{{ __('Material') }}</span>
+                            <span id="detailMaterial" class="fw-bold d-block"></span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-muted small fw-bold text-uppercase">{{ __('Acción') }}</span>
+                            <span id="detailAccion" class="badge bg-info text-dark border-0 px-3 py-2"></span>
+                        </div>
+                        <div class="list-group-item p-0">
+                            <div class="row g-0 text-center">
+                                <div class="col-4 border-end py-3 bg-light">
+                                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">{{ __('Anterior') }}</span>
+                                    <span id="detailAnterior" class="fw-bold"></span>
+                                </div>
+                                <div class="col-4 border-end py-3">
+                                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">{{ __('Nuevo') }}</span>
+                                    <span id="detailNuevo" class="fw-bold h5 mb-0"></span>
+                                </div>
+                                <div class="col-4 py-3 bg-light">
+                                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">{{ __('Cambio') }}</span>
+                                    <span id="detailCambio" class="fw-bold"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item py-4">
+                            <span class="text-muted small fw-bold text-uppercase d-block mb-2">{{ __('Notas / Observaciones') }}</span>
+                            <p id="detailNotas" class="mb-0 text-dark bg-light p-3 rounded" style="white-space: pre-wrap;"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">{{ __('Cerrar') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @push('styles')
+        <style>
+            .cursor-pointer {
+                cursor: pointer;
+            }
+            .hover-bg-light:hover {
+                background-color: #f8f9fa !important;
+            }
+        </style>
+    @endpush
+
+    @push('scripts')
+        <script>
+            function showLogDetails(details) {
+                document.getElementById('detailFecha').innerText = details.fecha;
+                document.getElementById('detailUsuario').innerText = details.usuario;
+                document.getElementById('detailMaterial').innerText = details.material;
+                document.getElementById('detailAccion').innerText = details.accion;
+                document.getElementById('detailAnterior').innerText = details.anterior;
+                document.getElementById('detailNuevo').innerText = details.nuevo;
+                document.getElementById('detailCambio').innerText = details.cambio;
+                document.getElementById('detailNotas').innerText = details.notas;
+
+                const cambioEl = document.getElementById('detailCambio');
+                if (details.cambio.startsWith('+')) {
+                    cambioEl.className = 'fw-bold text-success';
+                } else if (details.cambio.startsWith('-')) {
+                    cambioEl.className = 'fw-bold text-danger';
+                } else {
+                    cambioEl.className = 'fw-bold text-muted';
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+                modal.show();
+            }
+        </script>
+    @endpush
 </x-app-layout>

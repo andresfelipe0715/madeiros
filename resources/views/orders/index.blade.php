@@ -67,18 +67,38 @@
                                     <tr>
                                         <td class="px-4 py-3">#{{ $order->id }}</td>
                                         <td class="px-4 py-3">
-                                            @if(Str::length($order->client->name) > 50)
+                                            @if(Str::length($order->client->name) > 25)
                                                 <span style="cursor: pointer;" data-bs-toggle="modal"
                                                     data-bs-target="#clientDetailModal{{ $order->id }}">
-                                                    {{ Str::limit($order->client->name, 50) }}
+                                                    {{ Str::limit($order->client->name, 25) }}
                                                     <i class="bi bi-info-circle text-primary small ms-1"></i>
                                                 </span>
                                             @else
                                                 {{ $order->client->name }}
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3 text-nowrap">{{ $order->creator_name }}</td>
-                                        <td class="px-4 py-3">{{ $order->invoice_number }}</td>
+                                        <td class="px-4 py-3 text-nowrap">
+                                            @if(Str::length($order->creator_name) > 25)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#creatorDetailModal{{ $order->id }}">
+                                                    {{ Str::limit($order->creator_name, 25) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $order->creator_name }}
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if(Str::length($order->invoice_number) > 20)
+                                                <span style="cursor: pointer;" data-bs-toggle="modal"
+                                                    data-bs-target="#invoiceDetailModal{{ $order->id }}">
+                                                    {{ Str::limit($order->invoice_number, 20) }}
+                                                    <i class="bi bi-info-circle text-primary small ms-1"></i>
+                                                </span>
+                                            @else
+                                                {{ $order->invoice_number }}
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">
                                             @php
                                                 $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
@@ -215,7 +235,7 @@
     {{-- Modals Loop --}}
     @foreach($orders as $order)
         {{-- Modal de Detalle de Cliente --}}
-        @if(Str::length($order->client->name) > 50)
+        @if(Str::length($order->client->name) > 25)
             <div class="modal fade" id="clientDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content border-0 shadow">
@@ -236,20 +256,64 @@
             </div>
         @endif
 
+        {{-- Modal de Creado por --}}
+        @if(Str::length($order->creator_name) > 25)
+            <div class="modal fade" id="creatorDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title">Creado por - Orden #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $order->creator_name }}</span></p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Modal de Factura --}}
+        @if(Str::length($order->invoice_number) > 20)
+            <div class="modal fade" id="invoiceDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0">
+                            <h5 class="modal-title">Número de Factura - Orden #{{ $order->id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-start">
+                            <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $order->invoice_number }}</span></p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4"
+                                data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Modal de Detalle de Material --}}
         @php
             $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
             $cancelledMaterials = $order->orderMaterials->filter(fn($om) => !is_null($om->cancelled_at));
         @endphp
         <div class="modal fade" id="materialDetailModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow">
                     <div class="modal-header bg-dark text-white border-0">
                         <h5 class="modal-title">Detalle de Materiales - Orden #{{ $order->id }}</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4 text-start">
+                    <div class="modal-body p-4 text-start" style="max-height: 60vh; overflow-y: auto;">
                         <h6 class="small fw-bold text-primary text-uppercase mb-3">Materiales Activos</h6>
                         @if($activeMaterials->isEmpty())
                             <p class="text-muted small">No hay materiales activos.</p>
@@ -305,13 +369,13 @@
         $allOrderStages = $order->orderStages->sortBy('sequence');
     @endphp
     <div class="modal fade" id="notesModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white border-0">
                     <h5 class="modal-title">Traceabilidad y Notas - Orden #{{ $order->id }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4 bg-light">
+                <div class="modal-body p-4 bg-light" style="max-height: 70vh; overflow-y: auto;">
                     <div class="timeline-container">
                         <!-- 1. General Notes -->
                         <div class="timeline-item pb-4 position-relative">
@@ -382,8 +446,8 @@
                                 @php 
                                     $log = $item['data'];
                                     $data = $log->remit_data;
-                                    // Note: we can't easily get the 'from' stage name here without more queries, but we can try
                                     $fromStage = \App\Models\Stage::find($data['from'] ?? null);
+                                    $toStage = \App\Models\Stage::find($data['to'] ?? null);
                                 @endphp
                                 <div class="timeline-item pb-4 position-relative">
                                     <div class="timeline-indicator bg-danger position-absolute rounded-circle" style="left: -20px; width: 12px; height: 12px; top: 5px;"></div>
@@ -393,7 +457,10 @@
                                                 <h6 class="text-xs font-weight-bold text-danger mb-0 text-uppercase">Retorno de Producción</h6>
                                                 <small class="x-small text-muted">{{ $log->created_at->format('d/m/Y H:i') }}</small>
                                             </div>
-                                            <p class="mb-1 text-dark small"><span class="fw-bold">Desde:</span> {{ $fromStage?->name ?? 'Etapa anterior' }}</p>
+                                            <p class="mb-1 text-dark small">
+                                                <span class="fw-bold">Desde:</span> {{ $fromStage?->name ?? 'Etapa anterior' }}
+                                                <span class="fw-bold ms-2">A:</span> {{ $toStage?->name ?? 'Etapa destino' }}
+                                            </p>
                                             <p class="mb-0 text-dark small text-break"><span class="fw-bold">Motivo:</span> {{ $data['reason'] ?? '' }}</p>
                                         </div>
                                     </div>

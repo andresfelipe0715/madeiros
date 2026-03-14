@@ -367,13 +367,13 @@
             {{-- Modal de Detalle de Cliente --}}
             @if(Str::length($order->client->name) > 50)
                 <div class="modal fade" id="clientDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-scrollable">
                         <div class="modal-content border-0 shadow">
                             <div class="modal-header bg-dark text-white border-0">
                                 <h5 class="modal-title">Nombre del Cliente - Pedido #{{ $order->id }}</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body p-4">
+                            <div class="modal-body p-4" style="max-height: 50vh; overflow-y: auto;">
                                 <p class="mb-0 text-dark text-break"><span class="preserve-text">{{ $order->client->name }}</span></p>
                             </div>
                             <div class="modal-footer border-0">
@@ -389,13 +389,13 @@
                 $activeMaterials = $order->orderMaterials->filter(fn($om) => is_null($om->cancelled_at));
             @endphp
             <div class="modal fade" id="materialDetailModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow">
                         <div class="modal-header bg-dark text-white border-0">
                             <h5 class="modal-title">Detalle de Materiales - Pedido #{{ $order->id }}</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body p-4 text-start">
+                        <div class="modal-body p-4 text-start" style="max-height: 60vh; overflow-y: auto;">
                             <ul class="list-group list-group-flush">
                                 @foreach($activeMaterials as $om)
                                     <li class="list-group-item px-0 border-0">
@@ -419,13 +419,13 @@
 
             {{-- Modal de Servicios Especiales --}}
             <div class="modal fade" id="specialServicesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow">
                         <div class="modal-header bg-dark text-white border-0">
                             <h5 class="modal-title">Servicios Especiales - Pedido #{{ $order->id }}</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body p-4 text-start">
+                        <div class="modal-body p-4 text-start" style="max-height: 60vh; overflow-y: auto;">
                             <ul class="list-group list-group-flush">
                                 @php
                                     $activeServices = $order->orderSpecialServices->filter(fn($oss) => is_null($oss->cancelled_at));
@@ -450,7 +450,7 @@
             {{-- Modal for Evidence Photos --}}
             @if($stage->is_delivery_stage && $orderStage->started_at && !$orderStage->completed_at)
                 <div class="modal fade" id="evidenceModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-scrollable">
                         <div class="modal-content border-0 shadow">
                             <form action="{{ route('order-stages.upload-evidence', $orderStage->id) }}" method="POST" enctype="multipart/form-data" 
                                 x-data="{ files: null, count: 0, existing: {{ $order->orderFiles->filter(fn($f) => str_contains(strtolower($f->fileType->name), 'evidencia'))->count() }} }">
@@ -459,7 +459,7 @@
                                     <h5 class="modal-title"><i class="bi bi-camera-fill me-2"></i>Capturar Evidencia - #{{ $order->id }}</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <div class="modal-body p-4">
+                                <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
                                     <div class="alert alert-info py-2 small mb-3">
                                         <i class="bi bi-info-circle-fill me-1"></i> Se permiten máximo 2 fotos de evidencia por pedido.
                                         <br>Actual: <span class="fw-bold" x-text="existing"></span>/2

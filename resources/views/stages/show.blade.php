@@ -55,7 +55,7 @@
         @php $orderStage = $order->orderStages->firstWhere('stage_id', $stage->id); @endphp
         @if($stage->can_remit)
             <div class="modal fade" id="remitirModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow">
                         <form action="{{ route('order-stages.remit', $orderStage->id) }}" method="POST" novalidate>
                             @csrf
@@ -63,7 +63,7 @@
                                 <h5 class="modal-title">Remitir Pedido #{{ $order->id }}</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body p-4">
+                            <div class="modal-body p-4" style="max-height: 60vh; overflow-y: auto;">
                                 <p class="text-muted">¿A qué etapa desea devolver este pedido? Esta acción reiniciará el progreso desde la etapa seleccionada.</p>
                                 <div class="mb-3">
                                     <label class="form-label font-weight-bold">Etapa Destino</label>
@@ -110,13 +110,13 @@
             $machineFile = $order->orderFiles->first(fn($f) => str_contains(strtolower($f->fileType->name), 'máquina') || str_contains(strtolower($f->fileType->name), 'maquina'));
         @endphp
         <div class="modal fade" id="filesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow">
                     <div class="modal-header bg-dark text-white border-0">
                         <h5 class="modal-title">Documentación - Pedido #{{ $order->id }}</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4">
+                    <div class="modal-body p-4" style="max-height: 60vh; overflow-y: auto;">
                         <div class="list-group list-group-flush">
                             @if($orderFile && $permissions->canViewOrderFile())
                                 <a href="{{ $orderFile->file_url }}" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
@@ -188,7 +188,7 @@
             $orderRemitLogs = $remitLogs[$order->id] ?? collect();
         @endphp
         <div class="modal fade" id="notesModal{{ $orderStage->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow">
                     <form action="{{ route('order-stages.update-notes', $orderStage->id) }}" method="POST">
                         @csrf
@@ -196,7 +196,7 @@
                             <h5 class="modal-title">Traceabilidad y Notas - Pedido #{{ $order->id }}</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body p-4 bg-light">
+                        <div class="modal-body p-4 bg-light" style="max-height: 70vh; overflow-y: auto;">
                             <div class="timeline-container">
                                 <!-- 1. General Notes -->
                                 <div class="timeline-item pb-4 position-relative">

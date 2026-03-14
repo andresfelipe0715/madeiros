@@ -95,8 +95,11 @@
                             <div class="row g-0 border-bottom" style="min-height: 120px;">
                         @endif
 
-                            <div class="col border-end p-2 {{ ($i < $firstDayOfWeek || $currentDay > $daysInMonth) ? 'bg-light' : '' }}"
-                                style="width: 14.28%;">
+                            <div class="col border-end p-2 day-cell {{ ($i < $firstDayOfWeek || $currentDay > $daysInMonth) ? 'bg-light' : 'cursor-pointer hover-bg-light' }}"
+                                style="width: 14.28%; transition: background-color 0.2s;"
+                                @if (!($i < $firstDayOfWeek || $currentDay > $daysInMonth))
+                                    onclick="showConsumptionModal('{{ $startDate->copy()->day($currentDay)->translatedFormat('d F Y') }}', '{{ $startDate->copy()->day($currentDay)->format('Y-m-d') }}')"
+                                @endif>
                                 @if ($i >= $firstDayOfWeek && $currentDay <= $daysInMonth)
                                     @php
                                         $dateString = $startDate->copy()->day($currentDay)->format('Y-m-d');
@@ -161,6 +164,29 @@
         </div>
     </div>
 
+    <!-- Consumption Details Modal -->
+    <div class="modal fade" id="consumptionModal" tabindex="-1" aria-labelledby="consumptionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold" id="consumptionModalLabel">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        {{ __('Consumo Detallado') }}: <span id="modalDateDisplay"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 consumption-list" id="modalConsumptionBody" style="max-height: 60vh; overflow-y: auto;">
+                    <div class="text-center py-5 text-muted">
+                        {{ __('No hay consumos registrados para este día.') }}
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">{{ __('Cerrar') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('styles')
         <style>
             .calendar-container {
@@ -181,6 +207,14 @@
 
             .border-primary {
                 border-color: #0d6efd !important;
+            }
+
+            .cursor-pointer {
+                cursor: pointer;
+            }
+
+            .hover-bg-light:hover {
+                background-color: #f8f9fa !important;
             }
 
             .consumption-list::-webkit-scrollbar {
@@ -222,6 +256,59 @@
     @endpush
 
     <script>
+        // Data for the modal
+        const dailyConsumptionData = @json($dailyData);
+
+        function showConsumptionModal(formattedDate, dateString) {
+            document.getElementById('modalDateDisplay').innerText = formattedDate;
+            const container = document.getElementById('modalConsumptionBody');
+            
+            if (!dailyConsumptionData[dateString]) {
+                container.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-info-circle h2 d-block mb-3"></i>{{ __("No hay consumos registrados para este día.") }}</div>';
+            } else {
+                let html = '<div class="list-group list-group-flush border rounded shadow-sm">';
+                
+                Object.entries(dailyConsumptionData[dateString]).forEach(([materialId, data]) => {
+                    html += `
+                        <div class="list-group-item p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="h5 mb-0 fw-bold text-primary">${data.material_name}</h4>
+                                <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
+                                    ${parseFloat(data.total_actual_quantity).toLocaleString()} unidades
+                                </span>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <p class="small fw-bold text-muted mb-2 text-uppercase letter-spacing-1">
+                                    <i class="bi bi-journal-text me-1"></i> {{ __('Órdenes Asociadas') }}
+                                </p>
+                                <div class="d-flex flex-wrap gap-2">
+                    `;
+                    
+                    data.orders.forEach(order => {
+                        const url = "{{ route('orders.edit', ':id') }}".replace(':id', order.id);
+                        html += `
+                            <a href="${url}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="bi bi-file-earmark-text me-1"></i> #${order.invoice_number}
+                            </a>
+                        `;
+                    });
+                    
+                    html += `
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                container.innerHTML = html;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('consumptionModal'));
+            modal.show();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const materialSelect = document.getElementById('material_id');
             if (materialSelect) {
