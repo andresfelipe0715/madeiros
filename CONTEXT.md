@@ -150,7 +150,8 @@ CREATE TABLE clients (
 
 CREATE TABLE stage_groups (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL UNIQUE
+    name VARCHAR(100) NOT NULL UNIQUE,
+    active BOOLEAN NOT NULL DEFAULT 1
 );
 
 CREATE TABLE stages (
@@ -160,6 +161,7 @@ CREATE TABLE stages (
     stage_group_id INTEGER NULL, -- INDEX: FK
     can_remit BOOLEAN NOT NULL DEFAULT 1,
     is_delivery_stage BOOLEAN NOT NULL DEFAULT 0,
+    active BOOLEAN NOT NULL DEFAULT 1,
     FOREIGN KEY (stage_group_id) REFERENCES stage_groups(id)
 );
 
