@@ -58,7 +58,7 @@ This must be done first so the system-wide network (`proxy-tier`) is created.
    ```
 
 3. **Start the Proxy**
-   *Create the `docker-compose.yml` file in this folder.*
+   Use `manager` as the service name in your `docker-compose.yml` to avoid collisions with your apps.
    ```bash
    docker compose up -d
    ```
