@@ -43,13 +43,21 @@ sudo ufw enable
 ### Phase 1.8: Central Proxy Setup
 This must be done first so the system-wide network (`proxy-tier`) is created.
 
-1. **Create the Folder**
+1. **Create the Shared Network (Run ONCE, ever)**
+   This creates the permanent network that all apps on this VPS will share:
+   ```bash
+   sudo docker network create proxy-tier
+   ```
+   > [!IMPORTANT]
+   > This only needs to be run **once** when setting up a fresh VPS. The network persists through reboots and container restarts.
+
+2. **Create the Folder**
    ```bash
    mkdir -p ~/docker/proxy
    cd ~/docker/proxy
    ```
 
-2. **Start the Proxy**
+3. **Start the Proxy**
    *Create the `docker-compose.yml` file in this folder.*
    ```bash
    docker compose up -d
@@ -76,9 +84,13 @@ Navigate to your project folder (`cd ~/madeiros`):
    ```bash
    sudo docker compose up -d --build
    ```
-   > [!TIP]
-   > If you see a **502 Bad Gateway** or a **404 File Not Found** after rebuilding, try a "Hard Restart":
-   > `sudo docker compose down && sudo docker compose up -d`
+    > [!TIP]
+    > If you see a **502 Bad Gateway** or a **404 File Not Found** after rebuilding, try a "Hard Restart":
+    > `sudo docker compose down && sudo docker compose up -d`
+
+    > [!TIP]
+    > **Ghost Hunting**: If you deleted a service from the code but Docker keeps running it (orphans), use:
+    > `sudo docker compose down --remove-orphans`
 
 ---
 
@@ -115,6 +127,21 @@ If the app shows a 500 error, check the Laravel log file:
 sudo docker compose exec app tail -n 50 storage/logs/laravel.log
 ```
 
+## Pro Tip: Managing Port Conflicts
+If you get an error saying `Bind for 0.0.0.0:80 failed: port is already allocated`, it means some other container is using the port.
+1.  **Find the culprit**: `sudo docker ps --format "table {{.Names}}\t{{.Ports}}" | grep ":80"`
+2.  **Stop the ghost**: `sudo docker stop <container_name>`
+3.  **Prevent Orphans**: Always use `sudo docker compose up -d --remove-orphans` when applying changes.
+
 ## Verification Plan
 1. **Direct Access**: Visit `http://your-vps-ip:8888`
 2. **Proxy Access**: Visit `http://your-vps-ip:81` for the Nginx Proxy Manager setup.
+
+
+## After any change in the code
+```bash
+git pull origin dev
+sudo docker compose up -d --remove-orphans
+sudo docker compose exec app php artisan optimize:clear
+sudo docker compose exec app npm run build
+```
